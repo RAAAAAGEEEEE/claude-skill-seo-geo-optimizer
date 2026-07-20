@@ -97,6 +97,30 @@ cohérence NAP (Name/Address/Phone) partout pour le local.
   (les IA favorisent les sources tierces autoritatives) — orienter vers le
   skill `SEO` (`/SEO`) pour cette partie.
 
+### 7. Backlinks
+Cadre complet (interne vs externe, dofollow/nofollow, variation d'ancres,
+risque PBN, annuaires, ce qui est à bannir) :
+[references/backlinks.md](references/backlinks.md).
+Vérification technique d'une page source :
+[scripts/check_backlinks.sh](scripts/check_backlinks.sh).
+
+## Indexation — règles strictes
+- La bonne méthode par défaut : `sitemap.xml` à jour + Google Search
+  Console + inspection d'URL manuelle ponctuelle. Rien d'autre à construire.
+- **Ne jamais utiliser la Google Indexing API** pour des pages classiques —
+  elle est réservée à `JobPosting` et `BroadcastEvent`/`VideoObject` ; un
+  usage détourné risque un flag spam et une coupure d'accès à l'API.
+- **Ne jamais coder d'auto-submit d'URLs** vers un moteur en dehors du flux
+  sitemap → crawl normal.
+- Détail complet et nuances (Brave Search excepté) :
+  [references/indexing-rules.md](references/indexing-rules.md).
+
+## Hygiène des données
+Toujours distinguer donnée **mesurée** (Search Console, analytics, preuve
+concrète) de donnée **générée/hypothèse IA** dans un audit ou un rapport.
+Ne jamais recycler une génération IA comme si c'était une donnée vérifiée —
+détail : [references/data-hygiene.md](references/data-hygiene.md).
+
 ## Architecture : sous-répertoire vs sous-domaine
 Par défaut : sous-répertoires (héritent de l'autorité du domaine racine,
 rankent plus vite). C'est une décision produit (isolation, custom domains) :
@@ -123,6 +147,20 @@ d'un `curl`.
 - [references/schema-templates.md](references/schema-templates.md) — blocs
   JSON-LD paste-ready.
 - [references/ai-crawlers.md](references/ai-crawlers.md) — robots.txt/llms.txt,
-  liste des bots IA, sources.
+  liste des bots IA, soumission Brave Search (GEO), sources.
+- [references/indexing-rules.md](references/indexing-rules.md) — méthode
+  d'indexation correcte, interdictions (Google Indexing API, auto-submit).
+- [references/backlinks.md](references/backlinks.md) — cadre backlinks
+  (interne/externe, PBN, annuaires, à bannir).
+- [references/data-hygiene.md](references/data-hygiene.md) — mesuré vs
+  généré IA, audit périodique de la base de connaissances.
 - [scripts/validate_schema.py](scripts/validate_schema.py) — validateur JSON-LD
   local (champs requis par type schema.org).
+- [scripts/audit_site.sh](scripts/audit_site.sh) — audit technique
+  multi-URLs (curl) : HTTP, title, description, canonical, hreflang,
+  JSON-LD, OG, robots.txt/sitemap.
+- [scripts/generate_sitemap.py](scripts/generate_sitemap.py) — génère
+  `sitemap.xml` (+ `robots.txt` optionnel) pour un site ou un déploiement
+  multi-sites, sans dépendance à un schéma de DB particulier.
+- [scripts/check_backlinks.sh](scripts/check_backlinks.sh) — vérifie
+  dofollow/nofollow et répétition d'ancres sur une page source.
