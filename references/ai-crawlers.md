@@ -78,8 +78,34 @@ existe, est un choix explicite et pas un oubli.
 - [{{Titre page 2}}]({{url_page_2}}): {{description courte}}
 ```
 
+## GEO — soumission Brave Search
+Claude (Anthropic) utilise Brave Search comme backend principal pour son
+outil de recherche web (Brave est listé comme sous-traitant "web search" par
+Anthropic depuis mars 2025 ; des mesures indépendantes observent ~79-87%
+de recouvrement entre les résultats cités par Claude et les résultats
+organiques non-sponsorisés de Brave, selon l'échantillon et la période).
+
+Conséquence pratique : soumettre une URL sur
+`https://search.brave.com/submit-url` peut accélérer son re-crawl par Brave
+et donc sa disponibilité pour le web search de Claude.
+
+**Nuances à respecter** (ne jamais présenter autrement) :
+- Le formulaire déclenche un re-crawl, **ce n'est ni une garantie
+  d'indexation ni de ranking**.
+- Ça ne concerne que le web search **au moment de la requête** — pas les
+  connaissances natives d'entraînement de Claude (issues du pré-entraînement,
+  indépendantes de Brave et non influençables par cette soumission).
+- Aucune preuve que *toute* recherche web de Claude passe par Brave à 100% —
+  traiter l'overlap observé comme une forte corrélation, pas une certitude
+  absolue.
+- Soumission manuelle et ponctuelle uniquement (formulaire) — ne pas
+  automatiser cette soumission en masse, ça n'apporte rien et peut ressembler
+  à du spam de soumission.
+
 ## Sources
 - [The AI User-Agent Landscape in 2026: A Complete Reference](https://nohacks.co/blog/ai-user-agents-landscape-2026)
 - [AI Crawler Access Control: The 2026 Decision Matrix](https://www.digitalapplied.com/blog/ai-crawler-access-control-2026-robots-llms-txt-decision-matrix)
 - [Robots.txt & AI Crawlers in 2026: The Full Guide](https://dataimpulse.com/blog/robots-txt-ai-crawlers/)
 - [Robots.txt For AI Bots: Control GPTBot, Google-Extended & More](https://capston.ai/robots-txt-for-ai-bots/)
+- [Anthropic Lists Two Web-Search Subprocessors for Claude: Brave & TurboPuffer](https://xponent21.com/insights/claude-web-search-brave-turbopuffer/)
+- [Does Claude Use Brave Search? What the Brave Submit URL Page...](https://convertos.ai/geo/claude-brave-search-submit-url)
