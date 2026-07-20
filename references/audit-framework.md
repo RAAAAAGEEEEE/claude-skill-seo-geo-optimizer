@@ -1,6 +1,6 @@
 # Audit framework détaillé (technique, on-page, E-E-A-T)
 
-Base repose sur le framework du skill `seo-audit` (SEO classique), enrichi des
+Base SEO classique (technique/on-page/E-E-A-T), enrichie des
 signaux GEO (retrieval par IA génératives). Utiliser ce fichier pour l'audit
 approfondi ; [checklist.md](checklist.md) pour le pass rapide.
 
