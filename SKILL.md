@@ -91,18 +91,19 @@ cohérence NAP (Name/Address/Phone) partout pour le local.
 ### 5. Fraîcheur
 - Timestamp "Dernière mise à jour" visible + `dateModified` dans le schema.
 
-### 6. Autorité / entités (moyen terme, pas un fix de code)
-- `Organization` + `sameAs` vers réseaux + Wikidata pour désambiguïsation.
-- Signaler à l'utilisateur : le backlink/earned media se construit hors-code
-  (les IA favorisent les sources tierces autoritatives) — orienter vers le
-  skill `SEO` (`/SEO`) pour cette partie.
-
-### 7. Backlinks
-Cadre complet (interne vs externe, dofollow/nofollow, variation d'ancres,
-risque PBN, annuaires, ce qui est à bannir) :
-[references/backlinks.md](references/backlinks.md).
-Vérification technique d'une page source :
-[scripts/check_backlinks.sh](scripts/check_backlinks.sh).
+### 6. Autorité / entités et backlinks — évaluation technique, pas acquisition
+Ce skill **évalue et vérifie** des backlinks (existants ou proposés), il ne
+les **acquiert** pas : trouver des opportunités, choisir des cibles,
+prospecter, rédiger et envoyer des pitchs/outreach est le rôle du skill
+`SEO` (`/SEO`) — ne pas dupliquer ce travail ici.
+- `Organization` + `sameAs` vers réseaux + Wikidata pour désambiguïsation
+  (ça, c'est du code/on-site, donc dans le périmètre de ce skill).
+- Cadre d'évaluation technique d'un lien ou d'une opportunité de lien
+  (interne vs externe, dofollow/nofollow, variation d'ancres, risque PBN,
+  critères de choix d'annuaire, ce qui est à bannir) :
+  [references/backlinks.md](references/backlinks.md).
+- Vérification technique d'une page source donnée (dofollow ? ancres
+  répétées ?) : [scripts/check_backlinks.sh](scripts/check_backlinks.sh).
 
 ## Indexation — règles strictes
 - La bonne méthode par défaut : `sitemap.xml` à jour + Google Search

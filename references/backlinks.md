@@ -1,4 +1,9 @@
-# Backlinks — cadre générique
+# Backlinks — cadre d'évaluation technique
+
+Ce fichier sert à **évaluer** un lien existant ou une opportunité de lien
+(qualité, risque, conformité) — pas à en trouver ou à en acquérir. La
+prospection, le choix des cibles éditoriales, la rédaction et l'envoi de
+pitchs/outreach relèvent du skill `SEO` (`/SEO`), pas de ce skill.
 
 ## Interne vs externe
 - **Liens internes** (sous-domaines d'un même domaine racine, ex.
@@ -52,13 +57,12 @@ Utiles pour l'autorité de domaine, pas seulement pour le trafic direct :
 - Toute automatisation de soumission de masse vers des annuaires ou
   plateformes tierces.
 
-## Ce qui attire des liens naturellement
-Le contenu qui génère des backlinks sans démarchage actif :
-- Outils gratuits interactifs (calculateurs, générateurs) directement
-  utilisables sans inscription.
-- Articles de référence sourcés et datés (études de prix, benchmarks,
-  checklists) — cf. le levier "Autorité / entités" et les signaux GEO dans
-  [audit-framework.md](audit-framework.md#signaux-geo-retrieval-par-ia-génératives).
-- Ce type de contenu est aussi ce qui a le plus de chances d'être cité par
-  les moteurs génératifs (GEO) — les deux objectifs (backlinks + citations
-  IA) convergent sur le même type d'actif.
+## Ce qui attire des liens naturellement (repère, pas une action de ce skill)
+Le contenu qui génère des backlinks sans démarchage actif (outils gratuits
+interactifs, articles de référence sourcés et datés) est aussi ce qui a le
+plus de chances d'être cité par les moteurs génératifs — cf. les signaux GEO
+dans [audit-framework.md](audit-framework.md#signaux-geo-retrieval-par-ia-génératives).
+**Produire ce type d'actif citable est le travail du skill `SEO`** (phase
+"production de l'actif citable" de `/SEO`) — ce skill-ci se limite à
+vérifier qu'un actif déjà publié respecte les fondamentaux techniques
+(schema, structure, E-E-A-T) une fois que `/SEO` l'a produit.
