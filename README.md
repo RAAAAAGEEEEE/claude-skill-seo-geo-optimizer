@@ -28,6 +28,8 @@ projet spécifique.
   (interne/externe, dofollow, PBN, annuaires, à bannir).
 - [references/data-hygiene.md](references/data-hygiene.md) — mesuré vs
   généré IA, audit périodique de la base de connaissances.
+- [references/gsc-access.md](references/gsc-access.md) — compte de service
+  Search Console (donnée mesurée), piège domaine vs URL-préfixe.
 - [scripts/validate_schema.py](scripts/validate_schema.py) — validateur
   JSON-LD local (champs requis par type schema.org).
 - [scripts/audit_site.sh](scripts/audit_site.sh) — audit technique
@@ -37,6 +39,10 @@ projet spécifique.
   `sitemap.xml` (+ `robots.txt` optionnel), un ou multi-sites.
 - [scripts/check_backlinks.sh](scripts/check_backlinks.sh) — vérifie
   dofollow/nofollow et répétition d'ancres sur une page source.
+- [scripts/gsc_report.py](scripts/gsc_report.py) — requête Search Console
+  via compte de service, sortie JSON.
+- [scripts/generate_report.py](scripts/generate_report.py) — rapport final
+  consolidé (technique + schema + Search Console), Markdown + JSON.
 
 ## Périmètre
 
