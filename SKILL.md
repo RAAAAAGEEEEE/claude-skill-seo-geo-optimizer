@@ -135,7 +135,10 @@ ou le Rich Results Test — jamais conclure "pas de schema" sur la seule base
 d'un `curl`.
 
 ## Livrables standard
-- `AUDIT_GEO.md` — état + problèmes priorisés P0/P1/P2.
+- `AUDIT_GEO.md` — état + problèmes priorisés P0/P1/P2. Généré de
+  préférence via [scripts/generate_report.py](scripts/generate_report.py)
+  (technique + schema + Search Console en une commande) plutôt qu'écrit à
+  la main, pour rester cohérent et re-exécutable.
 - `CHANGELOG_GEO.md` — chaque modif + son objectif SEO/GEO.
 - Note de validation schema (sortie de `validate_schema.py` + Rich Results
   Test) avant de clore une tâche d'implémentation de schema.
@@ -155,6 +158,9 @@ d'un `curl`.
   (interne/externe, PBN, annuaires, à bannir).
 - [references/data-hygiene.md](references/data-hygiene.md) — mesuré vs
   généré IA, audit périodique de la base de connaissances.
+- [references/gsc-access.md](references/gsc-access.md) — mise en place d'un
+  compte de service Search Console (donnée mesurée), piège domaine vs
+  URL-préfixe.
 - [scripts/validate_schema.py](scripts/validate_schema.py) — validateur JSON-LD
   local (champs requis par type schema.org).
 - [scripts/audit_site.sh](scripts/audit_site.sh) — audit technique
@@ -165,3 +171,9 @@ d'un `curl`.
   multi-sites, sans dépendance à un schéma de DB particulier.
 - [scripts/check_backlinks.sh](scripts/check_backlinks.sh) — vérifie
   dofollow/nofollow et répétition d'ancres sur une page source.
+- [scripts/gsc_report.py](scripts/gsc_report.py) — requête Search Console
+  autonome via compte de service (top pages/requêtes, donnée mesurée).
+- [scripts/generate_report.py](scripts/generate_report.py) — **rapport
+  final consolidé** : audit technique + validation schema + Search Console
+  en une commande, sortie Markdown (lisible) + JSON (machine-lisible, base
+  pour un futur dashboard).
