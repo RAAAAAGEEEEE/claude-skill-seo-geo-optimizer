@@ -25,6 +25,7 @@ import json
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -104,21 +105,76 @@ def audit_url(url: str, timeout: float = 20.0) -> PageAudit:
     return audit
 
 
-def build_markdown(audits: list[PageAudit], gsc_data: dict | None) -> str:
+def build_markdown(
+    audits: list[PageAudit],
+    gsc_data: dict | None,
+    ai_access: dict | None = None,
+    crux_data: dict | None = None,
+) -> str:
     lines = [
         f"# Rapport SEO/GEO consolidé — {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
         "",
         "Généré par `scripts/generate_report.py` (seo-geo-optimizer). "
         "Sections techniques : inférées depuis le HTML public. "
-        "Section Search Console (si présente) : donnée mesurée réelle, voir `references/data-hygiene.md`.",
+        "Accès crawlers, Search Console et CrUX : données mesurées réelles "
+        "(voir `references/data-hygiene.md`).",
         "",
         "## Résumé",
         f"- {len(audits)} URL(s) auditée(s)",
         f"- {sum(1 for a in audits if not a.issues)} sans problème détecté",
         f"- {sum(1 for a in audits if a.issues)} avec au moins un problème",
-        "",
-        "## Détail par page",
     ]
+
+    # L'acces crawlers passe en tete : c'est un prerequis, pas un detail.
+    if ai_access:
+        blocked = [b for b in ai_access["bots"] if b["robots_allows"] and not b["served"]]
+        blocked_search = [b for b in ai_access["bots"] if b["role"] == "search" and not b["served"]]
+        if blocked_search:
+            lines.append(
+                f"- **P0 — {len(blocked_search)} crawler(s) de recherche IA bloqué(s)** : "
+                f"le site ne peut pas être cité par ces moteurs"
+            )
+        else:
+            lines.append("- Accès crawlers IA : OK")
+
+        lines.append("")
+        lines.append("## Accès des crawlers IA (donnée mesurée)")
+        lines.append("")
+        lines.append("| Bot | Rôle | robots.txt | HTTP | Servi |")
+        lines.append("|---|---|---|---|---|")
+        for b in ai_access["bots"]:
+            robots_col = {True: "allow", False: "DENY", None: "?"}[b["robots_allows"]]
+            lines.append(
+                f"| `{b['user_agent']}` | {b['role']} | {robots_col} | "
+                f"{b['http_status'] or 'err'} | {'oui' if b['served'] else '**NON**'} |"
+            )
+        if blocked:
+            lines.append("")
+            lines.append(
+                f"**{len(blocked)} bot(s) autorisé(s) par `robots.txt` mais bloqué(s) en amont** "
+                f"(`{', '.join(b['user_agent'] for b in blocked)}`) — cause probable : règle "
+                f"CDN/WAF. L'intention du `robots.txt` est trahie par l'infrastructure. "
+                f"Voir `references/cloudflare-ai-access.md`."
+            )
+
+    if crux_data:
+        lines.append("")
+        lines.append("## Core Web Vitals — terrain (CrUX, utilisateurs réels)")
+        lines.append("")
+        if crux_data.get("no_data"):
+            lines.append(
+                "Aucune donnée CrUX : trafic Chrome réel insuffisant sur 28 jours. "
+                "Ce n'est **pas** un problème de performance — se rabattre sur une "
+                "mesure labo (PageSpeed/Lighthouse) et le signaler comme telle."
+            )
+        else:
+            lines.append("| Métrique | p75 | État |")
+            lines.append("|---|---|---|")
+            for m in crux_data.get("metrics", []):
+                value = f"{m['p75']:.2f}" if m["unit"] == "" else f"{m['p75']:.0f}{m['unit']}"
+                lines.append(f"| {m['label']} | {value} | {m['rating']} |")
+
+    lines += ["", "## Détail par page"]
     for a in audits:
         lines.append(f"\n### {a.url}")
         if a.error:
@@ -163,9 +219,34 @@ def main() -> int:
     parser.add_argument("--gsc-site", default=None)
     parser.add_argument("--gsc-path-filter", default=None)
     parser.add_argument("--gsc-days", type=int, default=28)
+    parser.add_argument("--check-ai-access", action="store_true",
+                        help="Teste l'acces reel des crawlers IA sur l'origine de la 1re URL")
+    parser.add_argument("--crux-key", default=None,
+                        help="Cle API Google (Chrome UX Report) pour les Core Web Vitals terrain")
     args = parser.parse_args()
 
     urls = [u.strip() for u in args.urls.read_text(encoding="utf-8").splitlines() if u.strip()]
+
+    origin = None
+    if urls:
+        p = urllib.parse.urlparse(urls[0])
+        origin = f"{p.scheme}://{p.netloc}"
+
+    ai_access = None
+    if args.check_ai_access and origin:
+        print(f"Test d'acces des crawlers IA sur {origin}...")
+        import check_ai_access as ai_mod
+
+        ai_access = ai_mod.check_site(origin)
+
+    crux_data = None
+    if args.crux_key and origin:
+        print(f"Requete CrUX sur {origin}...")
+        import crux_report as crux_mod
+
+        record = crux_mod.query_crux(args.crux_key, {"origin": origin}, None)
+        crux_data = {"no_data": True} if record is None else {"metrics": crux_mod.extract(record)}
+
     print(f"Audit de {len(urls)} URL(s)...")
     audits = [audit_url(u) for u in urls]
 
@@ -191,7 +272,7 @@ def main() -> int:
             "rows": rows,
         }
 
-    markdown = build_markdown(audits, gsc_data)
+    markdown = build_markdown(audits, gsc_data, ai_access=ai_access, crux_data=crux_data)
     md_path = args.out_prefix.with_suffix(".md")
     md_path.write_text(markdown, encoding="utf-8")
 
@@ -207,6 +288,8 @@ def main() -> int:
             for a in audits
         ],
         "search_console": gsc_data,
+        "ai_access": ai_access,
+        "core_web_vitals": crux_data,
     }
     json_path = args.out_prefix.with_suffix(".json")
     json_path.write_text(json.dumps(json_data, indent=2, ensure_ascii=False), encoding="utf-8")

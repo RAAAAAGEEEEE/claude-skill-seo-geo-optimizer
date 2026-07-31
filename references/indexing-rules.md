@@ -1,40 +1,60 @@
-# Indexation — règles strictes à respecter
+# Indexation — ce qui est autorisé, ce qui est interdit
 
-## La bonne méthode (par défaut, toujours)
-Pour des pages web classiques : `sitemap.xml` à jour + soumission dans
-Google Search Console + inspection d'URL manuelle ponctuelle pour les pages
-importantes qui tardent à être crawlées. Google recrawle automatiquement via
-le sitemap — c'est le mécanisme normal, il n'y a rien d'autre à construire.
+## Google : sitemap + Search Console, rien d'autre
+`sitemap.xml` à jour, référencé dans `robots.txt`, soumis dans Search
+Console. Inspection d'URL manuelle et ponctuelle pour une page importante qui
+tarde à être crawlée. C'est le mécanisme normal et il n'y a rien d'autre à
+construire.
 
-## Interdictions (ne jamais faire, même si demandé sans plus de contexte)
+### Interdit — Google Indexing API hors périmètre
+Cette API est réservée par Google à `JobPosting` et à `BroadcastEvent`
+intégré dans une `VideoObject`. L'utiliser pour des pages marketing, des
+articles ou des pages produit est un usage détourné des conditions
+d'utilisation, avec un risque documenté de coupure d'accès à l'API pour le
+compte concerné.
 
-### Google Indexing API
-**Ne pas utiliser la Google Indexing API pour indexer des pages classiques.**
-Cette API est réservée par Google à deux types de contenu uniquement :
-`JobPosting` (offres d'emploi) et `BroadcastEvent` intégré dans une
-`VideoObject` (diffusions en direct). L'utiliser pour autre chose (pages
-marketing, articles de blog, pages produit) est un usage détourné des
-conditions d'utilisation de l'API — le risque documenté est un flag comme
-usage abusif pouvant mener à une coupure d'accès à l'API pour le compte
-concerné. Si l'utilisateur demande "indexer plus vite via l'API Google" pour
-un type de page hors `JobPosting`/`BroadcastEvent` : expliquer la
-restriction, proposer le sitemap + Search Console à la place.
+Si l'utilisateur demande « indexer plus vite via l'API Google » pour un type
+de page hors de ce périmètre : expliquer la restriction, proposer sitemap +
+Search Console, et IndexNow pour les autres moteurs.
 
-### Auto-submit hors sitemap
-Ne pas coder de mécanisme qui pousse automatiquement des URLs vers Google
-(ou tout moteur) en dehors du flux normal sitemap → crawl. Un script qui
-"ping" Google à chaque nouvelle page, ou qui automatise des soumissions
-répétées, s'apparente à du spam d'indexation et n'accélère pas
-l'indexation de façon fiable — le sitemap fait déjà ce travail.
+### Interdit — auto-submit maison
+Ne pas coder de mécanisme qui pousse des URLs vers un moteur en dehors du
+flux sitemap → crawl (ping répétés, soumissions en boucle). Ça n'accélère
+rien de façon fiable et s'apparente à du spam d'indexation.
 
-## Ce qui reste légitime et utile
-- Mettre à jour `sitemap.xml` immédiatement après publication d'une page
-  (voir [../scripts/generate_sitemap.py](../scripts/generate_sitemap.py)).
-- Inspection d'URL manuelle dans Search Console pour une page précise qui ne
-  s'indexe pas après plusieurs jours — c'est un outil de diagnostic/priorité,
-  pas un mécanisme d'indexation de masse, et il reste manuel par design.
-- Soumettre une URL à Brave Search (`https://search.brave.com/submit-url`)
-  pour la visibilité dans le web search de Claude — voir
-  [ai-crawlers.md](ai-crawlers.md#geo--soumission-brave-search). Ce n'est pas
-  un équivalent de la Google Indexing API : Brave ne pénalise pas ce type de
-  soumission ponctuelle, c'est son usage prévu.
+## Bing, Yandex, Naver, Seznam, Yep : IndexNow
+IndexNow est le mécanisme **prévu, gratuit et explicitement encouragé** par
+ces moteurs pour signaler une URL nouvelle ou modifiée. Rien à voir avec un
+détournement d'API : c'est son usage nominal.
+
+- Google **n'y participe pas** (position confirmée en 2026) — ne jamais
+  présenter IndexNow comme un moyen d'accélérer l'indexation Google.
+- Pas de quota documenté côté IndexNow (contrairement à l'API URL Submission
+  de Bing, limitée à 10 000 URLs/jour/domaine, que Microsoft pousse à
+  abandonner au profit d'IndexNow).
+- Cloudflare propose une intégration native en un clic sur les plans payants.
+- Script : [`../scripts/indexnow_submit.py`](../scripts/indexnow_submit.py)
+  — vérifie que le fichier de clé est publiquement accessible **avant** toute
+  soumission, et refuse de soumettre sinon.
+
+Mise en place (une fois par site) :
+1. Générer une clé : `python -c "import uuid; print(uuid.uuid4().hex)"`
+2. Publier `https://example.com/<clé>.txt` contenant uniquement la clé.
+3. `python scripts/indexnow_submit.py --host example.com --key <clé> --urls urls.txt --dry-run`
+   puis sans `--dry-run` une fois la vérification passée.
+
+Bon usage : soumettre les URLs **nouvelles ou réellement modifiées**, pas
+l'intégralité du sitemap à chaque exécution.
+
+## Brave Search
+Soumission manuelle et ponctuelle sur `https://search.brave.com/submit-url`
+— pertinent pour la visibilité dans le web search de Claude, voir
+[ai-crawlers.md](ai-crawlers.md#geo--soumission-brave-search). Ne pas
+automatiser en masse.
+
+## Rappel : l'indexation n'est pas le problème le plus fréquent
+Avant de chercher à accélérer l'indexation, vérifier que le site est
+réellement accessible aux crawlers ([cloudflare-ai-access.md](cloudflare-ai-access.md))
+et que les pages concernées ne sont pas exclues par un `noindex`, un
+canonical mal orienté ou une redirection. Un problème d'accès ne se corrige
+pas en soumettant plus fort.

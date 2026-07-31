@@ -8,6 +8,25 @@ Toujours valider le bloc généré avec `scripts/validate_schema.py` ou le
 Rich Results Test (https://search.google.com/test/rich-results) avant de
 considérer la tâche terminée.
 
+## Statut par type — vérifié juillet 2026
+
+| Type | Rich result Google | Lu par Bing / IA | Verdict |
+|---|---|---|---|
+| `Organization` | oui | oui | à mettre partout (domaine racine) |
+| `Product` (+`AggregateRating`) | oui (étoiles, prix) | oui | ROI le plus élevé en e-commerce |
+| `Article` / `BlogPosting` | oui | oui | à mettre sur tout contenu éditorial |
+| `BreadcrumbList` | oui | oui | à mettre sur toute page interne |
+| `LocalBusiness` | oui | oui | indispensable en commerce local |
+| `Event`, `JobPosting`, `Video`, `Recipe` | oui | oui | selon le type de site |
+| `FAQPage` | **non — supprimé le 7 mai 2026** | oui | garder si déjà en place, ne plus le vendre comme un gain SERP |
+| `HowTo` | **non — déprécié sept. 2023** | oui | zéro gain Google, valeur résiduelle côté IA |
+
+Google a retiré la documentation FAQ le 15 juin 2026. Le type schema.org
+reste valide et continue d'être lu par Bingbot et les crawlers RAG : le
+conserver est légitime, le présenter comme un levier de ranking Google ne
+l'est plus. Ne jamais prioriser `FAQPage`/`HowTo` devant les types du haut
+du tableau dans un plan d'action.
+
 ## LocalBusiness (choisir le sous-type : Restaurant, Bakery, HairSalon...)
 ```html
 <script type="application/ld+json">

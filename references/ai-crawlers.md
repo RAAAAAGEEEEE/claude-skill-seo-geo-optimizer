@@ -1,35 +1,42 @@
-# Crawlers IA : robots.txt et llms.txt
+# Crawlers IA : robots.txt, llms.txt, Brave
 
-## robots.txt vs llms.txt — ne pas confondre
-- `robots.txt` = seul mécanisme d'**accès**. C'est lui qui autorise ou bloque
-  un crawler.
-- `llms.txt` = fichier de **découverte** (description du site + pages clés)
-  pour aider un moteur génératif à comprendre le site. **Ce n'est pas un
-  mécanisme de contrôle d'accès** — les fournisseurs de crawlers IA ne s'y
-  fient pas pour décider quoi indexer. Ne jamais le présenter comme un moyen
-  de bloquer ou d'autoriser un bot.
+## Les deux familles de bots (la distinction qui compte)
+La plupart des fournisseurs font tourner **deux** bots. Les confondre est
+l'erreur la plus coûteuse en GEO.
 
-## Deux familles de bots par fournisseur
-La plupart des fournisseurs IA font tourner deux bots distincts : un bot
-d'**entraînement** (alimente le modèle) et un bot de **recherche/citation**
-(utilisé au moment de la requête, pour du RAG en temps réel). Bloquer le bot
-de recherche fait perdre les citations ; bloquer le bot d'entraînement
-n'empêche pas les citations si le bot de recherche reste autorisé.
-
-| Fournisseur | Bot d'entraînement | Bot de recherche/citation |
+| Fournisseur | Entraînement (nourrit le modèle) | Recherche/citation (au moment de la requête) |
 |---|---|---|
 | OpenAI | `GPTBot` | `OAI-SearchBot`, `ChatGPT-User` |
 | Anthropic | `ClaudeBot` | `Claude-SearchBot`, `Claude-User` |
 | Perplexity | — | `PerplexityBot`, `Perplexity-User` |
-| Google | `Google-Extended` | (déjà couvert par Googlebot standard) |
+| Google | `Google-Extended` | (Googlebot standard) |
 | Apple | `Applebot-Extended` | — |
 
-## Exemple de configuration robots.txt (autoriser les bots de citation)
+Bloquer un bot d'**entraînement** n'empêche pas d'être cité. Bloquer un bot
+de **recherche** rend la citation impossible, quel que soit le contenu.
+
+## robots.txt ne suffit pas à savoir si le site est accessible
+`robots.txt` est déclaratif. Le CDN peut renvoyer `403` à un bot que le
+`robots.txt` autorise — cas réel documenté et outillé dans
+[cloudflare-ai-access.md](cloudflare-ai-access.md). **Toujours vérifier
+l'accès réel** avec [`../scripts/check_ai_access.py`](../scripts/check_ai_access.py)
+avant de conclure quoi que ce soit sur la visibilité GEO d'un site.
+
+## Exemple de robots.txt (autoriser la citation)
 ```
+User-agent: *
+Allow: /
+
 User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
 Allow: /
 
 User-agent: PerplexityBot
@@ -38,13 +45,10 @@ Allow: /
 User-agent: Perplexity-User
 Allow: /
 
+User-agent: GPTBot
+Allow: /
+
 User-agent: ClaudeBot
-Allow: /
-
-User-agent: Claude-SearchBot
-Allow: /
-
-User-agent: Claude-User
 Allow: /
 
 User-agent: Google-Extended
@@ -55,57 +59,60 @@ Allow: /
 
 Sitemap: {{url_sitemap}}
 ```
-Ce blocage/déblocage est une décision produit (le site peut avoir une raison
-métier de bloquer l'entraînement tout en gardant la citation, ou l'inverse) —
-toujours la présenter à l'utilisateur plutôt que de trancher seul, surtout si
-le `robots.txt` actuel bloque déjà ces bots intentionnellement.
+Autoriser ou bloquer est une **décision produit** (contenu ouvert vs
+monétisation, cf. Pay Per Use de Cloudflare) : la présenter, ne pas la
+trancher seul. Si un blocage existe déjà, vérifier qu'il est intentionnel et
+pas hérité d'une configuration de 2023-2024.
 
-## Pourquoi ça compte
-Une part significative des sites B2B bloque encore au moins un bot IA majeur
-par défaut de configuration ("block everything" hérité de 2023-2024), ce qui
-exclut le site des réponses génératives sans bénéfice de sécurité réel — ces
-bots respectent publiquement `robots.txt`. Vérifier que le blocage, s'il
-existe, est un choix explicite et pas un oubli.
+## llms.txt — statut réel, à ne pas survendre
+Créer un `llms.txt` ne nuit pas, mais les faits en juillet 2026 :
 
-## llms.txt — structure minimale
+- **Google ne l'utilise pas.** Le guide officiel « AI features » (mis à jour
+  15 juin 2026) dit explicitement : *« You don't need to create new machine
+  readable files, AI text files, or markup to appear in these features »*.
+  John Mueller l'a comparé à la balise `meta keywords` — déclaratif, donc
+  manipulable, donc ignoré.
+- **Il n'est quasiment jamais lu.** Étude Ahrefs sur 137 000 sites : **97%
+  des fichiers `llms.txt` n'ont reçu aucune requête** en mai 2026. Les
+  crawlers IA récupèrent le HTML directement.
+- **Adoption ~10%** des domaines (étude SE Ranking, 300 000 domaines).
+- **Ce n'est pas un contrôle d'accès.** Seul `robots.txt` en est un. Ne
+  jamais le présenter comme un moyen de bloquer ou d'autoriser un bot.
+
+Usage résiduel légitime : documentation technique destinée aux outils de
+codage IA. Pour un site vitrine, SaaS ou commerce local, le classer en P2 au
+mieux — et ne jamais en faire une recommandation prioritaire dans un audit.
+
+Structure minimale si créé quand même :
 ```markdown
 # {{Nom du site}}
 
-> {{Description en une phrase de ce que fait le site/produit}}
+> {{Description en une phrase}}
 
 ## Pages clés
-- [{{Titre page 1}}]({{url_page_1}}): {{description courte}}
-- [{{Titre page 2}}]({{url_page_2}}): {{description courte}}
+- [{{Titre}}]({{url}}): {{description courte}}
 ```
 
 ## GEO — soumission Brave Search
-Claude (Anthropic) utilise Brave Search comme backend principal pour son
-outil de recherche web (Brave est listé comme sous-traitant "web search" par
-Anthropic depuis mars 2025 ; des mesures indépendantes observent ~79-87%
-de recouvrement entre les résultats cités par Claude et les résultats
-organiques non-sponsorisés de Brave, selon l'échantillon et la période).
+Claude utilise Brave Search comme backend principal de son outil de
+recherche web (Brave listé comme sous-traitant « web search » par Anthropic
+depuis mars 2025 ; recouvrement observé de ~79-87% entre les résultats cités
+par Claude et l'organique Brave, selon l'échantillon).
 
-Conséquence pratique : soumettre une URL sur
-`https://search.brave.com/submit-url` peut accélérer son re-crawl par Brave
-et donc sa disponibilité pour le web search de Claude.
+Soumettre une URL sur `https://search.brave.com/submit-url` peut accélérer
+son re-crawl côté Brave.
 
-**Nuances à respecter** (ne jamais présenter autrement) :
-- Le formulaire déclenche un re-crawl, **ce n'est ni une garantie
-  d'indexation ni de ranking**.
-- Ça ne concerne que le web search **au moment de la requête** — pas les
-  connaissances natives d'entraînement de Claude (issues du pré-entraînement,
-  indépendantes de Brave et non influençables par cette soumission).
-- Aucune preuve que *toute* recherche web de Claude passe par Brave à 100% —
-  traiter l'overlap observé comme une forte corrélation, pas une certitude
-  absolue.
-- Soumission manuelle et ponctuelle uniquement (formulaire) — ne pas
-  automatiser cette soumission en masse, ça n'apporte rien et peut ressembler
-  à du spam de soumission.
+Nuances à conserver :
+- Déclenche un re-crawl, **ni garantie d'indexation ni de ranking**.
+- Ne concerne que la recherche web au moment de la requête — pas les
+  connaissances d'entraînement du modèle.
+- L'overlap est une forte corrélation, pas une certitude que 100% des
+  recherches de Claude passent par Brave.
+- Soumission manuelle et ponctuelle ; ne pas automatiser en masse.
 
 ## Sources
-- [The AI User-Agent Landscape in 2026: A Complete Reference](https://nohacks.co/blog/ai-user-agents-landscape-2026)
-- [AI Crawler Access Control: The 2026 Decision Matrix](https://www.digitalapplied.com/blog/ai-crawler-access-control-2026-robots-llms-txt-decision-matrix)
-- [Robots.txt & AI Crawlers in 2026: The Full Guide](https://dataimpulse.com/blog/robots-txt-ai-crawlers/)
-- [Robots.txt For AI Bots: Control GPTBot, Google-Extended & More](https://capston.ai/robots-txt-for-ai-bots/)
-- [Anthropic Lists Two Web-Search Subprocessors for Claude: Brave & TurboPuffer](https://xponent21.com/insights/claude-web-search-brave-turbopuffer/)
-- [Does Claude Use Brave Search? What the Brave Submit URL Page...](https://convertos.ai/geo/claude-brave-search-submit-url)
+- [Google — AI features and your website](https://developers.google.com/search/docs/appearance/ai-features) (position officielle sur les fichiers IA)
+- [Ahrefs — We Analyzed 137K Sites: 97% of llms.txt Files Never Get Read](https://ahrefs.com/blog/llmstxt-study/)
+- [Google Confirms LLMs.txt Has No Current Implementation (SEJ)](https://www.searchenginejournal.com/google-says-llms-txt-is-purely-speculative-for-now/577576/)
+- [The AI User-Agent Landscape in 2026](https://nohacks.co/blog/ai-user-agents-landscape-2026)
+- [Anthropic Lists Two Web-Search Subprocessors: Brave & TurboPuffer](https://xponent21.com/insights/claude-web-search-brave-turbopuffer/)

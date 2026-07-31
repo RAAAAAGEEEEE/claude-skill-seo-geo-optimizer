@@ -1,45 +1,56 @@
-# Checklist audit SEO/GEO (pass rapide — remplir dans AUDIT_GEO.md)
+# Checklist — uniquement ce que les scripts ne peuvent PAS vérifier
 
-Pour le détail technique/on-page/E-E-A-T, voir [audit-framework.md](audit-framework.md).
+**Principe d'élagage : tout ce qui est automatisable a été retiré de cette
+checklist.** Ne pas re-vérifier à la main ce que `generate_report.py`
+contrôle déjà (HTTP, title, meta description, canonical, H1, JSON-LD valide,
+robots.txt/sitemap, impressions Search Console) ni ce que
+`check_ai_access.py` contrôle (accès réel des crawlers IA).
 
-## Technique
-- [ ] `<title>` unique et descriptif par page (50-60 car., mot-clé proche du début)
-- [ ] meta description par page (150-160 car., CTA inclus)
-- [ ] Un seul H1 par page, hiérarchie Hn logique
-- [ ] URLs propres, lisibles, sans paramètres inutiles
-- [ ] `sitemap.xml` présent + à jour + référencé dans `robots.txt`
-- [ ] Core Web Vitals : LCP < 2.5s, INP < 200ms, CLS < 0.1
-- [ ] HTTPS actif partout, pas de mixed content
-- [ ] Balises canonical correctes (pas de duplicate content)
+Cette liste ne contient que ce qui exige un jugement humain ou une donnée
+externe au HTML.
 
-## Schema JSON-LD
-- [ ] JSON-LD présent (pas Microdata/RDFa)
-- [ ] Schema **valide** (champs requis présents) — tester chaque bloc avec
-      `scripts/validate_schema.py` ou le Rich Results Test
-- [ ] `Organization` + `sameAs` sur la home
-- [ ] Type spécifique par page (`LocalBusiness`/sous-type, `Product`, `Article`...)
-- [ ] `FAQPage` là où il y a des Q/R
-- [ ] `AggregateRating` si avis disponibles
-- [ ] `BreadcrumbList` sur les pages internes
-- [ ] `dateModified` à jour sur le contenu éditorial
+## Avant de commencer
+- [ ] `python scripts/check_ai_access.py <url>` exécuté — **si des bots de
+      recherche sont bloqués, traiter ça avant tout le reste**, le reste a un
+      plafond de zéro côté GEO.
+- [ ] `python scripts/generate_report.py --urls urls.txt --out-prefix audit`
+      exécuté — le rapport sert de base, cette checklist le complète.
 
-## Crawlers IA
-- [ ] `robots.txt` : décision explicite (pas par défaut) sur GPTBot, ClaudeBot,
-      PerplexityBot, Google-Extended, OAI-SearchBot, Claude-SearchBot,
-      Applebot-Extended — voir [ai-crawlers.md](ai-crawlers.md)
-- [ ] `llms.txt` présent à la racine (description + pages clés)
-- [ ] Pas de contenu clé bloqué au JS/derrière login pour les crawlers
+## Jugement éditorial (non automatisable)
+- [ ] Le title est-il *cliquable*, pas seulement présent et bien dimensionné ?
+- [ ] La meta description donne-t-elle une raison de cliquer, ou décrit-elle
+      platement la page ?
+- [ ] Chaque section commence-t-elle par une réponse directe (retrieval IA),
+      ou par du contexte/préambule ?
+- [ ] Le contenu apporte-t-il quelque chose que les concurrents n'ont pas
+      (donnée propriétaire, expérience réelle, chiffre daté) ?
+- [ ] Cannibalisation : deux pages ciblent-elles la même intention ?
+- [ ] Contenu obsolète non rafraîchi depuis > 12 mois sur des sujets qui
+      bougent ?
 
-## Contenu / retrieval IA
-- [ ] TL;DR / réponse directe en tête de section (44% des citations LLM
-      viennent du premier tiers de la page)
-- [ ] FAQ en vrai balisage Q→R
-- [ ] Contenu factuel, chiffré, daté, sourcé (citer des sources tierces
-      augmente la probabilité de citation par les IA génératives)
+## Signaux de confiance (vérification manuelle)
+- [ ] Page À-propos réelle, pas un paragraphe générique.
+- [ ] Mentions légales complètes : éditeur, hébergeur, numéro
+      d'immatriculation si applicable, contact.
+- [ ] Auteur identifiable sur le contenu éditorial (`Person` plutôt
+      qu'`Organization` quand une vraie personne écrit).
+- [ ] NAP (nom/adresse/téléphone) cohérent entre le site, Google Business
+      Profile et les annuaires — en commerce local.
+- [ ] Date de dernière mise à jour visible sur le contenu daté.
+- [ ] Chiffres publics utilisés comme preuve sociale : datés et exacts ?
 
-## E-E-A-T
-- [ ] Page À-propos réelle
-- [ ] Mentions légales (éditeur, hébergeur, SIRET si applicable)
-- [ ] Bio auteur / équipe
-- [ ] NAP (Name/Address/Phone) cohérent partout pour le local
-- [ ] Timestamp "dernière mise à jour" visible + `dateModified` schema
+## Données externes (accès requis)
+- [ ] Search Console : pages en impressions sans clic → problème de
+      title/description, pas de contenu (`gsc_report.py`).
+- [ ] Search Console : pages attendues avec zéro impression → problème
+      d'indexation, pas de ranking.
+- [ ] CrUX : Core Web Vitals terrain (`crux_report.py`). Pas de données =
+      trafic insuffisant, **pas** un problème de performance.
+- [ ] Bing/Yandex : URLs récentes soumises via IndexNow
+      (`indexnow_submit.py`) ?
+
+## Décisions à remonter à l'utilisateur (ne jamais trancher seul)
+- [ ] Blocage/déblocage des crawlers IA (arbitrage contenu ouvert vs
+      monétisation).
+- [ ] Migration d'URLs, sous-domaine vs sous-répertoire.
+- [ ] Suppression ou désindexation de pages existantes.

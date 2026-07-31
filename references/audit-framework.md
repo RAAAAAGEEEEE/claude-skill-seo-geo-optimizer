@@ -89,19 +89,35 @@ conclure "pas de schema" sur la seule base d'un `curl`.
   HTTPS.
 
 ## Signaux GEO (retrieval par IA génératives)
-Sources détaillées et chiffres exacts : voir [ai-crawlers.md](ai-crawlers.md)
-et la section "Signaux GEO" de [SKILL.md](../SKILL.md).
-- Les IA lisent souvent des passages isolément (chunking) : réponse directe
-  en tête de section, contexte ensuite — ~44% des citations LLM proviennent
-  du premier tiers d'une page (nohacks.co, 2026).
-- Ranker sur Google ≠ être cité par une IA : seulement ~38% des citations IA
-  viennent du top 10 organique — deux systèmes de retrieval distincts.
-- Citer des sources tierces, inclure des statistiques et des citations
-  directes augmente la probabilité de citation par les moteurs génératifs
-  (étude Princeton/Georgia Tech/IIT Delhi, KDD 2024, Aggarwal et al. — lift
-  jusqu'à 40% selon la méthode).
-- 3+ types de schema sur une page : probabilité de citation LLM ~13 points
-  plus élevée (corrélation observée, pas une garantie).
+Prérequis absolu, à vérifier avant tout le reste : les crawlers IA
+accèdent-ils réellement au site ? Voir
+[cloudflare-ai-access.md](cloudflare-ai-access.md) et
+[`../scripts/check_ai_access.py`](../scripts/check_ai_access.py).
+
+Ce qui est établi et sourçable :
+- **Position officielle de Google** (guide « AI features », mis à jour le
+  15 juin 2026) : *« There are no additional requirements to appear in AI
+  Overviews or AI Mode, nor other special optimizations necessary »* et
+  *« You don't need to create new machine readable files, AI text files, or
+  markup »*. Autrement dit : côté Google, les fondamentaux SEO **sont** la
+  stratégie GEO. Se méfier de toute recommandation qui prétend l'inverse.
+- **Le contexte a changé, pas la méthode** : le taux de recherches Google
+  sans clic atteint ~65% en 2026, ~93% en AI Mode, et les AI Overviews
+  apparaissent sur une part importante des requêtes. Conséquence pratique :
+  l'objectif se déplace du clic vers la **citation**, ce qui renforce
+  l'intérêt d'un contenu factuel, daté et attribuable — mais ne crée pas de
+  levier technique nouveau côté Google.
+- **Structure pour le chunking** : les moteurs génératifs récupèrent des
+  passages isolément. Une section qui commence par sa réponse est
+  réutilisable telle quelle ; une section qui commence par un préambule ne
+  l'est pas. C'est un principe de rédaction robuste, indépendant des
+  chiffres marketing du moment.
+
+Les statistiques de « lift de citation » par type de schema, largement
+reprises dans les blogs SEO 2026, ne sont pas issues de recherche primaire
+vérifiable et ont été **retirées volontairement** de ce skill plutôt que
+conservées sans preuve (cf. [data-hygiene.md](data-hygiene.md)). Ne pas les
+réintroduire dans un audit sans source primaire.
 
 ## Problèmes fréquents par type de site
 ### SaaS/Produit
@@ -122,23 +138,25 @@ clustering thématique, maillage interne pauvre, pages auteur manquantes.
 NAP incohérent, schema local manquant, Google Business Profile non optimisé,
 pages de localisation manquantes, pas de contenu local.
 
-## Format de rapport d'audit
-**Résumé exécutif** : état de santé global, top 3-5 problèmes prioritaires,
-quick wins identifiés.
+## Format de rapport
+Ne pas rédiger le rapport à la main :
+[`../scripts/generate_report.py`](../scripts/generate_report.py) produit
+`AUDIT_GEO.md` (lisible) + `.json` (machine-lisible), re-exécutable à
+l'identique. Y ajouter ensuite, manuellement, ce que les scripts ne peuvent
+pas voir ([checklist.md](checklist.md)) et l'ordre de priorité P0/P1/P2 —
+qui relève du jugement, pas de la détection.
 
-**Par section** (technique, on-page, contenu) et par problème :
-- **Problème** : ce qui ne va pas
-- **Impact** : SEO/GEO, Élevé/Moyen/Faible
-- **Preuve** : comment le problème a été trouvé
-- **Correction** : recommandation précise
-- **Priorité** : P0/P1/P2
-
-**Plan d'action priorisé** : corrections critiques (bloquent
-indexation/ranking) → améliorations à fort impact → quick wins → recommandations
-long terme.
+Priorisation par défaut : accès crawlers bloqué → indexation cassée →
+fondamentaux manquants (title/canonical/H1) → schema invalide → performance →
+contenu/E-E-A-T → long terme.
 
 ## Outils
-**Gratuits** : Search Console, PageSpeed Insights, Bing Webmaster Tools,
-Rich Results Test, Mobile-Friendly Test, Schema Validator.
-**Payants (si disponibles)** : Screaming Frog, Ahrefs/Semrush, Sitebulb,
-ContentKing.
+Tout ce dont ce skill a besoin est gratuit et automatisable via ses scripts
+(voir le tableau dans [SKILL.md](../SKILL.md)) : Search Console API, CrUX
+API, IndexNow, requêtes HTTP directes. Les suites payantes (Screaming Frog,
+Ahrefs, Semrush) apportent surtout du crawl à grande échelle et des données
+de backlinks tierces — utiles au-delà de quelques centaines de pages, non
+nécessaires pour l'audit couvert ici.
+
+Compléments manuels ponctuels : Rich Results Test (rendu JS, référence pour
+l'éligibilité), PageSpeed Insights (labo, quand CrUX manque de données).
