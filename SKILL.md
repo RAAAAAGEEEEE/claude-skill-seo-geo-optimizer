@@ -70,6 +70,11 @@ Rien de nouveau, mais c'est ce qui casse le plus souvent. Automatisé par
 `scripts/audit_site.sh` et `scripts/generate_report.py`. Détail :
 [references/audit-framework.md](references/audit-framework.md).
 
+Site multilingue : vérifier la réciprocité hreflang
+(`generate_report.py` le fait automatiquement) — **75% des sites
+internationaux ont une erreur hreflang**, l'erreur technique la plus
+fréquente du domaine.
+
 ### 3. Schema JSON-LD — priorités réévaluées (juillet 2026)
 JSON-LD uniquement. Un schema **déployé** n'est pas un schema **valide** :
 toujours valider (`scripts/validate_schema.py` ou Rich Results Test).
@@ -102,6 +107,9 @@ Page À-propos réelle, mentions légales complètes (éditeur, hébergeur,
 numéro d'immatriculation si applicable), auteur identifiable, NAP cohérent
 en local, date de mise à jour visible. Détail :
 [references/audit-framework.md](references/audit-framework.md#e-e-a-t).
+Commerce local : Google Business Profile a une API, mais avec un délai
+d'approbation manuel Google à anticiper —
+[references/google-business-profile.md](references/google-business-profile.md).
 
 ### 6. Performance mesurée
 Core Web Vitals **terrain** (utilisateurs réels) via l'API CrUX, pas une
@@ -132,6 +140,15 @@ pas l'utiliser. Le créer coûte peu et ne nuit pas, mais le présenter comme un
 levier GEO est faux, et il **n'a jamais été un mécanisme de contrôle d'accès**
 (seul `robots.txt` en est un). Détail et sources :
 [references/ai-crawlers.md](references/ai-crawlers.md).
+
+## Agent Readiness — terrain émergent, pas un pilier
+Cloudflare a lancé un score « Agent Readiness » (`isitagentready.com`) qui
+mesure si un site est prêt pour l'interaction avec des agents IA autonomes
+(MCP, Agent Skills, protocoles de commerce agentique). Adoption réelle
+mesurée sur 200 000 domaines : Content Signals 4%, Markdown for Agents
+3,9%, MCP/API catalogs réunis sur moins de 15 sites. À connaître, pas à
+prioriser devant les leviers ci-dessus. Détail :
+[references/agent-readiness.md](references/agent-readiness.md).
 
 ## Hygiène des données
 Distinguer systématiquement donnée **mesurée** (Search Console, CrUX,
@@ -170,6 +187,9 @@ volontairement plutôt que conservée sans preuve.
 | [references/backlinks.md](references/backlinks.md) | Évaluation de liens, PBN, annuaires |
 | [references/data-hygiene.md](references/data-hygiene.md) | Mesuré vs généré, péremption |
 | [references/gsc-access.md](references/gsc-access.md) | Compte de service Search Console |
+| [references/google-business-profile.md](references/google-business-profile.md) | API GBP, délai d'approbation, automatisable |
+| [references/spam-policies.md](references/spam-policies.md) | Les 16 politiques anti-spam Google actuelles |
+| [references/agent-readiness.md](references/agent-readiness.md) | Score Agent Readiness Cloudflare, adoption réelle |
 | [references/checklist.md](references/checklist.md) | Ce que les scripts ne peuvent PAS vérifier |
 
 ## Scripts
@@ -183,4 +203,8 @@ volontairement plutôt que conservée sans preuve.
 | [crux_report.py](scripts/crux_report.py) | Core Web Vitals terrain | clé API Google (gratuite) |
 | [gsc_report.py](scripts/gsc_report.py) | Impressions/clics/positions réels | compte de service GSC |
 | [indexnow_submit.py](scripts/indexnow_submit.py) | Soumission Bing/Yandex/Naver | clé IndexNow (auto-hébergée) |
-| [generate_report.py](scripts/generate_report.py) | **Rapport consolidé** (technique + schema + GSC) | optionnel : GSC |
+| [generate_report.py](scripts/generate_report.py) | **Rapport consolidé** (technique + schema + hreflang + accès crawlers + CrUX + GSC) | tout optionnel sauf `--urls` |
+
+`generate_report.py` accepte `--check-ai-access` et `--crux-key` en plus des
+options GSC — la réciprocité hreflang est vérifiée automatiquement dès
+qu'une page auditée en contient.

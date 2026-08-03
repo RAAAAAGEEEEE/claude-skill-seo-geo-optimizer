@@ -50,7 +50,7 @@ python scripts/generate_report.py --urls urls.txt --out-prefix audit \
 | `crux_report.py` | Core Web Vitals terrain (utilisateurs réels) | clé API Google gratuite |
 | `gsc_report.py` | Impressions, clics, positions réelles | compte de service GSC |
 | `indexnow_submit.py` | Soumission Bing/Yandex/Naver/Seznam/Yep | clé IndexNow auto-hébergée |
-| `generate_report.py` | **Rapport consolidé** Markdown + JSON | optionnel |
+| `generate_report.py` | **Rapport consolidé** (technique + hreflang + crawlers + CrUX + GSC), Markdown + JSON | tout optionnel sauf `--urls` |
 
 ## Références
 
@@ -58,12 +58,15 @@ python scripts/generate_report.py --urls urls.txt --out-prefix audit \
 |---|---|
 | `references/cloudflare-ai-access.md` | Blocage CDN des bots IA : diagnostic, correction, arbitrage |
 | `references/ai-crawlers.md` | Bots entraînement vs recherche, robots.txt, statut réel de llms.txt |
-| `references/audit-framework.md` | Audit technique / on-page / E-E-A-T |
+| `references/audit-framework.md` | Audit technique / on-page / E-E-A-T / hreflang |
 | `references/schema-templates.md` | Blocs JSON-LD + statut par type (juillet 2026) |
 | `references/indexing-rules.md` | Autorisé / interdit, IndexNow |
 | `references/backlinks.md` | Évaluation de liens, PBN, annuaires |
+| `references/spam-policies.md` | Les 16 politiques anti-spam Google actuelles |
 | `references/data-hygiene.md` | Mesuré vs généré, péremption des recommandations |
 | `references/gsc-access.md` | Mise en place du compte de service Search Console |
+| `references/google-business-profile.md` | API GBP, délai d'approbation Google |
+| `references/agent-readiness.md` | Score Agent Readiness Cloudflare — adoption réelle, à ne pas prioriser |
 | `references/checklist.md` | Uniquement ce que les scripts ne peuvent pas vérifier |
 
 ## Périmètre

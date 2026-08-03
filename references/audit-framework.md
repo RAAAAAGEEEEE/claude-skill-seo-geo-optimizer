@@ -39,6 +39,22 @@ conclure "pas de schema" sur la seule base d'un `curl`.
 - Outils : PageSpeed Insights, WebPageTest, Chrome DevTools, rapport Core
   Web Vitals de Search Console.
 
+## hreflang (sites multilingues)
+Le point technique le plus souvent cassé en SEO international : **75% des
+sites ciblant plusieurs langues ont une erreur d'implémentation hreflang**
+(étude 2026), qui fragmente le classement entre versions au lieu de les
+consolider. Trois règles non négociables :
+- **Auto-référencement** : chaque page doit inclure une balise hreflang qui
+  pointe vers elle-même, en plus des autres langues.
+- **Réciprocité** : si la page A référence B, B doit référencer A en retour
+  — sinon Google ignore la paire. Vérifié automatiquement par
+  `scripts/generate_report.py` sur les pages incluses dans le même audit.
+- **Codes ISO valides** : `en-GB` pas `en-uk`, `es` pas `sp`. Un code
+  invalide fait ignorer la balise entièrement.
+Éviter aussi : canonical qui pointe vers une autre langue (chaque version
+doit se canonicaliser elle-même), absence de x-default pour le
+sélecteur de langue par défaut.
+
 ## Mobile & sécurité
 - Responsive (pas de site m. séparé), tailles de tap targets, viewport
   configuré, pas de scroll horizontal, contenu identique desktop/mobile.
@@ -136,7 +152,9 @@ clustering thématique, maillage interne pauvre, pages auteur manquantes.
 
 ### Commerce local
 NAP incohérent, schema local manquant, Google Business Profile non optimisé,
-pages de localisation manquantes, pas de contenu local.
+pages de localisation manquantes, pas de contenu local. Détail sur
+l'automatisation possible (API, délai d'approbation Google) :
+[google-business-profile.md](google-business-profile.md).
 
 ## Format de rapport
 Ne pas rédiger le rapport à la main :

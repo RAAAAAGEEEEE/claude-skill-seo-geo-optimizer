@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""Assemble un rapport SEO/GEO final unique : audit technique (par URL) +
-validation schema + donnees mesurees Search Console (si credentials fournis).
+"""Assemble un rapport SEO/GEO final unique : audit technique (par URL,
+incluant la reciprocite hreflang) + validation schema + acces reel des
+crawlers IA + Core Web Vitals terrain + Search Console -- tout ce qui est
+mesurable, en une seule commande.
 
 Produit deux fichiers : un Markdown lisible (style AUDIT_GEO.md) et un JSON
 machine-lisible (pour un futur dashboard -- voir la lacune identifiee dans
 ARCHITECTURE.md de seo-geo-optimizer : aucun script ne produisait de sortie
 structuree jusqu'ici).
 
-Usage minimal (technique + schema seulement) :
+Usage minimal (technique + schema + hreflang seulement, aucun acces requis) :
     python generate_report.py --urls urls.txt --out-prefix rapport
 
-Avec Search Console (donnee mesuree en plus des inferences HTML) :
+Complet (acces crawlers IA + CrUX + Search Console) :
     python generate_report.py --urls urls.txt --out-prefix rapport \
+        --check-ai-access --crux-key "$CRUX_KEY" \
         --gsc-service-account creds.json --gsc-site sc-domain:example.com \
         --gsc-path-filter https://example.com/
 
@@ -39,6 +42,27 @@ DESC_RE = re.compile(r'name=["\']description["\'][^>]*content=["\']([^"\']*)', r
 CANONICAL_RE = re.compile(r'rel=["\']canonical["\'][^>]*href=["\']([^"\']*)', re.IGNORECASE)
 OG_TITLE_RE = re.compile(r'property=["\']og:title["\']', re.IGNORECASE)
 H1_RE = re.compile(r"<h1[^>]*>", re.IGNORECASE)
+LINK_TAG_RE = re.compile(r"<link\s[^>]*>", re.IGNORECASE)
+HREFLANG_ATTR_RE = re.compile(r'hreflang=["\']([^"\']*)', re.IGNORECASE)
+HREF_ATTR_RE = re.compile(r'href=["\']([^"\']*)', re.IGNORECASE)
+
+
+def extract_hreflang_links(html: str) -> list[tuple[str, str]]:
+    """Extrait les paires (hreflang, href) des <link rel="alternate" hreflang=...>.
+
+    75% des sites internationaux ont une erreur hreflang (etude 2026, cf.
+    audit-framework.md) -- l'ordre des attributs varie d'un CMS a l'autre,
+    d'ou un parsing tolerant plutot qu'un regex rigide sur l'ordre exact.
+    """
+    links = []
+    for tag in LINK_TAG_RE.findall(html):
+        if "alternate" not in tag.lower() or "hreflang" not in tag.lower():
+            continue
+        hreflang_match = HREFLANG_ATTR_RE.search(tag)
+        href_match = HREF_ATTR_RE.search(tag)
+        if hreflang_match and href_match:
+            links.append((hreflang_match.group(1), href_match.group(1)))
+    return links
 
 
 @dataclass
@@ -51,6 +75,7 @@ class PageAudit:
     has_og: bool = False
     h1_count: int = 0
     schema_results: list[dict] = field(default_factory=list)
+    hreflang_links: list[tuple[str, str]] = field(default_factory=list)
     error: str | None = None
 
     @property
@@ -101,8 +126,43 @@ def audit_url(url: str, timeout: float = 20.0) -> PageAudit:
 
     blocks = extract_blocks_from_text(html)
     audit.schema_results = validate_blocks(blocks, label=url)
+    audit.hreflang_links = extract_hreflang_links(html)
 
     return audit
+
+
+def check_hreflang_reciprocity(audits: list[PageAudit]) -> list[str]:
+    """Verifie la reciprocite hreflang entre les pages auditees.
+
+    Erreur la plus frequente en international SEO (75% des sites concernes,
+    etude 2026) : la page A pointe vers B, mais B ne pointe pas vers A. Ne
+    peut etre verifiee que si les deux pages du couple ont ete auditees dans
+    ce meme run -- les cibles hors perimetre sont signalees separement, pas
+    traitees comme une erreur.
+    """
+    problems = []
+    audited_urls = {a.url for a in audits}
+
+    for a in audits:
+        if not a.hreflang_links:
+            continue
+
+        self_referencing = any(href == a.url for _lang, href in a.hreflang_links)
+        if not self_referencing:
+            problems.append(f"{a.url} : pas de balise hreflang auto-référencée (self-referencing manquant)")
+
+        for lang, href in a.hreflang_links:
+            if href == a.url:
+                continue
+            if href not in audited_urls:
+                continue  # hors perimetre de cet audit, pas verifiable ici
+            target = next((t for t in audits if t.url == href), None)
+            if target and not any(back_href == a.url for _l, back_href in target.hreflang_links):
+                problems.append(
+                    f"{a.url} référence {href} (hreflang={lang}) mais {href} ne référence pas {a.url} en retour"
+                )
+
+    return problems
 
 
 def build_markdown(
@@ -174,6 +234,16 @@ def build_markdown(
                 value = f"{m['p75']:.2f}" if m["unit"] == "" else f"{m['p75']:.0f}{m['unit']}"
                 lines.append(f"| {m['label']} | {value} | {m['rating']} |")
 
+    hreflang_problems = check_hreflang_reciprocity(audits)
+    if any(a.hreflang_links for a in audits):
+        lines.append("\n## hreflang (réciprocité)")
+        if hreflang_problems:
+            lines.append(f"**{len(hreflang_problems)} problème(s)** — l'erreur la plus fréquente en SEO international :")
+            for p in hreflang_problems:
+                lines.append(f"- {p}")
+        else:
+            lines.append("Réciprocité OK sur les paires vérifiables dans ce périmètre d'audit.")
+
     lines += ["", "## Détail par page"]
     for a in audits:
         lines.append(f"\n### {a.url}")
@@ -189,6 +259,8 @@ def build_markdown(
             types = [t for r in a.schema_results for t in r["types"]]
             if types:
                 lines.append(f"- Schema présent : {', '.join(types)}")
+        if a.hreflang_links:
+            lines.append(f"- hreflang : {len(a.hreflang_links)} variante(s) déclarée(s)")
 
     if gsc_data:
         lines.append("\n## Search Console (donnée mesurée)")
@@ -284,9 +356,11 @@ def main() -> int:
                 "has_description": a.has_description, "has_canonical": a.has_canonical,
                 "has_og": a.has_og, "h1_count": a.h1_count,
                 "schema_results": a.schema_results, "issues": a.issues, "error": a.error,
+                "hreflang_links": a.hreflang_links,
             }
             for a in audits
         ],
+        "hreflang_reciprocity_problems": check_hreflang_reciprocity(audits),
         "search_console": gsc_data,
         "ai_access": ai_access,
         "core_web_vitals": crux_data,

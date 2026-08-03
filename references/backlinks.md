@@ -53,7 +53,9 @@ Utiles pour l'autorité de domaine, pas seulement pour le trafic direct :
 ## À bannir sans exception
 - Achat de backlinks, fermes de liens, réseaux d'échange massif —
   pénalité Google Search Central documentée (Link Spam / netlinking
-  manipulateur).
+  manipulateur). Liste complète des politiques anti-spam actuelles (aucune
+  nouvelle catégorie depuis juin 2026, juste un raffinement de la
+  détection) : [spam-policies.md](spam-policies.md).
 - Toute automatisation de soumission de masse vers des annuaires ou
   plateformes tierces.
 
