@@ -5,159 +5,233 @@ description: >
   (dont AI Overviews, AI Mode, Discover, Actualités) et dans les moteurs de
   réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès
   réel des crawlers (robots.txt RFC 9309 et blocage CDN), indexabilité et
-  extraits, JSON-LD, meta, structure, E-E-A-T, Core Web Vitals mesurés,
-  Search Console, IndexNow. Chaque recommandation porte une source datée et
-  une étiquette ESTABLISHED/SUPPORTED/CLAIMED. À utiliser pour « auditer le
+  extraits, cohérence sitemap/canonical/hreflang, JSON-LD, maillage interne
+  et cocon sémantique, Core Web Vitals mesurés, Search Console, IndexNow.
+  Audit complet automatisable (une commande, rapport daté, diff dans le
+  temps, planifiable). Chaque recommandation porte une source datée et une
+  étiquette ESTABLISHED/SUPPORTED/CLAIMED. À utiliser pour « auditer le
   SEO/GEO », « pourquoi mon site n'est pas cité par ChatGPT/AI Overviews »,
-  « vérifier robots.txt, sitemap, schema, llms.txt ». Ne pas confondre avec
-  le skill `SEO` (prospection, digital PR, outreach via `/SEO`) : celui-ci
-  audite et modifie le site courant, sans prospection ni outreach.
+  « vérifier robots.txt, sitemap, schema, maillage, cocon », « planifier un
+  audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
+  outreach via `/SEO`) : celui-ci audite et modifie le site courant, sans
+  prospection ni outreach.
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.0.0 — connaissances revues le **2026-09-27** (historique :
+Version 2.1.0 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
 ## Principe
-Deux fronts, un seul métier : Google dit lui-même que l'optimisation pour ses
-fonctions IA « reste du SEO », et les autres moteurs de réponse s'appuient sur
-des index de recherche. L'ordre ne se négocie pas :
+Google dit lui-même que l'optimisation pour ses fonctions IA « reste du
+SEO ». Les autres moteurs de réponse s'appuient eux aussi sur des index de
+recherche. L'ordre ne se négocie pas :
 **accès → indexation et extrait autorisé → contenu dans le HTML → preuves
 vérifiables → balisage exact → performance**. Un site que les crawlers ne
-peuvent pas lire a un plafond de zéro.
+peuvent pas lire a un plafond de zéro. Tout ce qui peut tourner sans humain
+passe par `scripts/run_audit.py`. Le jugement et les décisions produit
+restent humains.
 
 ## Périmètre
 - **Dans** : audit et modification du site courant (code, templates,
-  robots.txt, sitemap, meta, JSON-LD, en-têtes), mesure via APIs gratuites.
+  robots.txt, sitemap, meta, JSON-LD, en-têtes, maillage interne), mesure via
+  APIs gratuites, audit planifié.
 - **Hors** : prospection, netlinking, digital PR, outreach → skill `SEO`
   (`/SEO`). Production massive de contenu → jamais (scaled content abuse).
 - Sur un même projet : ce skill d'abord, `/SEO` ensuite.
 
 ## Quand l'utiliser
-Audit SEO/GEO, site absent des réponses IA, doute sur robots.txt/CDN,
-migration, ajout de schema, préparation d'un lancement, revue d'un
-`llms.txt`/RSL. Pas pour rédiger du marketing (skill `copywriting`).
+- audit SEO/GEO, ou site absent des réponses IA ;
+- doute sur robots.txt ou le CDN ;
+- migration, ajout de schema, préparation d'un lancement ;
+- revue d'un `llms.txt`/RSL ;
+- maillage interne ou cocon sémantique ;
+- suivi planifié d'un site.
+
+Pas pour rédiger du marketing (skill `copywriting`).
+
+## Entrées et sorties
+- **Entrée** : l'URL du site ; le dépôt du site si des corrections sont
+  demandées. Les accès optionnels (PageSpeed, CrUX, Search Console, IndexNow)
+  passent **uniquement** par des variables d'environnement
+  ([docs/CONFIGURATION.md](docs/CONFIGURATION.md)).
+- **Sortie** : `<out-dir>/<hôte>/audit_<AAAAMMJJTHHMMSSZ>.md` et `.json`,
+  avec un plan P0/P1/P2 ; `diff_<date>.md` quand un rapport précédent
+  existe ; un sitemap proposé et la liste des URLs pour IndexNow quand ils
+  s'appliquent.
 
 ## Procédure (PLAN → FIX → VERIFY)
 
-1. **Accès réel** — `python scripts/check_ai_access.py <url_importante>`.
-   Sortie 1 = blocage, 2 = non concluant (le site ne répond pas 200 : ne rien
-   conclure). Un crawler de recherche/citation bloqué est P0.
-2. **Explorer** le repo : stack, rendu (SSR ou JS client), robots.txt,
-   sitemaps, head/meta, JSON-LD, en-têtes, redirections, pages d'erreur.
-3. **Auditer** — `python scripts/generate_report.py --urls urls.txt --out-prefix AUDIT_GEO --check-ai-access`
-   (+ `--crux-key`, `--gsc-*` si accès). Inclure dans `urls.txt` : accueil,
-   pages clés, une page de langue secondaire, une URL **inexistante** (doit
-   répondre 404). Compléter avec [checklist.md](references/checklist.md)
-   (réglages de comptes, jugement éditorial).
-4. **PLAN** : prioriser P0/P1/P2 avec l'ordre ci-dessus, chaque point
-   étiqueté et sourcé. **Attendre le GO** avant de coder.
-5. **FIX** par lots, un diff à la fois. Décisions produit (ouvrir/fermer des
-   crawlers, opt-out IA Google, migration d'URLs, désindexation) : exposer
-   les options, **ne pas trancher**.
-6. **VERIFY** : relancer les scripts sur les URLs modifiées ;
-   `validate_schema.py` sur tout JSON-LD touché ; `python -m unittest discover -s tests`
-   si un script du skill a changé. Pas de « terminé » sans sortie de script.
+1. **Audit automatique** — `python scripts/run_audit.py --site <url> --out-dir <dossier>`.
+   - Code de sortie : 0 = aucun P0, 1 = au moins un P0, 2 = accueil
+     injoignable (ne rien conclure).
+   - Lire en premier les modules `skipped` et `error` : un module absent
+     n'est pas un module OK.
+   - Détail des étapes : [docs/USAGE.md](docs/USAGE.md).
+2. **Explorer** le dépôt : stack, rendu (SSR ou JS client), génération de
+   robots.txt, du sitemap, du head/meta, du JSON-LD, des redirections, des
+   pages d'erreur et des menus (origine des liens de navigation).
+3. **Compléter** avec [checklist.md](references/checklist.md) : réglages de
+   comptes, jugement éditorial, carte de la demande et définition canonique
+   ([french-practitioners.md](references/french-practitioners.md)).
+4. **PLAN** : reprendre le plan P0/P1/P2 du rapport. Un constat CLAIMED
+   (maillage de praticien, seuils) reste P2. **Attendre le GO** avant de
+   coder.
+5. **FIX** par lots, un diff à la fois. Les décisions produit restent au
+   propriétaire : exposer les options, **ne pas trancher**. Exemples :
+   - ouvrir ou fermer des crawlers, opt-out IA Google ;
+   - migrer des URLs, désindexer ;
+   - restructurer une rubrique en cocon ;
+   - soumettre à IndexNow.
+6. **VERIFY** : relancer `run_audit.py`. Le `diff_*.md` doit montrer les
+   constats résolus. Lancer `validate_schema.py` sur tout JSON-LD touché, et
+   `python -m unittest discover -s tests` si un script du skill a changé.
+   Pas de « terminé » sans sortie de script.
+7. **Planifier** si le propriétaire le demande : cron, Planificateur de
+   tâches Windows ou tâche Claude Code
+   ([docs/USAGE.md](docs/USAGE.md#planifier-laudit)). La création de la
+   tâche est une configuration persistante : **confirmation requise**.
 
 ## Les leviers (détail dans les références)
 
 | Levier | À retenir | Référence |
 |---|---|---|
-| Accès crawlers | Rôles engine / search / user / training / token ; `Google-Extended` et `Applebot-Extended` ne sont que des jetons ; plusieurs fetchers « utilisateur » ignorent robots.txt ; Cloudflare bloque Training+Agent par défaut sur les pages avec publicité depuis le 2026-09-15 | [ai-crawlers.md](references/ai-crawlers.md), [cloudflare-ai-access.md](references/cloudflare-ai-access.md) |
-| Google IA | AI Overviews/AI Mode en France depuis le 2026-07-22 ; conditions : indexé + extrait autorisé + réglage Search Console « Search generative AI » sur Inclure ; rapports IA = impressions seulement | [google-ai-features.md](references/google-ai-features.md) |
-| Technique / on-page | 404 et jamais 5xx sur une URL inconnue, 301/308 pour un déplacement définitif, pas de doublon de langue, canonical sur chaque page, contenu dans le HTML initial | [audit-framework.md](references/audit-framework.md) |
-| Schema | Rich results FAQ supprimés le 2026-05-07 ; Dataset = Dataset Search seulement ; `WebSite` pour le nom du site ; pas d'étoiles auto-attribuées ; aucun schema « spécial IA » | [schema-templates.md](references/schema-templates.md) |
-| Contenu citable | Preuves vérifiables (chiffres, sources, dates) ; fraîcheur réelle ; structure lisible ; pas de chunking artificiel | [evidence.md](references/evidence.md) |
-| E-E-A-T / éditeur | Pas un facteur de classement en soi ; auteur désambiguïsé (`author.url`) ; politiques éditoriales exactes | [eeat-news.md](references/eeat-news.md) |
-| Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 au p75 terrain (CrUX) | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
-| Indexation | Google : sitemap exact (lastmod vrai) + Search Console ; Indexing API interdite hors JobPosting/BroadcastEvent ; IndexNow pour Bing & co, **clé à la racine** | [indexing-rules.md](references/indexing-rules.md) |
-| Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire ; P2 au mieux | [licensing-signals.md](references/licensing-signals.md) |
-| Agents | MCP, API catalog, WebMCP : marginal au 2026-09-27 | [agent-discovery.md](references/agent-discovery.md) |
-| Liens | Évaluer, pas acquérir ; `sponsored`/`ugc`/`nofollow` = indications | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
-| Local | API GBP : fiche validée depuis 60+ jours, approbation manuelle | [google-business-profile.md](references/google-business-profile.md) |
+| Accès crawlers | Rôles : engine, search, user, training, token. `Google-Extended` et `Applebot-Extended` ne sont que des jetons. Plusieurs fetchers « utilisateur » ignorent robots.txt. Depuis le 2026-09-15, Cloudflare bloque par défaut Training et Agent sur les pages avec publicité. | [ai-crawlers.md](references/ai-crawlers.md), [cloudflare-ai-access.md](references/cloudflare-ai-access.md) |
+| Google IA | AI Overviews et AI Mode sont en France depuis le 2026-07-22. Conditions : page indexée, extrait autorisé, réglage Search Console « Search generative AI » sur Inclure. Les rapports IA donnent les impressions seulement. | [google-ai-features.md](references/google-ai-features.md) |
+| Technique / on-page | Une URL inconnue répond 404, jamais 5xx. Un déplacement définitif passe par 301/308. Pas de doublon de langue. Un canonical sur chaque page. Le contenu est dans le HTML initial. | [audit-framework.md](references/audit-framework.md) |
+| Maillage / cocon | Google : `<a href>`, au moins un lien vers chaque page importante, ancres descriptives, aucun nombre idéal de liens. Cocon, liens contextuels et profondeur ≤ 3 : méthodes de praticiens, CLAIMED. | [french-practitioners.md](references/french-practitioners.md) |
+| Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». | [schema-templates.md](references/schema-templates.md) |
+| Contenu citable | Preuves vérifiables (chiffres, sources, dates), fraîcheur réelle, structure lisible, pas de découpage artificiel. | [evidence.md](references/evidence.md) |
+| E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
+| Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, au p75 terrain (CrUX). | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
+| Indexation | Google : sitemap exact (lastmod vrai) et Search Console. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md) |
+| Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
+| Agents | MCP, API catalog, WebMCP : impact marginal au 2026-09-27. | [agent-discovery.md](references/agent-discovery.md) |
+| Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
+| Local | API GBP : fiche validée depuis 60 jours ou plus, approbation manuelle. | [google-business-profile.md](references/google-business-profile.md) |
 
 ## Niveaux de preuve
-- **ESTABLISHED** (doc officielle, déclaration du fournisseur sur son
-  produit), **SUPPORTED** (étude indépendante avec données), **CLAIMED**
-  (vendeur ou blog, y compris étude de vendeur à méthode publiée). Un
-  CLAIMED ne fonde jamais seul une priorité.
-- Chaque constat d'audit : **mesuré** (requête HTTP, CrUX, Search Console),
-  **inféré** (HTML, code) ou **hypothèse**. Détail :
-  [data-hygiene.md](references/data-hygiene.md).
+- **ESTABLISHED** : documentation officielle, ou déclaration du fournisseur
+  sur son propre produit.
+- **SUPPORTED** : étude indépendante avec données.
+- **CLAIMED** : vendeur, blog ou praticien, y compris une étude de vendeur à
+  méthode publiée.
+
+Un CLAIMED ne fonde jamais seul une priorité : les règles CLAIMED de
+`scripts/audit_rules.py` sont P2, et un test le vérifie.
+
+Chaque constat d'audit est marqué **mesuré** (requête HTTP, CrUX, Search
+Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
+[data-hygiene.md](references/data-hygiene.md).
 
 ## Replis et erreurs
-- Schema injecté en JavaScript (Yoast, RankMath...) : `curl` ne le voit pas ;
-  conclure avec un navigateur ou le Rich Results Test, jamais « pas de schema ».
-- `check_ai_access.py` teste avec des user-agents simulés depuis votre
-  machine : un 403 prouve une règle par user-agent, un 200 ne prouve pas que
-  le vrai bot passe. Confirmer dans les journaux ou le tableau de bord CDN.
-- CrUX sans données = trafic insuffisant, pas un problème de performance :
-  mesure labo étiquetée comme telle.
-- Pas d'accès Search Console / Bing Webmaster Tools : le dire, ne pas
+- Schema, liens ou contenu injectés en JavaScript : les scripts ne les voient
+  pas. Conclure avec un navigateur ou le Rich Results Test, jamais par
+  « absent ».
+- Accès crawlers : les user-agents sont simulés depuis votre machine. Un 403
+  prouve une règle par user-agent. Un 200 ne prouve pas que le vrai bot
+  passe. Confirmer dans les journaux ou le tableau de bord CDN.
+- Pas de `<main>`/`<nav>` dans le HTML : les contrôles de liens contextuels
+  sont désactivés, et le rapport le dit.
+- Crawl incomplet (`--max-pages` atteint) : les orphelines et la profondeur
+  sont des estimations, et le rapport le dit.
+- CrUX sans données = trafic insuffisant, pas un problème de performance.
+- PageSpeed sans clé : le quota partagé est souvent épuisé. Fournir
+  `PAGESPEED_API_KEY`, sinon le module est `skipped`.
+- Pas d'accès Search Console ni Bing Webmaster Tools : le dire, ne pas
   extrapoler une mesure de citation.
-- Page en 403/JS lors d'une vérification de source : noter « non vérifié ».
+- Page en 403 ou rendue en JS lors d'une vérification de source : noter
+  « non vérifié ».
 
 ## Sécurité et confidentialité
-- Par défaut, les scripts ne font que des **GET publics** vers le site
-  audité. Rien d'autre ne sort sans option explicite : `--crux-key` (clé
-  Google en paramètre d'URL vers l'API CrUX), `--gsc-service-account`
-  (jeton OAuth vers l'API Search Console), `indexnow_submit.py` sans
-  `--dry-run` (URLs envoyées à api.indexnow.org et partagées avec tous les
-  moteurs participants : **action externe, confirmation requise**).
-- Clés et fichiers de compte de service : hors du dépôt, jamais affichés
-  dans un rapport ni un log.
-- Aucune modification de compte (Search Console, CDN, GBP) par ce skill :
-  il liste les réglages, le propriétaire les change.
+- Par défaut, uniquement des **GET publics** vers le site audité. Le crawl
+  respecte robots.txt et marque une pause entre les requêtes (`--delay`).
+- Rien d'autre ne sort sans accès fourni par l'environnement :
+  - `PAGESPEED_API_KEY` / `CRUX_API_KEY` : clé en paramètre d'URL vers les
+    API Google ;
+  - `GSC_SERVICE_ACCOUNT_FILE` : jeton OAuth vers Search Console ;
+  - `--indexnow-submit` : URLs envoyées à api.indexnow.org et partagées
+    avec tous les moteurs participants. C'est une **action externe :
+    confirmation requise**.
+- Les clés ne passent jamais en argument. Elles ne sont jamais affichées ni
+  écrites : le rapport est masqué avant écriture, et un test le vérifie.
+  Détail : [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md).
+- Ce skill ne modifie aucun compte (Search Console, CDN, GBP) : il liste
+  les réglages, et le propriétaire les change.
 
 ## Exemples d'invocation
 - « Audite le SEO/GEO de ce site et propose un plan » → procédure complète.
 - « Pourquoi Perplexity ne nous cite jamais ? » → étape 1, puis
   [ai-crawlers.md](references/ai-crawlers.md).
-- « Ajoute le schema produit » → [schema-templates.md](references/schema-templates.md),
-  puis `validate_schema.py`.
+- « Vérifie notre maillage, on veut un cocon » → étape 1, tableau
+  « Cocon / silos » du rapport, puis
+  [french-practitioners.md](references/french-practitioners.md).
+- « Lance cet audit chaque lundi » → étape 7, après confirmation.
+- « Ajoute le schema produit » →
+  [schema-templates.md](references/schema-templates.md), puis
+  `validate_schema.py`.
 
-## Exemple de sortie (réelle, site anonymisé, 2026-09-27)
+## Exemple de sortie (réelle, site anonymisé, 2026-09-27 22:32 UTC)
 ```
-### https://example.com/
-- Redirections : 307 https://example.com/fr
-- **redirection temporaire 307 vers https://example.com/fr : utiliser 301/308 si le deplacement est definitif**
-
-### https://example.com/fr/donnees
-- **canonical manquant**
-- schema : ...Dataset - sert uniquement a Dataset Search, pas a Google Search (05/11/2025)
-
-### https://example.com/fr/robots/nexiste-pas
-- **HTTP 500 : erreur serveur (une URL inconnue doit repondre 404/410, jamais 5xx ; des 5xx repetes ralentissent le crawl)**
+Resultat : P0=0 P1=1 P2=4 ; 25 page(s), 80 requete(s)
+  P1 Page du sitemap sans aucun lien interne entrant (orpheline) (1) [ESTABLISHED, inféré]
+  P2 Page indexable quasi vide (risque de soft 404) (6) [ESTABLISHED, inféré]
+  P2 Page en noindex liée en interne : vérifier que c'est voulu (4) [ESTABLISHED, inféré]
+  P2 Page sans lien contextuel sortant (11) [CLAIMED, inféré]
+  P2 Page liée uniquement depuis la navigation (aucun lien contextuel entrant) (6) [CLAIMED, inféré]
+  module ai_access: ran -- 25 crawlers, 0 bloqué(s)
+  module crawl: ran -- 25 page(s) récupérée(s), 14/14 URL(s) du sitemap, ...
+  module probes_404: ran -- 19 URL(s) sondée(s)
+  module pagespeed: skipped -- PAGESPEED_API_KEY absente
 ```
+L'URL orpheline est `https://example.com/fr/guides`.
 
 ## Livrables
-- `AUDIT_GEO.md` + `AUDIT_GEO.json` (`generate_report.py`), complétés à la
-  main par la checklist et les priorités P0/P1/P2 étiquetées.
+- Le rapport `audit_*.md` + `.json` de `run_audit.py`, et `diff_*.md` au
+  passage suivant.
 - `CHANGELOG_GEO.md` dans le projet audité : chaque modification et son but.
-- Sortie de `validate_schema.py` avant de clore une tâche schema.
+- La sortie de `validate_schema.py` avant de clore une tâche schema.
 
 ## Scripts
 | Script | Rôle | Accès requis |
 |---|---|---|
+| [run_audit.py](scripts/run_audit.py) | **Point d'entrée** : audit complet, plan priorisé, correctifs sûrs, diff | optionnel (env) |
+| [diff_reports.py](scripts/diff_reports.py) | Évolution entre deux rapports ; sortie 1 si un P0 apparaît | aucun |
 | [check_ai_access.py](scripts/check_ai_access.py) | robots.txt (RFC 9309) + accès HTTP par crawler vs navigateur | aucun |
-| [generate_report.py](scripts/generate_report.py) | Rapport consolidé (redirections, noindex/nosnippet, meta, canonical, lang, schema, hreflang, crawlers, CrUX, GSC) | optionnel |
-| [audit_site.sh](scripts/audit_site.sh) | Passe rapide curl multi-URLs | aucun |
+| [generate_report.py](scripts/generate_report.py) | Rapport sur une liste d'URLs choisie | optionnel |
 | [validate_schema.py](scripts/validate_schema.py) | JSON-LD vs exigences Google, types retirés, avis auto-attribués | aucun |
 | [generate_sitemap.py](scripts/generate_sitemap.py) | sitemap.xml conforme + robots.txt (`--ai-policy open\|search-only`) | aucun |
-| [indexnow_submit.py](scripts/indexnow_submit.py) | IndexNow avec contrôle de la clé et de sa portée | clé auto-hébergée |
-| [crux_report.py](scripts/crux_report.py) | Core Web Vitals terrain | clé API Google gratuite |
+| [indexnow_submit.py](scripts/indexnow_submit.py) | IndexNow avec contrôle de la clé et de sa portée | `INDEXNOW_KEY` |
+| [pagespeed.py](scripts/pagespeed.py) | PageSpeed Insights : labo + terrain | `PAGESPEED_API_KEY` |
+| [crux_report.py](scripts/crux_report.py) | Core Web Vitals terrain | `CRUX_API_KEY` |
 | [gsc_report.py](scripts/gsc_report.py) | Search Console (web, discover, googleNews, news, image, video) | compte de service |
-| [check_backlinks.sh](scripts/check_backlinks.sh) | Liens suivis vs nofollow/sponsored/ugc, ancres | aucun |
+| [audit_site.sh](scripts/audit_site.sh), [check_backlinks.sh](scripts/check_backlinks.sh) | Passe curl rapide ; liens suivis/nofollow d'une page | aucun |
 
-Modules partagés : [ai_bots.py](scripts/ai_bots.py) (catalogue des
-crawlers, source unique avec [ai-crawlers.md](references/ai-crawlers.md)),
-[robotstxt.py](scripts/robotstxt.py), [htmlsignals.py](scripts/htmlsignals.py).
-Tests hors ligne : `python -m unittest discover -s tests`.
+Modules partagés :
+- [audit_rules.py](scripts/audit_rules.py) : catalogue des règles
+  (priorité, étiquette, source) ;
+- [linkgraph.py](scripts/linkgraph.py) : maillage et cocon ;
+- [sitemaps.py](scripts/sitemaps.py), [htmlsignals.py](scripts/htmlsignals.py),
+  [robotstxt.py](scripts/robotstxt.py) ;
+- [ai_bots.py](scripts/ai_bots.py) : catalogue des crawlers ;
+- [envkeys.py](scripts/envkeys.py) : secrets ;
+- [report_markdown.py](scripts/report_markdown.py).
+
+Tests hors ligne, dont un audit complet sur un site de test servi en
+127.0.0.1 : `python -m unittest discover -s tests`. Il n'existe pas d'évaluation du
+comportement du skill lui-même.
 
 ## Installation
-Personnelle : `~/.claude/skills/seo-geo-optimizer/`. Par projet :
-`.claude/skills/seo-geo-optimizer/`. Python 3.10+, bibliothèque standard ;
-`pip install google-auth requests` uniquement pour `gsc_report.py`. Voir
-[README.md](README.md).
+- Personnelle : `~/.claude/skills/seo-geo-optimizer/`.
+- Par projet : `.claude/skills/seo-geo-optimizer/`.
+- Python 3.10+, bibliothèque standard uniquement.
+  `pip install google-auth requests` n'est nécessaire que pour Search
+  Console.
+
+Voir [docs/INSTALLATION.md](docs/INSTALLATION.md).
+
+## Références et attributions
+Méthodes de Laurent Bourrelly et de Stéphane Delgado, citées et étiquetées
+dans [french-practitioners.md](references/french-practitioners.md).
+Attributions : [docs/LEGAL_AND_ATTRIBUTION.md](docs/LEGAL_AND_ATTRIBUTION.md).

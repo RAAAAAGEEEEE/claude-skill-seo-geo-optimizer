@@ -1,0 +1,23 @@
+{
+  "id": "https://example.com/",
+  "loadingExperience": {
+    "metrics": {
+      "LARGEST_CONTENTFUL_PAINT_MS": {"percentile": 4300, "category": "SLOW"},
+      "INTERACTION_TO_NEXT_PAINT": {"percentile": 180, "category": "FAST"},
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": {"percentile": 12, "category": "AVERAGE"}
+    },
+    "overall_category": "SLOW"
+  },
+  "originLoadingExperience": {},
+  "lighthouseResult": {
+    "finalUrl": "https://example.com/",
+    "lighthouseVersion": "12.8.0",
+    "configSettings": {"formFactor": "mobile"},
+    "categories": {"performance": {"score": 0.42}},
+    "audits": {
+      "largest-contentful-paint": {"numericValue": 5120.5},
+      "cumulative-layout-shift": {"numericValue": 0.08},
+      "total-blocking-time": {"numericValue": 640}
+    }
+  }
+}

@@ -18,12 +18,15 @@ Mise en place (une fois par site) :
 3. Verifier qu'il est accessible publiquement (le script le fait avant tout
    envoi et refuse de soumettre sinon).
 
-Usage:
+Usage (cle dans la variable INDEXNOW_KEY, ou celle nommee par --key-env) :
     # verifie la cle sans rien soumettre
-    python indexnow_submit.py --host example.com --key <cle> --dry-run --urls urls.txt
+    INDEXNOW_KEY=... python indexnow_submit.py --host example.com --dry-run --urls urls.txt
 
-    # soumission reelle
-    python indexnow_submit.py --host example.com --key <cle> --urls urls.txt
+    # soumission reelle (action externe : confirmation du proprietaire)
+    python indexnow_submit.py --host example.com --urls urls.txt
+
+--key reste accepte pour compatibilite (deprecie : visible dans la liste
+des processus). La cle n'est jamais affichee (URL du fichier masquee).
 
 Gratuit, sans authentification autre que la cle. Max 10 000 URLs par POST.
 Moteurs participants et regles : references/indexing-rules.md.
@@ -33,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -111,12 +115,17 @@ def interpret_status(code: int) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--host", required=True, help="Domaine sans schema, ex: example.com")
-    parser.add_argument("--key", required=True, help="Cle IndexNow (hex, 8-128 caracteres)")
+    parser.add_argument("--key", default=None, help="Deprecie : preferer la variable d'environnement")
+    parser.add_argument("--key-env", default="INDEXNOW_KEY", help="Variable qui contient la cle (defaut INDEXNOW_KEY)")
     parser.add_argument("--key-location", default=None, help="URL du fichier de cle si non standard")
     parser.add_argument("--urls", required=True, type=Path, help="Fichier: une URL par ligne")
     parser.add_argument("--dry-run", action="store_true", help="Verifie la cle et les URLs, ne soumet rien")
     args = parser.parse_args()
 
+    args.key = args.key or os.environ.get(args.key_env, "").strip()
+    if not args.key:
+        print(f"Cle absente : definir la variable d'environnement {args.key_env}.", file=sys.stderr)
+        return 1
     if not KEY_RE.match(args.key):
         print("Cle invalide : attendu 8 a 128 caracteres parmi a-z, A-Z, 0-9 et '-'.", file=sys.stderr)
         return 1
@@ -138,7 +147,8 @@ def main() -> int:
     key_url = args.key_location or f"https://{args.host}/{args.key}.txt"
     out_of_scope = urls_outside_key_scope(urls, key_url)
     if out_of_scope:
-        print(f"{len(out_of_scope)} URL(s) hors du perimetre du fichier de cle {key_url}, ex: {out_of_scope[0]}",
+        print(f"{len(out_of_scope)} URL(s) hors du perimetre du fichier de cle {key_url.replace(args.key, '[REDACTED]')}, "
+              f"ex: {out_of_scope[0]}",
               file=sys.stderr)
         print("Le protocole limite une cle hors racine a son repertoire : publier la cle a la racine.",
               file=sys.stderr)
@@ -146,10 +156,10 @@ def main() -> int:
 
     ok, key_info = verify_key_file(args.host, args.key, args.key_location)
     if not ok:
-        print(f"Verification de la cle ECHOUEE : {key_info}", file=sys.stderr)
+        print(f"Verification de la cle ECHOUEE : {key_info.replace(args.key, '[REDACTED]')}", file=sys.stderr)
         print("Publier le fichier de cle avant toute soumission.", file=sys.stderr)
         return 1
-    print(f"Cle verifiee : {key_info}")
+    print(f"Cle verifiee : {key_info.replace(args.key, '[REDACTED]')}")
     print(f"{len(urls)} URL(s) pretes.")
 
     if args.dry_run:

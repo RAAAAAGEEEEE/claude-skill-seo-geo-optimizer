@@ -8,9 +8,9 @@ Produit deux fichiers : <prefix>.md (lisible) et <prefix>.json (machine).
 Usage minimal (technique + schema + hreflang, aucun acces requis) :
     python generate_report.py --urls urls.txt --out-prefix rapport
 
-Complet (acces crawlers IA + CrUX + Search Console) :
+Complet (acces crawlers IA + CrUX via la variable CRUX_API_KEY + Search Console) :
     python generate_report.py --urls urls.txt --out-prefix rapport \
-        --check-ai-access --crux-key "$CRUX_API_KEY" \
+        --check-ai-access \
         --gsc-service-account creds.json --gsc-site sc-domain:example.com \
         --gsc-path-filter https://example.com/
 
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import urllib.parse
 from dataclasses import dataclass, field
@@ -33,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from htmlsignals import PageSignals, fetch_signals  # noqa: E402
+from audit_rules import hreflang_checks, page_checks  # noqa: E402
 from validate_schema import validate_blocks  # noqa: E402
 
 CITATION_ROLES = ("search", "user", "engine")
@@ -48,55 +50,16 @@ class PageAudit:
         return self.signals.url
 
     @property
+    def checks(self) -> list[dict]:
+        return page_checks(self.signals, self.schema_results)
+
+    @property
     def issues(self) -> list[str]:
-        s = self.signals
-        problems: list[str] = []
-        if s.error and s.http_status is None:
-            return [f"inaccessible : {s.error}"]
-        if s.http_status and s.http_status >= 500:
-            problems.append(f"HTTP {s.http_status} : erreur serveur (une URL inconnue doit repondre 404/410, "
-                            "jamais 5xx ; des 5xx repetes ralentissent le crawl)")
-        elif s.http_status and s.http_status != 200:
-            problems.append(f"HTTP {s.http_status} (normal seulement si l'URL ne doit pas exister)")
-        for code, target in s.redirects:
-            if code in (302, 303, 307):
-                problems.append(
-                    f"redirection temporaire {code} vers {target} : utiliser 301/308 si le deplacement est definitif"
-                )
-        if s.noindex:
-            problems.append("noindex (meta robots ou X-Robots-Tag) : page exclue de Google, donc des AI Overviews/AI Mode")
-        if s.nosnippet:
-            problems.append("nosnippet ou max-snippet:0 : pas d'extrait ni d'usage dans AI Overviews/AI Mode")
-        if s.http_status == 200:
-            if not s.title:
-                problems.append("title manquant")
-            if not s.description:
-                problems.append("meta description manquante")
-            if not s.canonical:
-                problems.append("canonical manquant")
-            if s.h1_count == 0:
-                problems.append("aucun H1")
-            elif s.h1_count > 1:
-                problems.append(f"{s.h1_count} H1 (un seul attendu)")
-            if not s.html_lang:
-                problems.append("attribut lang absent sur <html>")
-        for r in self.schema_results:
-            if not r["valid"]:
-                problems.append(f"schema invalide ({r['block']}) : {r['error']}")
-        return problems
+        return [c["message"] for c in self.checks if c["kind"] == "issue"]
 
     @property
     def notes(self) -> list[str]:
-        s = self.signals
-        out: list[str] = []
-        final = s.final_url or s.url
-        if s.canonical and s.canonical.rstrip("/") != final.rstrip("/"):
-            out.append(f"canonical vers une autre URL : {s.canonical}")
-        if s.has_data_nosnippet:
-            out.append("data-nosnippet present : ces passages sont exclus des extraits et des AI Overviews")
-        for r in self.schema_results:
-            out += [f"schema : {w}" for w in r.get("warnings", [])]
-        return out
+        return [c["message"] for c in self.checks if c["kind"] == "note"]
 
 
 def audit_url(url: str) -> PageAudit:
@@ -108,29 +71,8 @@ def audit_url(url: str) -> PageAudit:
 
 
 def check_hreflang_reciprocity(audits: list[PageAudit]) -> list[str]:
-    """Self-reference and return links between the audited pages.
-
-    Only pairs where both pages are in this run can be checked; targets outside
-    the run are skipped, not reported as errors.
-    """
-    problems: list[str] = []
-    by_url = {a.signals.final_url or a.url: a for a in audits}
-    for a in audits:
-        links = a.signals.hreflang_links
-        if not links:
-            continue
-        me = a.signals.final_url or a.url
-        if not any(href == me for _lang, href in links):
-            problems.append(f"{me} : pas de balise hreflang vers elle-meme")
-        if not any(lang.lower() == "x-default" for lang, _href in links):
-            problems.append(f"{me} : pas de x-default (recommande, pas obligatoire)")
-        for lang, href in links:
-            if href == me or href not in by_url:
-                continue
-            back = by_url[href].signals.hreflang_links
-            if not any(back_href == me for _l, back_href in back):
-                problems.append(f"{me} reference {href} (hreflang={lang}) sans lien retour")
-    return problems
+    """Self-reference, x-default and return links (rules: audit_rules.py)."""
+    return [c["message"] for c in hreflang_checks([a.signals for a in audits])]
 
 
 def _cell(value: object) -> str:
@@ -245,7 +187,8 @@ def main() -> int:
     parser.add_argument("--gsc-days", type=int, default=28)
     parser.add_argument("--check-ai-access", action="store_true",
                         help="Teste l'acces reel des crawlers IA sur la 1re URL")
-    parser.add_argument("--crux-key", default=None, help="Cle API Chrome UX Report (Core Web Vitals terrain)")
+    parser.add_argument("--crux-key", default=None,
+                        help="Deprecie (visible dans la liste des processus) : preferer la variable CRUX_API_KEY")
     args = parser.parse_args()
 
     urls = [u.strip() for u in args.urls.read_text(encoding="utf-8").splitlines() if u.strip() and not u.startswith("#")]
@@ -262,12 +205,13 @@ def main() -> int:
 
         ai_access = check_ai_access.check_site(urls[0])
 
+    crux_key = args.crux_key or os.environ.get("CRUX_API_KEY") or None
     crux_data = None
-    if args.crux_key:
+    if crux_key:
         print(f"CrUX sur {origin}...")
         import crux_report
 
-        record = crux_report.query_crux(args.crux_key, {"origin": origin}, None)
+        record = crux_report.query_crux(crux_key, {"origin": origin}, None)
         crux_data = {"no_data": True} if record is None else {"metrics": crux_report.extract(record)}
 
     print(f"Audit de {len(urls)} URL(s)...")

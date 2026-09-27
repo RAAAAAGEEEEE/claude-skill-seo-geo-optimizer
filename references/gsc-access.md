@@ -1,6 +1,6 @@
 # Accès Google Search Console (donnée mesurée)
 
-Revu le 2026-09-27.
+Revu le 2026-09-28.
 
 Ce fichier documente comment obtenir un accès **programmatique en lecture
 seule** à Search Console pour n'importe quel site, via un compte de service
@@ -42,6 +42,9 @@ comme un substitut de l'autre.
 ```bash
 python scripts/gsc_report.py --service-account creds.json --site "sc-domain:example.com"
 ```
+En automatique : `GSC_SERVICE_ACCOUNT_FILE=/chemin/creds.json` et
+`--gsc-site sc-domain:example.com` (ou `GSC_SITE`) pour `run_audit.py`. Le
+rapport liste alors les pages du sitemap sans impression sur 28 jours.
 Le script affiche un avertissement explicite si le compte de service n'a
 pas d'accès confirmé à la propriété demandée, plutôt que d'échouer
 silencieusement.

@@ -19,16 +19,19 @@ Cle API gratuite (une fois) :
 La cle passe en parametre ?key= (seule methode documentee) : ne jamais
 l'ecrire dans un rapport, un log ou un fichier commite.
 
-Usage:
-    python crux_report.py --key <API_KEY> --origin https://example.com
-    python crux_report.py --key <API_KEY> --url https://example.com/page --form-factor PHONE
-    python crux_report.py --key <API_KEY> --origin https://example.com --json out.json
+Usage (cle dans la variable CRUX_API_KEY -- jamais en argument, visible
+dans la liste des processus et l'historique du shell) :
+    CRUX_API_KEY=... python crux_report.py --origin https://example.com
+    python crux_report.py --url https://example.com/page --form-factor PHONE
+    python crux_report.py --origin https://example.com --json out.json
+--key reste accepte pour compatibilite (deprecie).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -115,16 +118,20 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--origin", help="Origine entiere, ex: https://example.com")
     group.add_argument("--url", help="URL de page precise")
-    parser.add_argument("--key", required=True, help="Cle API Google (Chrome UX Report API)")
+    parser.add_argument("--key", default=None, help="Deprecie : preferer la variable CRUX_API_KEY")
     parser.add_argument("--form-factor", choices=["PHONE", "DESKTOP", "TABLET"], default=None,
                         help="Par defaut : toutes plateformes confondues")
     parser.add_argument("--json", dest="json_out", default=None)
     args = parser.parse_args()
 
+    key = args.key or os.environ.get("CRUX_API_KEY", "").strip()
+    if not key:
+        print("Cle absente : definir la variable d'environnement CRUX_API_KEY.", file=sys.stderr)
+        return 2
     target = {"origin": args.origin} if args.origin else {"url": args.url}
     label = args.origin or args.url
 
-    record = query_crux(args.key, target, args.form_factor)
+    record = query_crux(key, target, args.form_factor)
     if record is None:
         print(f"{label} : aucune donnee CrUX disponible.")
         print("Cela signifie un trafic Chrome reel insuffisant sur les 28 derniers jours,")

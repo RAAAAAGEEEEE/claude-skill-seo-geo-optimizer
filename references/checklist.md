@@ -1,17 +1,24 @@
 # Checklist — uniquement ce que les scripts ne peuvent PAS vérifier
 
-Revu le 2026-09-27.
+Revu le 2026-09-28.
 
 Tout ce qui est automatisable en est retiré. Ne pas revérifier à la main ce
-que `generate_report.py` contrôle (HTTP, redirections, noindex/nosnippet,
-title, description, canonical, H1, lang, JSON-LD, hreflang, Search Console)
-ni ce que `check_ai_access.py` contrôle (robots.txt, accès par crawler).
+que `run_audit.py` contrôle :
+- HTTP, redirections, noindex et nosnippet ;
+- title, description, canonical, H1, lang, JSON-LD ;
+- hreflang et langue ;
+- sitemaps et lastmod ;
+- 404 des URLs inconnues ;
+- maillage : orphelines, profondeur, ancres, cocon par répertoire ;
+- robots.txt et accès par crawler ;
+- PageSpeed, CrUX, Search Console et clé IndexNow, si un accès est fourni.
 
 ## Avant de commencer
-- [ ] `python scripts/check_ai_access.py <url>` exécuté — si un crawler de
-      recherche/citation est bloqué, le traiter avant tout le reste.
-- [ ] `python scripts/generate_report.py --urls urls.txt --out-prefix audit`
-      exécuté ; ce qui suit le complète.
+- [ ] `python scripts/run_audit.py --site <url>` exécuté — si un P0 sort
+      (crawler de recherche/citation bloqué, accueil ou robots.txt
+      illisible), le traiter avant tout le reste.
+- [ ] Les modules `skipped` du rapport sont assumés (accès non fourni) ou
+      corrigés (variable d'environnement, [../docs/CONFIGURATION.md](../docs/CONFIGURATION.md)).
 
 ## Réglages qu'aucun script ne voit (accès au compte requis)
 - [ ] Search Console > Paramètres > **« Search generative AI »** : sur
@@ -35,6 +42,12 @@ ni ce que `check_ai_access.py` contrôle (robots.txt, accès par crawler).
 - [ ] Contenu important rendu dans le HTML initial, pas seulement en
       JavaScript ni caché dans des onglets ou des PDF ?
 - [ ] Cannibalisation : deux pages sur la même intention ?
+- [ ] Cocon : les rubriques correspondent-elles à des intentions de
+      visiteurs (carte de la demande), et chaque page a-t-elle un rôle
+      distinct ? Voir [french-practitioners.md](french-practitioners.md)
+      (CLAIMED).
+- [ ] Définition canonique de l'entité (nom et description) identique sur
+      le site et les profils externes (CLAIMED, D2).
 - [ ] Contenu non rafraîchi depuis > 12 mois sur un sujet qui bouge ? (mettre
       à jour le fond, pas seulement la date)
 - [ ] Pages « vides » indexables (liste sans résultat, rubrique sans
@@ -55,7 +68,10 @@ ni ce que `check_ai_access.py` contrôle (robots.txt, accès par crawler).
 - [ ] Search Console : pages attendues sans impression → indexation.
 - [ ] CrUX : Core Web Vitals terrain (`crux_report.py`) ; pas de données =
       trafic insuffisant, pas un problème de performance.
-- [ ] IndexNow : clé publiée **à la racine**, URLs récentes soumises.
+- [ ] IndexNow : clé publiée **à la racine** (vérifiée par `run_audit.py`
+      si la clé est dans l'environnement), URLs récentes soumises.
+- [ ] Citations IA : relevé manuel daté de 10 à 20 questions réelles
+      (ligne de base, puis mensuel) — facultatif, CLAIMED (D1, D4).
 
 ## Décisions à remonter (ne jamais trancher seul)
 - [ ] Ouvrir ou fermer les crawlers IA, par rôle (recherche, utilisateur,

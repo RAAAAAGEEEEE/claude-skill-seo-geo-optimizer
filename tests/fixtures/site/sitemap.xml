@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>{ORIGIN}/</loc></url>
+  <url><loc>{ORIGIN}/docs/</loc></url>
+  <url><loc>{ORIGIN}/docs/one.html</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>{ORIGIN}/docs/two.html</loc></url>
+  <url><loc>{ORIGIN}/lonely.html</loc></url>
+  <url><loc>{ORIGIN}/hidden.html</loc></url>
+</urlset>

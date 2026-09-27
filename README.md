@@ -3,136 +3,146 @@
 Skill Claude Code qui audite puis corrige, dans le dépôt d'un site, sa
 visibilité dans Google (y compris AI Overviews, AI Mode, Discover) et dans
 les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
-Mistral).
+Mistral). L'audit complet tourne sans intervention, se planifie, et compare
+chaque rapport au précédent.
 
-**Statut : bêta** — version 2.0.0, connaissances revues le 2026-09-27
-([CHANGELOG.md](CHANGELOG.md)). Utilisé en conditions réelles sur quelques
-sites ; pas de suite d'évaluation du comportement du skill lui-même, seuls
-ses scripts sont testés.
+**Statut : bêta.** Version 2.1.0, connaissances revues le 2026-09-28
+([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
+sur quelques sites. Ses scripts sont testés (52 tests hors ligne), mais le
+comportement du skill lui-même n'a pas de suite d'évaluation.
 
 ## Le problème
 Un site peut être invisible pour les moteurs de réponse IA sans que personne
-le voie : un CDN qui renvoie 403 à `ClaudeBot` alors que `robots.txt`
-l'autorise, un `nosnippet` oublié, une URL inconnue qui répond 500, une page
-de langue qui duplique le français. En parallèle, les conseils « GEO »
-circulent sans source : `llms.txt` miracle, schema « pour l'IA »,
-statistiques recopiées de blog en blog.
+le voie. Quelques cas réels :
+- un CDN qui renvoie 403 à `ClaudeBot` alors que `robots.txt` l'autorise ;
+- un `nosnippet` oublié ;
+- une URL inconnue qui répond 500 ;
+- une page du sitemap qu'aucune autre page ne lie.
+
+En parallèle, les conseils « GEO » circulent sans source : `llms.txt`
+miracle, schema « pour l'IA », seuils de maillage présentés comme des règles.
 
 ## Pour qui
 Développeurs et indépendants qui maintiennent un site vitrine, un SaaS, un
-e-commerce, un commerce local ou un site de contenu, et qui veulent un audit
-re-exécutable plutôt qu'une liste de bonnes pratiques.
+e-commerce, un commerce local ou un site de contenu. Ils veulent un audit
+re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
 
 ## Ce que le skill apporte
-- **Accès réel des crawlers** : `robots.txt` interprété selon la RFC 9309,
-  puis requête de la page avec le user-agent documenté de chaque crawler,
-  comparée à un navigateur. Détecte le blocage CDN silencieux.
-- **Audit consolidé** sur un vrai parseur HTML : redirections temporaires,
-  `noindex`/`nosnippet` (meta et en-tête), canonical, lang, H1, JSON-LD
-  validé contre les exigences Google, hreflang, et en option Core Web Vitals
-  terrain et Search Console.
-- **Preuves étiquetées** : chaque affirmation des références porte une source
-  datée et une étiquette ESTABLISHED (doc officielle), SUPPORTED (étude
-  indépendante) ou CLAIMED (vendeur, blog). Les croyances démenties sont
-  listées ([references/evidence.md](references/evidence.md)).
+- **Une commande, un rapport daté** : `run_audit.py` écrit un rapport
+  Markdown et JSON avec un plan P0/P1/P2. Il couvre :
+  - l'accès réel des crawlers ;
+  - les sitemaps ;
+  - la cohérence canonical, hreflang et noindex ;
+  - le JSON-LD ;
+  - les 404 ;
+  - le maillage interne et le cocon ;
+  - en option : PageSpeed, CrUX, Search Console et IndexNow.
+- **Suivi dans le temps** : chaque passage est comparé au précédent
+  (`diff_*.md`), avec un code de sortie 1 si un problème bloquant apparaît.
+  C'est utilisable dans un cron.
+- **Preuves étiquetées** : chaque règle porte une source datée et une
+  étiquette. ESTABLISHED = documentation officielle, SUPPORTED = étude
+  indépendante, CLAIMED = praticien ou vendeur. Les méthodes de Laurent
+  Bourrelly (cocon sémantique) et de Stéphane Delgado (GEO, maillage) sont
+  intégrées comme CLAIMED, confrontées à la documentation de Google
+  ([references/french-practitioners.md](references/french-practitioners.md)).
 
 ## Exemple de sortie
-Extrait réel de `generate_report.py` sur un site réel, 2026-09-27 :
+Extrait réel de `run_audit.py` sur un site réel, le 2026-09-27 à 22:32 UTC
+(aucune clé fournie) :
 ```
-### https://example.com/
-- Redirections : 307 https://example.com/fr
-- **redirection temporaire 307 vers https://example.com/fr : utiliser 301/308 si le deplacement est definitif**
-
-### https://example.com/fr/robots/nexiste-pas
-- **HTTP 500 : erreur serveur (une URL inconnue doit repondre 404/410, jamais 5xx ; des 5xx repetes ralentissent le crawl)**
+Resultat : P0=0 P1=1 P2=4 ; 25 page(s), 80 requete(s)
+  P1 Page du sitemap sans aucun lien interne entrant (orpheline) (1) [ESTABLISHED, inféré]
+  P2 Page indexable quasi vide (risque de soft 404) (6) [ESTABLISHED, inféré]
+  P2 Page en noindex liée en interne : vérifier que c'est voulu (4) [ESTABLISHED, inféré]
+  P2 Page sans lien contextuel sortant (11) [CLAIMED, inféré]
+  P2 Page liée uniquement depuis la navigation (aucun lien contextuel entrant) (6) [CLAIMED, inféré]
+  module ai_access: ran -- 25 crawlers, 0 bloqué(s)
+  module pagespeed: skipped -- PAGESPEED_API_KEY absente
 ```
 
 ## Prérequis
-- Python 3.10+ (bibliothèque standard uniquement pour tous les scripts sauf
-  `gsc_report.py`) ; Bash et curl pour `audit_site.sh` et
-  `check_backlinks.sh`.
-- Optionnel : `pip install google-auth requests` (Search Console), une clé
-  API Chrome UX Report gratuite (Core Web Vitals terrain).
+- Python 3.10+. Tous les scripts se contentent de la bibliothèque standard,
+  sauf `gsc_report.py`.
+- Bash et curl, seulement pour `audit_site.sh` et `check_backlinks.sh`.
+- Optionnel : une clé API Google (PageSpeed / CrUX), un compte de service
+  Search Console (`pip install google-auth requests`), une clé IndexNow.
 
 ## Installation
 ```bash
 git clone https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer.git ~/.claude/skills/seo-geo-optimizer
 ```
-Ou, pour un seul projet, dans `.claude/skills/seo-geo-optimizer/` à la
-racine du projet. Claude Code le déclenche sur une demande d'audit SEO/GEO.
+Pour un seul projet : `.claude/skills/seo-geo-optimizer/` à la racine du
+projet. Détail : [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## Démarrage rapide
 Depuis le dossier du skill :
 ```bash
-# 1. Les crawlers de recherche et d'IA accèdent-ils vraiment au site ?
-python scripts/check_ai_access.py https://example.com
+# Audit complet (lecture seule), rapport dans ./seo-reports/<hôte>/
+python scripts/run_audit.py --site https://example.com
 
-# 2. Rapport consolidé (Markdown + JSON)
-printf 'https://example.com/\n' > urls.txt
-python scripts/generate_report.py --urls urls.txt --out-prefix AUDIT_GEO --check-ai-access
+# Relancé plus tard : un diff_*.md compare au rapport précédent
+python scripts/diff_reports.py --dir seo-reports/example.com
 
-# 3. Valider du JSON-LD (fichier HTML, .json ou URL)
-python scripts/validate_schema.py tests/fixtures/schema_cases.html
-
-# 4. Tests hors ligne des scripts
+# Tests hors ligne
 python -m unittest discover -s tests
 ```
-Codes de sortie de `check_ai_access.py` : 0 aucun blocage, 1 blocage,
-2 non concluant (la page ne répond pas 200 à un navigateur).
+Codes de sortie de `run_audit.py` : 0 = aucun P0, 1 = au moins un P0,
+2 = accueil injoignable. Planification (cron, Windows, Claude Code) :
+[docs/USAGE.md](docs/USAGE.md#planifier-laudit).
 
 ## Architecture
-- `SKILL.md` : la procédure que suit Claude (PLAN → FIX → VERIFY), courte.
+- `SKILL.md` : la procédure que suit Claude (PLAN → FIX → VERIFY).
 - `references/` : le détail daté et sourcé, chargé à la demande.
-- `scripts/` : outils re-exécutables ; modules partagés `ai_bots.py`
-  (catalogue des crawlers), `robotstxt.py` (RFC 9309), `htmlsignals.py`
-  (extraction HTML).
-- `tests/` : tests unitaires hors ligne et fixture JSON-LD.
+- `scripts/` : `run_audit.py` orchestre des modules testables (règles,
+  sitemaps, maillage, secrets).
+- `tests/` : tests hors ligne.
+
+Détail : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Configuration
-Aucune configuration requise. Les accès optionnels passent en arguments :
-`--crux-key` (clé API CrUX), `--gsc-service-account` + `--gsc-site`
-(compte de service Search Console, mise en place dans
-[references/gsc-access.md](references/gsc-access.md)), `--key` pour
-IndexNow. Garder clés et fichiers de compte hors du dépôt.
+Aucune configuration n'est requise pour l'audit de base. Les accès
+optionnels se donnent **uniquement par variables d'environnement** :
+`PAGESPEED_API_KEY`, `CRUX_API_KEY`, `GSC_SERVICE_ACCOUNT_FILE`, `GSC_SITE`,
+`INDEXNOW_KEY`. Voir [.env.example](.env.example) et
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Sécurité et confidentialité
-Par défaut, uniquement des requêtes GET publiques vers le site audité.
-Envois vers des tiers seulement sur option explicite : API CrUX (clé en
-paramètre d'URL), API Search Console (jeton OAuth), IndexNow (les URLs
-soumises sont partagées avec tous les moteurs participants — action externe,
-à confirmer). Le skill ne modifie aucun compte (Search Console, CDN, Google
-Business Profile).
+Par défaut, le skill n'envoie que des requêtes GET publiques vers le site
+audité, en respectant robots.txt. Des données ne partent vers des tiers que
+si l'accès correspondant est fourni (API Google, Search Console).
+La soumission IndexNow exige une option explicite, car c'est une action
+externe. Les clés ne sont jamais affichées ni écrites dans un rapport.
+Voir [SECURITY.md](SECURITY.md) et
+[docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md).
 
 ## Limites
-- Les tests d'accès utilisent des user-agents simulés depuis votre machine :
-  un 403 prouve une règle par user-agent, un 200 ne prouve pas que le vrai
-  crawler (identifié par IP ou signature) passe.
-- Pas de rendu JavaScript : un schema injecté côté client est invisible pour
-  les scripts (utiliser le Rich Results Test).
-- Les user-agents complets de ClaudeBot, Claude-User et Claude-SearchBot ne
-  sont pas publiés par Anthropic : le script utilise une chaîne construite
-  autour du jeton.
-- Le rapport « Generative AI performance » de Search Console et le rapport
-  « AI Performance » de Bing ne sont pas accessibles par API : lecture
-  manuelle.
+- Pas de rendu JavaScript : ce qui est injecté côté client est invisible.
+- Les user-agents des crawlers sont simulés : un 200 ne prouve pas que le
+  vrai crawler passe.
+- Le maillage « contextuel » dépend des balises `<main>`/`<nav>`, et les
+  rubriques sont déduites des répertoires d'URL.
 - Aucune mesure directe des citations dans ChatGPT, Claude ou Perplexity.
-- Connaissances datées : au-delà de 3 mois, revérifier les références.
-- Pas de dossier `docs/` ni de `CONTRIBUTING.md` à ce jour.
+- Les seuils de praticiens restent des heuristiques.
+
+Liste complète : [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ## Feuille de route (non contractuelle)
-- Lecture du rapport IA de Search Console si Google l'expose dans l'API.
-- Script Google Business Profile quand un accès API pourra être testé.
+- Lecture du rapport IA de Search Console, si Google l'expose dans l'API.
+- Rendu JavaScript optionnel (navigateur sans interface) pour les sites en
+  rendu client.
 - Vérification optionnelle des IP réelles des crawlers dans des journaux
   serveur fournis par l'utilisateur.
 
 ## Contribution
-Issues et pull requests bienvenues. Toute modification de script passe
-`python -m unittest discover -s tests` ; toute affirmation ajoutée dans
-`references/` porte une source primaire datée et son étiquette.
+Voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 MIT — voir [LICENSE](LICENSE).
 
 ## Documentation
-[SKILL.md](SKILL.md) (procédure) · [references/](references/) (détail) ·
-[CHANGELOG.md](CHANGELOG.md) (versions).
+- [SKILL.md](SKILL.md) : la procédure.
+- [docs/](docs/) : installation, usage, configuration, dépannage, limites,
+  sécurité, attributions.
+- [references/](references/) : les règles sourcées.
+- [CHANGELOG.md](CHANGELOG.md) : les versions.

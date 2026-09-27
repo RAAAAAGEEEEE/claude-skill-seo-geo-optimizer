@@ -1,6 +1,6 @@
 # Indexation — ce qui est autorisé, ce qui est interdit
 
-Revu le 2026-09-27. Tout est **ESTABLISHED** sauf mention.
+Revu le 2026-09-28. Tout est **ESTABLISHED** sauf mention.
 
 ## Google : sitemap + Search Console, rien d'autre
 `sitemap.xml` à jour, référencé dans `robots.txt`, soumis dans Search
@@ -54,8 +54,15 @@ envoi, refuse sinon.
 Mise en place (une fois par site) :
 1. `python -c "import uuid; print(uuid.uuid4().hex)"`
 2. Publier `https://example.com/<clé>.txt` contenant uniquement la clé.
-3. `python scripts/indexnow_submit.py --host example.com --key <clé> --urls urls.txt --dry-run`
-   puis sans `--dry-run`.
+3. Mettre la clé dans la variable `INDEXNOW_KEY` (jamais en argument), puis
+   `python scripts/indexnow_submit.py --host example.com --urls urls.txt --dry-run`,
+   et enfin sans `--dry-run`.
+
+En automatique, `run_audit.py` vérifie le fichier de clé à chaque passage. Il
+écrit la liste des URLs nouvelles ou modifiées depuis le rapport précédent
+(`audit_<date>_indexnow_urls.txt`). Il ne les soumet qu'avec
+`--indexnow-submit`, option à n'ajouter à une tâche planifiée qu'après
+accord du propriétaire (action externe).
 
 Bing URL Submission API : le quota « 10 000 URLs/jour » date de 2019 ; un
 développeur a constaté 100/jour en 2026 (CLAIMED). Préférer IndexNow.

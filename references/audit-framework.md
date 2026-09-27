@@ -1,6 +1,6 @@
 # Audit framework détaillé (technique, on-page, E-E-A-T)
 
-Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-28. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 Base SEO classique (technique/on-page/E-E-A-T), enrichie des
 signaux GEO (retrieval par IA génératives). Utiliser ce fichier pour l'audit
@@ -25,8 +25,9 @@ conclure "pas de schema" sur la seule base d'un `curl`.
   référence au sitemap. Pour les bots IA, voir [ai-crawlers.md](ai-crawlers.md).
 - `sitemap.xml` : existe, accessible, uniquement des URLs canoniques et
   indexables, à jour, bien formaté.
-- Architecture : pages importantes à ≤3 clics de la home, hiérarchie
-  logique, pas de pages orphelines.
+- Architecture : chaque page importante reçoit au moins un lien interne
+  (ESTABLISHED, Google), hiérarchie logique ; « ≤ 3 clics de l'accueil » est
+  une convention (CLAIMED). Mesuré par `scripts/run_audit.py`.
 - Sites volumineux : URLs paramétrées maîtrisées, navigation à facettes
   gérée, pas de session ID dans l'URL.
 - Indexation : comparer indexé vs attendu (`site:domaine.com` + Search
@@ -104,9 +105,23 @@ traduction — la passer en 404 ou `noindex` tant qu'elle n'est pas traduite.
   l'image), fichiers compressés, formats modernes (WebP), lazy loading,
   images responsive.
 
-### Maillage interne
-- Pages importantes bien liées, anchor text descriptif, pas de lien interne
-  cassé, pas de pages orphelines, pas d'anchor text sur-optimisé.
+### Maillage interne et cocon
+Ce que Google établit (Link best practices, maj 2025-12-10) :
+- des liens en `<a href>` ;
+- au moins un lien entrant vers chaque page importante ;
+- des ancres descriptives ;
+- aucun nombre idéal de liens.
+
+Méthodes de praticiens (cocon sémantique, liens contextuels, silos), toutes
+CLAIMED : [french-practitioners.md](french-practitioners.md).
+
+`scripts/run_audit.py` mesure :
+- orphelines, profondeur, liens cassés et liens vers des redirections ;
+- ancres génériques, vides ou répétées ;
+- liens contextuels et liens de navigation ;
+- tableau des rubriques par répertoire.
+
+Aucun seuil de praticien n'y est traité comme une règle.
 
 ### Ciblage mot-clé
 - Un mot-clé principal clair par page, alignement title/H1/URL, pas de
@@ -175,10 +190,13 @@ l'automatisation possible (API, délai d'approbation Google) :
 [google-business-profile.md](google-business-profile.md).
 
 ## Format de rapport
-Ne pas rédiger le rapport à la main :
+Ne pas rédiger le rapport à la main.
+[`../scripts/run_audit.py`](../scripts/run_audit.py) produit un rapport daté
+pour un site entier : Markdown, JSON, plan P0/P1/P2 et diff avec le rapport
+précédent.
 [`../scripts/generate_report.py`](../scripts/generate_report.py) produit
-`AUDIT_GEO.md` (lisible) + `.json` (machine-lisible), re-exécutable à
-l'identique. Y ajouter ensuite, manuellement, ce que les scripts ne peuvent
+`AUDIT_GEO.md` + `.json` pour une liste d'URLs choisie. Les deux sont
+re-exécutables à l'identique. Y ajouter ensuite, manuellement, ce que les scripts ne peuvent
 pas voir ([checklist.md](checklist.md)) et l'ordre de priorité P0/P1/P2 —
 qui relève du jugement, pas de la détection.
 
