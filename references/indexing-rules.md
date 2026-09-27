@@ -1,60 +1,72 @@
 # Indexation — ce qui est autorisé, ce qui est interdit
 
+Revu le 2026-09-27. Tout est **ESTABLISHED** sauf mention.
+
 ## Google : sitemap + Search Console, rien d'autre
 `sitemap.xml` à jour, référencé dans `robots.txt`, soumis dans Search
-Console. Inspection d'URL manuelle et ponctuelle pour une page importante qui
-tarde à être crawlée. C'est le mécanisme normal et il n'y a rien d'autre à
-construire.
+Console. Inspection d'URL manuelle et ponctuelle pour une page importante.
+
+Règles du sitemap ([Google](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), maj 2026-07-08) :
+- `lastmod` utilisé seulement s'il est exact de façon constante et
+  vérifiable ; il doit refléter un changement significatif (contenu
+  principal, données structurées, liens). Dater toutes les pages du jour
+  apprend à Google à ignorer le champ.
+- `priority` et `changefreq` : ignorés par Google.
+- 50 000 URLs ou 50 Mo non compressés par fichier ; au-delà, un index.
+- Le « ping » sitemap n'existe plus (404 depuis 2023-2024).
+- Uniquement des URLs canoniques, indexables, en 200.
+Générateur conforme : [`../scripts/generate_sitemap.py`](../scripts/generate_sitemap.py).
 
 ### Interdit — Google Indexing API hors périmètre
-Cette API est réservée par Google à `JobPosting` et à `BroadcastEvent`
-intégré dans une `VideoObject`. L'utiliser pour des pages marketing, des
-articles ou des pages produit est un usage détourné des conditions
-d'utilisation, avec un risque documenté de coupure d'accès à l'API pour le
-compte concerné.
-
-Si l'utilisateur demande « indexer plus vite via l'API Google » pour un type
-de page hors de ce périmètre : expliquer la restriction, proposer sitemap +
-Search Console, et IndexNow pour les autres moteurs.
+Réservée aux pages `JobPosting` et `BroadcastEvent` dans une `VideoObject`.
+Chaque soumission passe par une détection de spam, l'abus peut couper
+l'accès, le quota par défaut ne sert qu'aux tests et l'usage réel demande
+une approbation ([quickstart](https://developers.google.com/search/apis/indexing-api/v3/quickstart), maj 2026-07-16).
+À quelqu'un qui veut « indexer plus vite via l'API Google » : expliquer,
+proposer sitemap + Search Console, et IndexNow pour les autres moteurs.
 
 ### Interdit — auto-submit maison
-Ne pas coder de mécanisme qui pousse des URLs vers un moteur en dehors du
-flux sitemap → crawl (ping répétés, soumissions en boucle). Ça n'accélère
-rien de façon fiable et s'apparente à du spam d'indexation.
+Pas de mécanisme qui pousse des URLs en boucle hors du flux sitemap →
+crawl : rien de fiable, et proche du spam d'indexation.
 
-## Bing, Yandex, Naver, Seznam, Yep : IndexNow
-IndexNow est le mécanisme **prévu, gratuit et explicitement encouragé** par
-ces moteurs pour signaler une URL nouvelle ou modifiée. Rien à voir avec un
-détournement d'API : c'est son usage nominal.
+## Bing, Yandex, Naver, Seznam, Yep, Amazon, Internet Archive : IndexNow
+Mécanisme prévu, gratuit, encouragé par ces moteurs
+([searchengines.json](https://www.indexnow.org/searchengines.json), consulté
+2026-09-27). Une soumission est partagée entre tous les participants.
+Google **n'y participe pas**.
 
-- Google **n'y participe pas** (position confirmée en 2026) — ne jamais
-  présenter IndexNow comme un moyen d'accélérer l'indexation Google.
-- Pas de quota documenté côté IndexNow (contrairement à l'API URL Submission
-  de Bing, limitée à 10 000 URLs/jour/domaine, que Microsoft pousse à
-  abandonner au profit d'IndexNow).
-- Cloudflare propose une intégration native en un clic sur les plans payants.
-- Script : [`../scripts/indexnow_submit.py`](../scripts/indexnow_submit.py)
-  — vérifie que le fichier de clé est publiquement accessible **avant** toute
-  soumission, et refuse de soumettre sinon.
+Règles du protocole ([documentation](https://www.indexnow.org/documentation)) :
+- Clé : 8 à 128 caractères parmi `a-z`, `A-Z`, `0-9`, `-` (la doc dit
+  aussi « hexadécimal », ce qui contredit la liste ; un UUID hex convient
+  aux deux lectures).
+- **Emplacement de la clé** : un fichier de clé hors racine ne couvre que
+  les URLs sous son répertoire. Une clé servie en `/indexnow/<clé>.txt` ne
+  peut pas soumettre `/fr/page` : la soumission est refusée. Publier la clé
+  à la racine (`/<clé>.txt`).
+- 10 000 URLs max par POST ; réponses 200, 202 (clé en validation), 400,
+  403 (clé invalide), 422 (URL hors hôte/portée), 429 (trop de requêtes).
+- Soumettre les URLs nouvelles ou réellement modifiées, pas tout le sitemap.
+
+Script : [`../scripts/indexnow_submit.py`](../scripts/indexnow_submit.py) —
+vérifie la clé publiée **et** la portée de son emplacement avant tout
+envoi, refuse sinon.
 
 Mise en place (une fois par site) :
-1. Générer une clé : `python -c "import uuid; print(uuid.uuid4().hex)"`
+1. `python -c "import uuid; print(uuid.uuid4().hex)"`
 2. Publier `https://example.com/<clé>.txt` contenant uniquement la clé.
 3. `python scripts/indexnow_submit.py --host example.com --key <clé> --urls urls.txt --dry-run`
-   puis sans `--dry-run` une fois la vérification passée.
+   puis sans `--dry-run`.
 
-Bon usage : soumettre les URLs **nouvelles ou réellement modifiées**, pas
-l'intégralité du sitemap à chaque exécution.
+Bing URL Submission API : le quota « 10 000 URLs/jour » date de 2019 ; un
+développeur a constaté 100/jour en 2026 (CLAIMED). Préférer IndexNow.
 
 ## Brave Search
+Pas de crawler propre : Brave ne crawle que ce que `Googlebot` peut crawler.
 Soumission manuelle et ponctuelle sur `https://search.brave.com/submit-url`
-— pertinent pour la visibilité dans le web search de Claude, voir
-[ai-crawlers.md](ai-crawlers.md#geo--soumission-brave-search). Ne pas
-automatiser en masse.
+(re-crawl, sans garantie). Voir [ai-crawlers.md](ai-crawlers.md).
 
 ## Rappel : l'indexation n'est pas le problème le plus fréquent
-Avant de chercher à accélérer l'indexation, vérifier que le site est
-réellement accessible aux crawlers ([cloudflare-ai-access.md](cloudflare-ai-access.md))
-et que les pages concernées ne sont pas exclues par un `noindex`, un
-canonical mal orienté ou une redirection. Un problème d'accès ne se corrige
-pas en soumettant plus fort.
+Avant d'accélérer, vérifier l'accès réel
+([cloudflare-ai-access.md](cloudflare-ai-access.md)) et l'absence de
+`noindex`, de canonical mal orienté, de redirection temporaire, de 5xx.
+Un problème d'accès ne se corrige pas en soumettant plus fort.

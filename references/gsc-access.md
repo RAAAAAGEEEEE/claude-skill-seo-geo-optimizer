@@ -1,5 +1,7 @@
 # Accès Google Search Console (donnée mesurée)
 
+Revu le 2026-09-27.
+
 Ce fichier documente comment obtenir un accès **programmatique en lecture
 seule** à Search Console pour n'importe quel site, via un compte de service
 GCP — pas de flow OAuth interactif, réutilisable en automatisation (cron,
@@ -31,8 +33,10 @@ comme un substitut de l'autre.
    propriété visée : **Paramètres > Utilisateurs et autorisations > Ajouter
    un utilisateur**. Coller l'email du compte de service (visible dans le
    JSON, champ `client_email`, format
-   `xxx@projet.iam.gserviceaccount.com`). Rôle **Propriétaire** ou
-   **Complet** — le rôle **Restreint** ne suffit pas pour interroger l'API.
+   `xxx@projet.iam.gserviceaccount.com`). L'API Search Analytics demande
+   un droit de lecture : **Restreint** devrait suffire (inférence depuis la
+   table des permissions, Google ne l'écrit pas), **Complet** en cas de doute.
+   Ne jamais donner **Propriétaire** à un compte de service de lecture.
 
 ## Vérifier l'accès
 ```bash
@@ -50,6 +54,21 @@ avec `--path-filter https://example.com/` (ou l'équivalent
 `--gsc-path-filter` dans `generate_report.py`) pour isoler un domaine
 racine précis. Confirmé empiriquement sur un SaaS : sans filtre, les
 résultats mélangeaient le site marketing et ~2800 sous-domaines clients.
+
+## Ce que l'API ne donne pas (au 2026-09-27)
+- Le rapport **« Generative AI performance »** (impressions dans AI
+  Overviews, AI Mode, AI Overviews de Discover ; tous les sites depuis le
+  2026-08-31) : interface seulement. Les mêmes impressions restent incluses
+  dans le type `web` de l'API, sans distinction.
+- Le réglage **« Search generative AI »** (Inclure/Exclure) : à vérifier dans
+  Paramètres, à la main. Voir [google-ai-features.md](google-ai-features.md).
+
+Types disponibles dans l'API (`--search-type`) : `web`, `discover`,
+`googleNews`, `news`, `image`, `video` ; `--data-state all` pour inclure les
+données fraîches non consolidées.
+
+Anomalie connue : impressions faussées du 2025-05-13 au 2026-04-27 (clics non
+affectés). Le signaler avant toute comparaison sur un an.
 
 ## Scripts associés
 - [../scripts/gsc_report.py](../scripts/gsc_report.py) — requête Search

@@ -1,373 +1,319 @@
 #!/usr/bin/env python3
-"""Assemble un rapport SEO/GEO final unique : audit technique (par URL,
-incluant la reciprocite hreflang) + validation schema + acces reel des
-crawlers IA + Core Web Vitals terrain + Search Console -- tout ce qui est
-mesurable, en une seule commande.
+"""Rapport SEO/GEO consolide : audit technique par URL (parseur HTML reel),
+reciprocite hreflang, validation schema, acces reel des crawlers IA, Core Web
+Vitals terrain et Search Console -- tout ce qui est mesurable, en une commande.
 
-Produit deux fichiers : un Markdown lisible (style AUDIT_GEO.md) et un JSON
-machine-lisible (pour un futur dashboard -- voir la lacune identifiee dans
-ARCHITECTURE.md de seo-geo-optimizer : aucun script ne produisait de sortie
-structuree jusqu'ici).
+Produit deux fichiers : <prefix>.md (lisible) et <prefix>.json (machine).
 
-Usage minimal (technique + schema + hreflang seulement, aucun acces requis) :
+Usage minimal (technique + schema + hreflang, aucun acces requis) :
     python generate_report.py --urls urls.txt --out-prefix rapport
 
 Complet (acces crawlers IA + CrUX + Search Console) :
     python generate_report.py --urls urls.txt --out-prefix rapport \
-        --check-ai-access --crux-key "$CRUX_KEY" \
+        --check-ai-access --crux-key "$CRUX_API_KEY" \
         --gsc-service-account creds.json --gsc-site sc-domain:example.com \
         --gsc-path-filter https://example.com/
 
-Necessite : pip install requests (+ google-auth si --gsc-service-account utilise)
+Chaque section indique sa nature : "inferee" (lecture du HTML public) ou
+"mesuree" (requete HTTP reelle, CrUX, Search Console) -- cf.
+references/data-hygiene.md.
+
+Stdlib uniquement, sauf --gsc-service-account (pip install google-auth requests).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
-import urllib.error
 import urllib.parse
-import urllib.request
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from validate_schema import extract_blocks_from_text, validate_blocks  # noqa: E402
+from htmlsignals import PageSignals, fetch_signals  # noqa: E402
+from validate_schema import validate_blocks  # noqa: E402
 
-TITLE_RE = re.compile(r"<title>([^<]*)</title>", re.IGNORECASE)
-DESC_RE = re.compile(r'name=["\']description["\'][^>]*content=["\']([^"\']*)', re.IGNORECASE)
-CANONICAL_RE = re.compile(r'rel=["\']canonical["\'][^>]*href=["\']([^"\']*)', re.IGNORECASE)
-OG_TITLE_RE = re.compile(r'property=["\']og:title["\']', re.IGNORECASE)
-H1_RE = re.compile(r"<h1[^>]*>", re.IGNORECASE)
-LINK_TAG_RE = re.compile(r"<link\s[^>]*>", re.IGNORECASE)
-HREFLANG_ATTR_RE = re.compile(r'hreflang=["\']([^"\']*)', re.IGNORECASE)
-HREF_ATTR_RE = re.compile(r'href=["\']([^"\']*)', re.IGNORECASE)
-
-
-def extract_hreflang_links(html: str) -> list[tuple[str, str]]:
-    """Extrait les paires (hreflang, href) des <link rel="alternate" hreflang=...>.
-
-    75% des sites internationaux ont une erreur hreflang (etude 2026, cf.
-    audit-framework.md) -- l'ordre des attributs varie d'un CMS a l'autre,
-    d'ou un parsing tolerant plutot qu'un regex rigide sur l'ordre exact.
-    """
-    links = []
-    for tag in LINK_TAG_RE.findall(html):
-        if "alternate" not in tag.lower() or "hreflang" not in tag.lower():
-            continue
-        hreflang_match = HREFLANG_ATTR_RE.search(tag)
-        href_match = HREF_ATTR_RE.search(tag)
-        if hreflang_match and href_match:
-            links.append((hreflang_match.group(1), href_match.group(1)))
-    return links
+CITATION_ROLES = ("search", "user", "engine")
 
 
 @dataclass
 class PageAudit:
-    url: str
-    http_status: int | None = None
-    title: str | None = None
-    has_description: bool = False
-    has_canonical: bool = False
-    has_og: bool = False
-    h1_count: int = 0
+    signals: PageSignals
     schema_results: list[dict] = field(default_factory=list)
-    hreflang_links: list[tuple[str, str]] = field(default_factory=list)
-    error: str | None = None
+
+    @property
+    def url(self) -> str:
+        return self.signals.url
 
     @property
     def issues(self) -> list[str]:
-        problems = []
-        if self.http_status and self.http_status != 200:
-            problems.append(f"HTTP {self.http_status} (attendu 200)")
-        if not self.title:
-            problems.append("title manquant")
-        if not self.has_description:
-            problems.append("meta description manquante")
-        if not self.has_canonical:
-            problems.append("canonical manquant")
-        if self.h1_count == 0:
-            problems.append("aucun H1")
-        elif self.h1_count > 1:
-            problems.append(f"{self.h1_count} H1 (attendu 1)")
+        s = self.signals
+        problems: list[str] = []
+        if s.error and s.http_status is None:
+            return [f"inaccessible : {s.error}"]
+        if s.http_status and s.http_status >= 500:
+            problems.append(f"HTTP {s.http_status} : erreur serveur (une URL inconnue doit repondre 404/410, "
+                            "jamais 5xx ; des 5xx repetes ralentissent le crawl)")
+        elif s.http_status and s.http_status != 200:
+            problems.append(f"HTTP {s.http_status} (normal seulement si l'URL ne doit pas exister)")
+        for code, target in s.redirects:
+            if code in (302, 303, 307):
+                problems.append(
+                    f"redirection temporaire {code} vers {target} : utiliser 301/308 si le deplacement est definitif"
+                )
+        if s.noindex:
+            problems.append("noindex (meta robots ou X-Robots-Tag) : page exclue de Google, donc des AI Overviews/AI Mode")
+        if s.nosnippet:
+            problems.append("nosnippet ou max-snippet:0 : pas d'extrait ni d'usage dans AI Overviews/AI Mode")
+        if s.http_status == 200:
+            if not s.title:
+                problems.append("title manquant")
+            if not s.description:
+                problems.append("meta description manquante")
+            if not s.canonical:
+                problems.append("canonical manquant")
+            if s.h1_count == 0:
+                problems.append("aucun H1")
+            elif s.h1_count > 1:
+                problems.append(f"{s.h1_count} H1 (un seul attendu)")
+            if not s.html_lang:
+                problems.append("attribut lang absent sur <html>")
         for r in self.schema_results:
             if not r["valid"]:
-                problems.append(f"schema invalide ({r['block']}): {r['error']}")
+                problems.append(f"schema invalide ({r['block']}) : {r['error']}")
         return problems
 
+    @property
+    def notes(self) -> list[str]:
+        s = self.signals
+        out: list[str] = []
+        final = s.final_url or s.url
+        if s.canonical and s.canonical.rstrip("/") != final.rstrip("/"):
+            out.append(f"canonical vers une autre URL : {s.canonical}")
+        if s.has_data_nosnippet:
+            out.append("data-nosnippet present : ces passages sont exclus des extraits et des AI Overviews")
+        for r in self.schema_results:
+            out += [f"schema : {w}" for w in r.get("warnings", [])]
+        return out
 
-USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/1.0)"
 
-
-def audit_url(url: str, timeout: float = 20.0) -> PageAudit:
-    audit = PageAudit(url=url)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as resp:
-            audit.http_status = resp.status
-            html = resp.read().decode("utf-8", errors="replace")
-    except urllib.error.HTTPError as e:
-        audit.http_status = e.code
-        audit.error = f"HTTP {e.code}"
-        return audit
-    except Exception as e:
-        audit.error = str(e)
-        return audit
-
-    title_match = TITLE_RE.search(html)
-    audit.title = title_match.group(1).strip() if title_match else None
-    audit.has_description = bool(DESC_RE.search(html))
-    audit.has_canonical = bool(CANONICAL_RE.search(html))
-    audit.has_og = bool(OG_TITLE_RE.search(html))
-    audit.h1_count = len(H1_RE.findall(html))
-
-    blocks = extract_blocks_from_text(html)
-    audit.schema_results = validate_blocks(blocks, label=url)
-    audit.hreflang_links = extract_hreflang_links(html)
-
+def audit_url(url: str) -> PageAudit:
+    signals = fetch_signals(url)
+    audit = PageAudit(signals=signals)
+    if signals.jsonld_blocks:
+        audit.schema_results = validate_blocks(signals.jsonld_blocks, label=url)
     return audit
 
 
 def check_hreflang_reciprocity(audits: list[PageAudit]) -> list[str]:
-    """Verifie la reciprocite hreflang entre les pages auditees.
+    """Self-reference and return links between the audited pages.
 
-    Erreur la plus frequente en international SEO (75% des sites concernes,
-    etude 2026) : la page A pointe vers B, mais B ne pointe pas vers A. Ne
-    peut etre verifiee que si les deux pages du couple ont ete auditees dans
-    ce meme run -- les cibles hors perimetre sont signalees separement, pas
-    traitees comme une erreur.
+    Only pairs where both pages are in this run can be checked; targets outside
+    the run are skipped, not reported as errors.
     """
-    problems = []
-    audited_urls = {a.url for a in audits}
-
+    problems: list[str] = []
+    by_url = {a.signals.final_url or a.url: a for a in audits}
     for a in audits:
-        if not a.hreflang_links:
+        links = a.signals.hreflang_links
+        if not links:
             continue
-
-        self_referencing = any(href == a.url for _lang, href in a.hreflang_links)
-        if not self_referencing:
-            problems.append(f"{a.url} : pas de balise hreflang auto-référencée (self-referencing manquant)")
-
-        for lang, href in a.hreflang_links:
-            if href == a.url:
+        me = a.signals.final_url or a.url
+        if not any(href == me for _lang, href in links):
+            problems.append(f"{me} : pas de balise hreflang vers elle-meme")
+        if not any(lang.lower() == "x-default" for lang, _href in links):
+            problems.append(f"{me} : pas de x-default (recommande, pas obligatoire)")
+        for lang, href in links:
+            if href == me or href not in by_url:
                 continue
-            if href not in audited_urls:
-                continue  # hors perimetre de cet audit, pas verifiable ici
-            target = next((t for t in audits if t.url == href), None)
-            if target and not any(back_href == a.url for _l, back_href in target.hreflang_links):
-                problems.append(
-                    f"{a.url} référence {href} (hreflang={lang}) mais {href} ne référence pas {a.url} en retour"
-                )
-
+            back = by_url[href].signals.hreflang_links
+            if not any(back_href == me for _l, back_href in back):
+                problems.append(f"{me} reference {href} (hreflang={lang}) sans lien retour")
     return problems
 
 
-def build_markdown(
-    audits: list[PageAudit],
-    gsc_data: dict | None,
-    ai_access: dict | None = None,
-    crux_data: dict | None = None,
-) -> str:
+def _cell(value: object) -> str:
+    return str(value).replace("|", "\\|")
+
+
+def build_markdown(audits: list[PageAudit], gsc_data: dict | None, ai_access: dict | None, crux_data: dict | None) -> str:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     lines = [
-        f"# Rapport SEO/GEO consolidé — {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
+        f"# Rapport SEO/GEO consolidé — {today}",
         "",
-        "Généré par `scripts/generate_report.py` (seo-geo-optimizer). "
-        "Sections techniques : inférées depuis le HTML public. "
-        "Accès crawlers, Search Console et CrUX : données mesurées réelles "
-        "(voir `references/data-hygiene.md`).",
+        "Généré par `scripts/generate_report.py` (seo-geo-optimizer). Technique et schema : "
+        "**inférés** du HTML public servi sans JavaScript. Accès crawlers, CrUX, Search Console : "
+        "**mesurés** (voir `references/data-hygiene.md`).",
         "",
         "## Résumé",
-        f"- {len(audits)} URL(s) auditée(s)",
-        f"- {sum(1 for a in audits if not a.issues)} sans problème détecté",
-        f"- {sum(1 for a in audits if a.issues)} avec au moins un problème",
+        f"- {len(audits)} URL(s) auditée(s), {sum(1 for a in audits if not a.issues)} sans problème détecté",
     ]
 
-    # L'acces crawlers passe en tete : c'est un prerequis, pas un detail.
     if ai_access:
-        blocked = [b for b in ai_access["bots"] if b["robots_allows"] and not b["served"]]
-        blocked_search = [b for b in ai_access["bots"] if b["role"] == "search" and not b["served"]]
-        if blocked_search:
+        blocked = [b for b in ai_access["bots"] if b["role"] in CITATION_ROLES and b["verdict"] in ("blocked-upstream", "blocked-by-robots")]
+        if blocked:
             lines.append(
-                f"- **P0 — {len(blocked_search)} crawler(s) de recherche IA bloqué(s)** : "
-                f"le site ne peut pas être cité par ces moteurs"
+                f"- **P0 — {len(blocked)} crawler(s) de recherche/citation bloqué(s)** : "
+                + ", ".join(f"`{b['token']}`" for b in blocked)
             )
         else:
-            lines.append("- Accès crawlers IA : OK")
-
-        lines.append("")
-        lines.append("## Accès des crawlers IA (donnée mesurée)")
-        lines.append("")
-        lines.append("| Bot | Rôle | robots.txt | HTTP | Servi |")
-        lines.append("|---|---|---|---|---|")
+            lines.append("- Accès des crawlers de recherche/citation : aucun blocage détecté (UA simulés)")
+        lines += ["", "## Accès des crawlers IA (mesuré, user-agents simulés)", ""]
+        base = ai_access.get("baseline", {})
+        lines.append(f"Référence navigateur : HTTP {base.get('http_status') or 'erreur'}"
+                     + (f", CDN détecté : {base['cdn']}" if base.get("cdn") else ""))
+        lines += ["", "| Crawler | Rôle | robots.txt | HTTP | Verdict |", "|---|---|---|---|---|"]
         for b in ai_access["bots"]:
-            robots_col = {True: "allow", False: "DENY", None: "?"}[b["robots_allows"]]
+            robots_col = {True: "allow", False: "**DENY**", None: "?"}[b["robots_allows"]]
             lines.append(
-                f"| `{b['user_agent']}` | {b['role']} | {robots_col} | "
-                f"{b['http_status'] or 'err'} | {'oui' if b['served'] else '**NON**'} |"
+                f"| `{b['token']}` ({_cell(b['vendor'])}) | {b['role']} | {robots_col} | "
+                f"{b['http_status'] or '—'} | {b['verdict']} |"
             )
-        if blocked:
-            lines.append("")
-            lines.append(
-                f"**{len(blocked)} bot(s) autorisé(s) par `robots.txt` mais bloqué(s) en amont** "
-                f"(`{', '.join(b['user_agent'] for b in blocked)}`) — cause probable : règle "
-                f"CDN/WAF. L'intention du `robots.txt` est trahie par l'infrastructure. "
-                f"Voir `references/cloudflare-ai-access.md`."
-            )
+        lines += [
+            "",
+            "Une requête avec un user-agent simulé ne vient pas des IP du fournisseur : un 403 indique une règle "
+            "par user-agent (CDN/WAF), un 200 ne garantit pas que le vrai bot passe. Confirmer dans les journaux "
+            "serveur ou le tableau de bord CDN. Voir `references/cloudflare-ai-access.md`.",
+        ]
 
     if crux_data:
-        lines.append("")
-        lines.append("## Core Web Vitals — terrain (CrUX, utilisateurs réels)")
-        lines.append("")
+        lines += ["", "## Core Web Vitals — terrain (CrUX, mesuré)", ""]
         if crux_data.get("no_data"):
-            lines.append(
-                "Aucune donnée CrUX : trafic Chrome réel insuffisant sur 28 jours. "
-                "Ce n'est **pas** un problème de performance — se rabattre sur une "
-                "mesure labo (PageSpeed/Lighthouse) et le signaler comme telle."
-            )
+            lines.append("Aucune donnée CrUX : trafic Chrome réel insuffisant sur 28 jours. Ce n'est **pas** un "
+                         "problème de performance ; se rabattre sur une mesure labo et l'étiqueter comme telle.")
         else:
-            lines.append("| Métrique | p75 | État |")
-            lines.append("|---|---|---|")
+            lines += ["| Métrique | p75 | État |", "|---|---|---|"]
             for m in crux_data.get("metrics", []):
                 value = f"{m['p75']:.2f}" if m["unit"] == "" else f"{m['p75']:.0f}{m['unit']}"
                 lines.append(f"| {m['label']} | {value} | {m['rating']} |")
 
     hreflang_problems = check_hreflang_reciprocity(audits)
-    if any(a.hreflang_links for a in audits):
-        lines.append("\n## hreflang (réciprocité)")
+    if any(a.signals.hreflang_links for a in audits):
+        lines += ["", "## hreflang (inféré)"]
         if hreflang_problems:
-            lines.append(f"**{len(hreflang_problems)} problème(s)** — l'erreur la plus fréquente en SEO international :")
-            for p in hreflang_problems:
-                lines.append(f"- {p}")
+            lines += [f"- {p}" for p in hreflang_problems]
         else:
-            lines.append("Réciprocité OK sur les paires vérifiables dans ce périmètre d'audit.")
+            lines.append("Auto-référence et liens retour OK sur les paires vérifiables dans ce périmètre.")
 
-    lines += ["", "## Détail par page"]
+    lines += ["", "## Détail par page (inféré)"]
     for a in audits:
+        s = a.signals
         lines.append(f"\n### {a.url}")
-        if a.error:
-            lines.append(f"- **Erreur** : {a.error}")
-            continue
-        if not a.issues:
-            lines.append("- Aucun problème détecté (title/description/canonical/H1/schema OK).")
+        if s.redirects:
+            chain = " → ".join(f"{code} {target}" for code, target in s.redirects)
+            lines.append(f"- Redirections : {chain}")
+        if a.issues:
+            lines += [f"- **{issue}**" for issue in a.issues]
         else:
-            for issue in a.issues:
-                lines.append(f"- **{issue}**")
-        if a.schema_results:
-            types = [t for r in a.schema_results for t in r["types"]]
-            if types:
-                lines.append(f"- Schema présent : {', '.join(types)}")
-        if a.hreflang_links:
-            lines.append(f"- hreflang : {len(a.hreflang_links)} variante(s) déclarée(s)")
+            lines.append("- Aucun problème détecté (HTTP, indexabilité, title, description, canonical, H1, lang, schema).")
+        lines += [f"- {n}" for n in a.notes]
+        types = sorted({t for r in a.schema_results for t in r["types"]})
+        if types:
+            lines.append(f"- Schema : {', '.join(types)}")
 
     if gsc_data:
-        lines.append("\n## Search Console (donnée mesurée)")
+        lines += ["", "## Search Console (mesuré)"]
         lines.append(
-            f"Période : {gsc_data['start_date']} → {gsc_data['end_date']} "
-            f"(propriété `{gsc_data['site']}`{', filtré sur ' + gsc_data['path_filter'] if gsc_data.get('path_filter') else ''})"
+            f"Période : {gsc_data['start_date']} → {gsc_data['end_date']}, type `{gsc_data.get('search_type', 'web')}` "
+            f"(propriété `{gsc_data['site']}`"
+            f"{', filtré sur ' + gsc_data['path_filter'] if gsc_data.get('path_filter') else ''}). "
+            "AI Overviews et AI Mode sont comptés dans le type `web` ; le rapport « Generative AI performance » "
+            "(impressions seulement) n'existe que dans l'interface Search Console, pas dans l'API "
+            "(voir references/google-ai-features.md)."
         )
-        lines.append("")
-        lines.append("| Page/requête | Clics | Impressions | CTR | Position |")
-        lines.append("|---|---|---|---|---|")
+        lines += ["", "| Page | Clics | Impressions | CTR | Position |", "|---|---|---|---|---|"]
         for row in gsc_data["rows"]:
-            lines.append(f"| {row['key']} | {row['clicks']} | {row['impressions']} | {row['ctr']}% | {row['position']} |")
-        zero_impression_urls = [a.url for a in audits if not any(r["key"] == a.url for r in gsc_data["rows"])]
-        if zero_impression_urls:
-            lines.append(
-                f"\n**{len(zero_impression_urls)} page(s) auditée(s) sans aucune impression Search Console "
-                f"sur cette période** : {', '.join(zero_impression_urls)} — normal si récentes, à re-vérifier plus tard."
-            )
-
-    return "\n".join(lines)
+            lines.append(f"| {_cell(row['key'])} | {row['clicks']} | {row['impressions']} | {row['ctr']}% | {row['position']} |")
+        seen = {r["key"] for r in gsc_data["rows"]}
+        missing = [a.url for a in audits if a.url not in seen and (a.signals.final_url or "") not in seen]
+        if missing:
+            lines.append(f"\n**{len(missing)} page(s) auditée(s) sans impression sur la période** : "
+                         f"{', '.join(missing)} — normal si récentes, sinon vérifier l'indexation.")
+    return "\n".join(lines) + "\n"
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--urls", required=True, type=Path, help="Fichier avec une URL par ligne")
-    parser.add_argument("--out-prefix", required=True, type=Path, help="Prefixe de sortie (ecrit <prefix>.md et <prefix>.json)")
+    parser.add_argument("--out-prefix", required=True, type=Path, help="Ecrit <prefix>.md et <prefix>.json")
     parser.add_argument("--gsc-service-account", type=Path, default=None)
     parser.add_argument("--gsc-site", default=None)
     parser.add_argument("--gsc-path-filter", default=None)
     parser.add_argument("--gsc-days", type=int, default=28)
     parser.add_argument("--check-ai-access", action="store_true",
-                        help="Teste l'acces reel des crawlers IA sur l'origine de la 1re URL")
-    parser.add_argument("--crux-key", default=None,
-                        help="Cle API Google (Chrome UX Report) pour les Core Web Vitals terrain")
+                        help="Teste l'acces reel des crawlers IA sur la 1re URL")
+    parser.add_argument("--crux-key", default=None, help="Cle API Chrome UX Report (Core Web Vitals terrain)")
     args = parser.parse_args()
 
-    urls = [u.strip() for u in args.urls.read_text(encoding="utf-8").splitlines() if u.strip()]
-
-    origin = None
-    if urls:
-        p = urllib.parse.urlparse(urls[0])
-        origin = f"{p.scheme}://{p.netloc}"
+    urls = [u.strip() for u in args.urls.read_text(encoding="utf-8").splitlines() if u.strip() and not u.startswith("#")]
+    if not urls:
+        print("Aucune URL.", file=sys.stderr)
+        return 1
+    first = urllib.parse.urlparse(urls[0])
+    origin = f"{first.scheme}://{first.netloc}"
 
     ai_access = None
-    if args.check_ai_access and origin:
-        print(f"Test d'acces des crawlers IA sur {origin}...")
-        import check_ai_access as ai_mod
+    if args.check_ai_access:
+        print(f"Acces des crawlers IA sur {urls[0]}...")
+        import check_ai_access
 
-        ai_access = ai_mod.check_site(origin)
+        ai_access = check_ai_access.check_site(urls[0])
 
     crux_data = None
-    if args.crux_key and origin:
-        print(f"Requete CrUX sur {origin}...")
-        import crux_report as crux_mod
+    if args.crux_key:
+        print(f"CrUX sur {origin}...")
+        import crux_report
 
-        record = crux_mod.query_crux(args.crux_key, {"origin": origin}, None)
-        crux_data = {"no_data": True} if record is None else {"metrics": crux_mod.extract(record)}
+        record = crux_report.query_crux(args.crux_key, {"origin": origin}, None)
+        crux_data = {"no_data": True} if record is None else {"metrics": crux_report.extract(record)}
 
     print(f"Audit de {len(urls)} URL(s)...")
     audits = [audit_url(u) for u in urls]
 
     gsc_data = None
     if args.gsc_service_account and args.gsc_site:
-        print("Requete Search Console...")
+        print("Search Console...")
         import gsc_report
 
         token = gsc_report.get_access_token(args.gsc_service_account)
-        from datetime import timedelta
-
         end = datetime.now(timezone.utc).date()
         start = end - timedelta(days=args.gsc_days)
         rows = gsc_report.query_search_analytics(
             token, args.gsc_site, start.isoformat(), end.isoformat(),
-            dimension="page", path_filter=args.gsc_path_filter, row_limit=100,
+            dimension="page", path_filter=args.gsc_path_filter, row_limit=250,
         )
-        gsc_data = {
-            "site": args.gsc_site,
-            "path_filter": args.gsc_path_filter,
-            "start_date": start.isoformat(),
-            "end_date": end.isoformat(),
-            "rows": rows,
-        }
+        gsc_data = {"site": args.gsc_site, "path_filter": args.gsc_path_filter, "search_type": "web",
+                    "start_date": start.isoformat(), "end_date": end.isoformat(), "rows": rows}
 
-    markdown = build_markdown(audits, gsc_data, ai_access=ai_access, crux_data=crux_data)
     md_path = args.out_prefix.with_suffix(".md")
-    md_path.write_text(markdown, encoding="utf-8")
+    md_path.write_text(build_markdown(audits, gsc_data, ai_access, crux_data), encoding="utf-8")
 
     json_data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generator": "seo-geo-optimizer/scripts/generate_report.py",
         "pages": [
             {
-                "url": a.url, "http_status": a.http_status, "title": a.title,
-                "has_description": a.has_description, "has_canonical": a.has_canonical,
-                "has_og": a.has_og, "h1_count": a.h1_count,
-                "schema_results": a.schema_results, "issues": a.issues, "error": a.error,
-                "hreflang_links": a.hreflang_links,
+                "url": a.url, "final_url": a.signals.final_url, "http_status": a.signals.http_status,
+                "redirects": a.signals.redirects, "title": a.signals.title, "description": a.signals.description,
+                "canonical": a.signals.canonical, "html_lang": a.signals.html_lang,
+                "robots_directives": a.signals.robots_directives, "noindex": a.signals.noindex,
+                "nosnippet": a.signals.nosnippet, "h1_count": a.signals.h1_count,
+                "has_og_title": a.signals.has_og_title, "hreflang_links": a.signals.hreflang_links,
+                "schema_results": a.schema_results, "issues": a.issues, "notes": a.notes,
+                "error": a.signals.error, "nature": "inferred",
             }
             for a in audits
         ],
-        "hreflang_reciprocity_problems": check_hreflang_reciprocity(audits),
-        "search_console": gsc_data,
+        "hreflang_problems": check_hreflang_reciprocity(audits),
         "ai_access": ai_access,
         "core_web_vitals": crux_data,
+        "search_console": gsc_data,
     }
     json_path = args.out_prefix.with_suffix(".json")
     json_path.write_text(json.dumps(json_data, indent=2, ensure_ascii=False), encoding="utf-8")
-
     print(f"Ecrit : {md_path}")
     print(f"Ecrit : {json_path}")
     return 0

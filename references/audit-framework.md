@@ -1,5 +1,7 @@
 # Audit framework détaillé (technique, on-page, E-E-A-T)
 
+Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+
 Base SEO classique (technique/on-page/E-E-A-T), enrichie des
 signaux GEO (retrieval par IA génératives). Utiliser ce fichier pour l'audit
 approfondi ; [checklist.md](checklist.md) pour le pass rapide.
@@ -28,22 +30,36 @@ conclure "pas de schema" sur la seule base d'un `curl`.
 - Sites volumineux : URLs paramétrées maîtrisées, navigation à facettes
   gérée, pas de session ID dans l'URL.
 - Indexation : comparer indexé vs attendu (`site:domaine.com` + Search
-  Console), pas de noindex sur des pages importantes, pas de chaînes de
-  redirection, pas de soft 404, canonicals cohérents (HTTP→HTTPS, www vs
-  non-www, trailing slash).
+  Console), pas de noindex sur des pages importantes (meta **ou** en-tête
+  `X-Robots-Tag`, détectés par `generate_report.py`), pas de chaînes de
+  redirection, pas de redirection temporaire (302/307) sur une URL
+  canonique, pas de soft 404 (page « aucun résultat » en 200 indexable), une
+  URL inexistante répond 404/410 et **jamais 5xx**, canonicals cohérents
+  (HTTP→HTTPS, www vs non-www, trailing slash).
+- Contenu dans le HTML initial : les crawlers IA autres que Googlebot
+  n'exécutent pas ou peu le JavaScript ; tout ce qui n'est rendu que côté
+  client est invisible pour eux (Microsoft le dit pour le contenu caché :
+  « AI systems may not render hidden content », 2025-10-08, ESTABLISHED).
 
 ## Vitesse & Core Web Vitals
-- LCP < 2.5s, INP < 200ms, CLS < 0.1 (seuils Google actuels).
+- Bon : LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 ; mauvais : > 4 s, > 500 ms,
+  > 0,25 ; au 75e percentile, mobile et desktop séparés (ESTABLISHED,
+  [Google](https://developers.google.com/search/docs/appearance/core-web-vitals),
+  maj 2025-12-10). Pas de signal « page experience » unique ; la pertinence
+  prime ([page experience](https://developers.google.com/search/docs/appearance/page-experience), maj 2026-09-22).
+- À venir : soft navigations activées par défaut dans Chrome 151, intégration
+  future aux Core Web Vitals, remontée CrUX non décidée (2026-09-02).
 - Facteurs : TTFB, optimisation images, exécution JS, delivery CSS, headers
   de cache, CDN, chargement des fonts.
 - Outils : PageSpeed Insights, WebPageTest, Chrome DevTools, rapport Core
   Web Vitals de Search Console.
 
 ## hreflang (sites multilingues)
-Le point technique le plus souvent cassé en SEO international : **75% des
-sites ciblant plusieurs langues ont une erreur d'implémentation hreflang**
-(étude 2026), qui fragmente le classement entre versions au lieu de les
-consolider. Trois règles non négociables :
+Point technique souvent cassé en SEO international. Ordre de grandeur :
+67 % de 374 756 domaines avec au moins une erreur (Ahrefs, 2023-08-10,
+CLAIMED méthode publiée — ce chiffre compte l'absence de `x-default`, que
+Google n'exige pas). Le « 75 % » souvent cité vient d'une étude SEMrush de
+**2017**, pas de 2026. Trois règles non négociables :
 - **Auto-référencement** : chaque page doit inclure une balise hreflang qui
   pointe vers elle-même, en plus des autres langues.
 - **Réciprocité** : si la page A référence B, B doit référencer A en retour
@@ -52,8 +68,10 @@ consolider. Trois règles non négociables :
 - **Codes ISO valides** : `en-GB` pas `en-uk`, `es` pas `sp`. Un code
   invalide fait ignorer la balise entièrement.
 Éviter aussi : canonical qui pointe vers une autre langue (chaque version
-doit se canonicaliser elle-même), absence de x-default pour le
-sélecteur de langue par défaut.
+doit se canonicaliser elle-même). `x-default` est recommandé, pas requis.
+Et surtout : une URL de langue qui sert le contenu d'une autre langue
+(`/en/` en français, `lang="en"`, indexable) est un doublon, pas une
+traduction — la passer en 404 ou `noindex` tant qu'elle n'est pas traduite.
 
 ## Mobile & sécurité
 - Responsive (pas de site m. séparé), tailles de tap targets, viewport
@@ -63,8 +81,9 @@ sélecteur de langue par défaut.
 
 ## On-page
 ### Title / meta description
-- Title : unique par page, mot-clé proche du début, 50-60 caractères,
-  accrocheur. Pas de nom de marque en fin (déjà affiché par le SERP).
+- Title : unique par page, descriptif, concis, mot-clé proche du début.
+  La longueur « 50-60 caractères » est une convention d'outils SEO, pas une
+  règle Google (qui peut réécrire le lien de titre).
 - Meta description : unique, 150-160 caractères, mot-clé principal, value
   proposition claire, CTA.
 
@@ -94,6 +113,8 @@ sélecteur de langue par défaut.
   cannibalisation entre pages, mapping mot-clé au niveau du site.
 
 ## E-E-A-T signals
+Ce que Google en dit (pas un facteur de classement en soi, la confiance
+d'abord) et le balisage d'éditeur : [eeat-news.md](eeat-news.md).
 - **Experience** : expérience de première main démontrée, insights/données
   originaux, exemples et études de cas réels.
 - **Expertise** : credentials auteur visibles, information précise et
@@ -105,35 +126,32 @@ sélecteur de langue par défaut.
   HTTPS.
 
 ## Signaux GEO (retrieval par IA génératives)
-Prérequis absolu, à vérifier avant tout le reste : les crawlers IA
-accèdent-ils réellement au site ? Voir
-[cloudflare-ai-access.md](cloudflare-ai-access.md) et
-[`../scripts/check_ai_access.py`](../scripts/check_ai_access.py).
+Prérequis, dans l'ordre :
+1. Accès réel des crawlers ([cloudflare-ai-access.md](cloudflare-ai-access.md),
+   [`../scripts/check_ai_access.py`](../scripts/check_ai_access.py)).
+2. Indexation et extrait autorisé : pas de `noindex`, `nosnippet`,
+   `max-snippet:0` involontaire.
+3. Google : réglage Search Console « Search generative AI » sur Inclure
+   (défaut) ; `Google-Extended` n'y change rien
+   ([google-ai-features.md](google-ai-features.md)).
 
-Ce qui est établi et sourçable :
-- **Position officielle de Google** (guide « AI features », mis à jour le
-  15 juin 2026) : *« There are no additional requirements to appear in AI
-  Overviews or AI Mode, nor other special optimizations necessary »* et
-  *« You don't need to create new machine readable files, AI text files, or
-  markup »*. Autrement dit : côté Google, les fondamentaux SEO **sont** la
-  stratégie GEO. Se méfier de toute recommandation qui prétend l'inverse.
-- **Le contexte a changé, pas la méthode** : le taux de recherches Google
-  sans clic atteint ~65% en 2026, ~93% en AI Mode, et les AI Overviews
-  apparaissent sur une part importante des requêtes. Conséquence pratique :
-  l'objectif se déplace du clic vers la **citation**, ce qui renforce
-  l'intérêt d'un contenu factuel, daté et attribuable — mais ne crée pas de
-  levier technique nouveau côté Google.
-- **Structure pour le chunking** : les moteurs génératifs récupèrent des
-  passages isolément. Une section qui commence par sa réponse est
-  réutilisable telle quelle ; une section qui commence par un préambule ne
-  l'est pas. C'est un principe de rédaction robuste, indépendant des
-  chiffres marketing du moment.
+Ensuite, ce qui est établi ou soutenu (détail et sources :
+[evidence.md](evidence.md)) :
+- Google : l'optimisation pour l'IA « reste du SEO » ; pas de fichier, de
+  balisage ou de découpage spécial (ESTABLISHED, guide maj 2026-07-10).
+- Des preuves vérifiables dans le texte (chiffres, citations, sources,
+  dates) : seul levier de contenu appuyé par une étude causale évaluée par
+  des pairs, en cadre simulé (SUPPORTED, KDD 2024).
+- Structure lisible : titres explicites, réponse directe en tête de
+  section, tableaux HTML sémantiques, contenu non caché (ESTABLISHED côté
+  Bing ; principe de rédaction robuste, pas une garantie).
+- Fraîcheur réelle : mettre à jour le fond, pas seulement la date.
+- Les moteurs IA citent beaucoup de sources tierces : la présence ailleurs
+  (mentions, reprises) relève du skill `SEO`.
 
-Les statistiques de « lift de citation » par type de schema, largement
-reprises dans les blogs SEO 2026, ne sont pas issues de recherche primaire
-vérifiable et ont été **retirées volontairement** de ce skill plutôt que
-conservées sans preuve (cf. [data-hygiene.md](data-hygiene.md)). Ne pas les
-réintroduire dans un audit sans source primaire.
+Les statistiques de « lift de citation » par type de schema reprises dans
+les blogs SEO ne reposent sur aucune donnée primaire publiée (vérifié le
+2026-09-27) : ne pas les réintroduire.
 
 ## Problèmes fréquents par type de site
 ### SaaS/Produit
@@ -164,14 +182,18 @@ l'identique. Y ajouter ensuite, manuellement, ce que les scripts ne peuvent
 pas voir ([checklist.md](checklist.md)) et l'ordre de priorité P0/P1/P2 —
 qui relève du jugement, pas de la détection.
 
-Priorisation par défaut : accès crawlers bloqué → indexation cassée →
-fondamentaux manquants (title/canonical/H1) → schema invalide → performance →
-contenu/E-E-A-T → long terme.
+Priorisation par défaut : accès crawlers bloqué → indexation cassée
+(noindex, 5xx, redirections temporaires, doublons de langue) → extrait ou
+réglage IA bloquant → fondamentaux manquants (title/canonical/H1) → schema
+invalide → performance → contenu/E-E-A-T → long terme.
 
 ## Outils
 Tout ce dont ce skill a besoin est gratuit et automatisable via ses scripts
 (voir le tableau dans [SKILL.md](../SKILL.md)) : Search Console API, CrUX
-API, IndexNow, requêtes HTTP directes. Les suites payantes (Screaming Frog,
+API, IndexNow, requêtes HTTP directes. Mesure des citations IA : rapport
+« Generative AI performance » de Search Console (impressions, interface
+seulement) et rapport « AI Performance » de Bing Webmaster Tools (citations
+Copilot) — tous deux exigent la vérification du site. Les suites payantes (Screaming Frog,
 Ahrefs, Semrush) apportent surtout du crawl à grande échelle et des données
 de backlinks tierces — utiles au-delà de quelques centaines de pages, non
 nécessaires pour l'audit couvert ici.

@@ -18,8 +18,9 @@ Prerequis compte de service (a faire une fois par site, dans Google Cloud Consol
 3. Creer une cle JSON pour ce compte (Cles > Ajouter une cle > JSON).
 4. Dans Search Console (search.google.com/search-console) : Parametres >
    Utilisateurs et autorisations > Ajouter un utilisateur > coller l'email
-   du compte de service (ex: xxx@projet.iam.gserviceaccount.com), role
-   "Proprietaire" ou "Complet" (Restreint ne suffit pas pour l'API).
+   du compte de service (ex: xxx@projet.iam.gserviceaccount.com). L'API
+   demande un droit de lecture : "Restreint" devrait suffire (inference depuis
+   la table des permissions, non ecrit par Google) ; "Complet" en cas de doute.
 5. Stocker le fichier JSON hors du repo git (secrets/, jamais commite).
 
 Necessite : pip install google-auth requests
@@ -53,6 +54,30 @@ def list_accessible_sites(token: str) -> list[dict]:
     return resp.json().get("siteEntry", [])
 
 
+SEARCH_TYPES = ("web", "discover", "googleNews", "news", "image", "video")
+
+
+def build_query_body(start_date: str, end_date: str, dimension: str, path_filter: str | None,
+                     row_limit: int, search_type: str = "web", data_state: str = "final") -> dict:
+    """Request body for searchAnalytics.query. `type` replaces the deprecated
+    `searchType` (API reference, last updated 2026-08-11)."""
+    if search_type not in SEARCH_TYPES:
+        raise ValueError(f"type inconnu : {search_type}")
+    body: dict = {
+        "startDate": start_date,
+        "endDate": end_date,
+        "dimensions": [dimension],
+        "rowLimit": min(row_limit, 25_000),
+        "type": search_type,
+        "dataState": data_state,
+    }
+    if path_filter:
+        body["dimensionFilterGroups"] = [
+            {"filters": [{"dimension": "page", "operator": "contains", "expression": path_filter}]}
+        ]
+    return body
+
+
 def query_search_analytics(
     token: str,
     site_url: str,
@@ -61,18 +86,10 @@ def query_search_analytics(
     dimension: str = "page",
     path_filter: str | None = None,
     row_limit: int = 25,
+    search_type: str = "web",
+    data_state: str = "final",
 ) -> list[dict]:
-    body = {
-        "startDate": start_date,
-        "endDate": end_date,
-        "dimensions": [dimension],
-        "rowLimit": row_limit,
-    }
-    if path_filter:
-        body["dimensionFilterGroups"] = [
-            {"filters": [{"dimension": "page", "operator": "contains", "expression": path_filter}]}
-        ]
-
+    body = build_query_body(start_date, end_date, dimension, path_filter, row_limit, search_type, data_state)
     from urllib.parse import quote
 
     resp = requests.post(
@@ -102,6 +119,9 @@ def main() -> int:
     parser.add_argument("--days", type=int, default=28)
     parser.add_argument("--dimension", choices=["query", "page"], default="page")
     parser.add_argument("--row-limit", type=int, default=25)
+    parser.add_argument("--search-type", choices=SEARCH_TYPES, default="web")
+    parser.add_argument("--data-state", choices=["final", "all"], default="final",
+                        help="all = inclut les donnees fraiches non consolidees")
     parser.add_argument("--out", type=Path, default=None, help="Ecrit le resultat en JSON ici (sinon stdout)")
     args = parser.parse_args()
 
@@ -125,12 +145,15 @@ def main() -> int:
     rows = query_search_analytics(
         token, args.site, start.isoformat(), end.isoformat(),
         dimension=args.dimension, path_filter=args.path_filter, row_limit=args.row_limit,
+        search_type=args.search_type, data_state=args.data_state,
     )
 
     result = {
         "site": args.site,
         "path_filter": args.path_filter,
         "dimension": args.dimension,
+        "search_type": args.search_type,
+        "data_state": args.data_state,
         "start_date": start.isoformat(),
         "end_date": end.isoformat(),
         "rows": rows,

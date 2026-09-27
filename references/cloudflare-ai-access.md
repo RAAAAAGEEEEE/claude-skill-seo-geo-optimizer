@@ -1,116 +1,96 @@
 # Blocage CDN des crawlers IA (Cloudflare et autres)
 
-Le point aveugle le plus courant en GEO en 2026 : **`robots.txt` déclare une
-intention, le CDN décide de la réalité.** Un site peut autoriser
-explicitement tous les bots IA dans son `robots.txt` et malgré tout leur
-renvoyer `403` parce qu'une règle Cloudflare/WAF les bloque en amont, avant
-même que le serveur d'origine ne soit consulté.
+Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
-Aucun audit HTML, aucun `curl` classique et aucune lecture de `robots.txt`
-ne détecte ce cas. Il faut requêter le site **avec le user-agent de chaque
-bot** et comparer.
-
-→ [`scripts/check_ai_access.py`](../scripts/check_ai_access.py) fait
-exactement ça, sans authentification.
+`robots.txt` déclare une intention ; le CDN décide de la réalité. Un site peut
+autoriser tous les crawlers IA dans son `robots.txt` et leur renvoyer `403`
+parce qu'une règle Cloudflare/WAF les bloque avant même le serveur d'origine.
+Aucun audit HTML ni lecture de `robots.txt` ne le voit : il faut requêter la
+page avec le user-agent de chaque crawler et comparer à un navigateur.
+→ [`../scripts/check_ai_access.py`](../scripts/check_ai_access.py).
 
 ## Cas réel observé (2026-07-23)
 
-Sur un site en production dont le `robots.txt` contenait un bloc
-`User-agent: ClaudeBot / Allow: /` ajouté volontairement quelques jours plus
-tôt, avec en commentaire « vise activement les citations par les moteurs
-génératifs » :
+Site en production, `robots.txt` avec un bloc `User-agent: ClaudeBot / Allow: /`
+ajouté volontairement quelques jours plus tôt :
 
-| Bot | robots.txt | Réponse réelle |
+| Crawler | robots.txt | Réponse |
 |---|---|---|
-| Googlebot | allow | 200 |
-| Bingbot | allow | 200 |
-| GPTBot | allow | 200 |
-| OAI-SearchBot | allow | 200 |
-| Google-Extended | allow | 200 |
-| **ClaudeBot** | allow | **403** |
-| **Claude-SearchBot** | allow | **403** |
-| **Claude-User** | allow | **403** |
-| **PerplexityBot** | allow | **403** |
-| **Perplexity-User** | allow | **403** |
-| **ChatGPT-User** | allow | **403** |
+| Googlebot, Bingbot, GPTBot, OAI-SearchBot | allow | 200 |
+| ClaudeBot, Claude-SearchBot, Claude-User | allow | **403** |
+| PerplexityBot, Perplexity-User, ChatGPT-User | allow | **403** |
 
-Réponse : `Server: cloudflare`, corps `Your request was blocked.`
+Réponse : `Server: cloudflare`, corps `Your request was blocked.` Le site
+était incitable par Claude et Perplexity à cause d'une règle CDN que personne
+n'avait vue. (Constat de terrain du skill, mesuré ; pas une source publique.)
 
-Conséquence concrète : le site était **structurellement incitable par Claude
-et Perplexity** — pas à cause de son contenu, de son schema ou de son
-autorité, mais d'une règle CDN que personne n'avait vue. Le travail SEO/GEO
-on-site sur ces pages avait un plafond de zéro pour ces moteurs.
+## Ce que Cloudflare a changé (chronologie, ESTABLISHED sauf mention)
 
-## Pourquoi ça arrive
+| Date | Changement | Source |
+|---|---|---|
+| 2025-07-01 | Blocage des crawlers IA par défaut proposé à l'inscription de tout nouveau domaine ; lancement de Pay per crawl (HTTP 402, bêta privée) | [communiqué](https://www.cloudflare.com/press/press-releases/2025/cloudflare-just-changed-how-ai-crawlers-scrape-the-internet-at-large/), [blog](https://blog.cloudflare.com/introducing-pay-per-crawl/) |
+| 2025-09-24 | Content Signals Policy : ligne `Content-Signal: search=yes, ai-train=no` dans robots.txt, appliquée aux 3,8 M de domaines en robots.txt géré | [blog](https://blog.cloudflare.com/content-signals-policy/) |
+| 2026-02-12 | Markdown for Agents (`Accept: text/markdown`, plans payants) | [changelog](https://developers.cloudflare.com/changelog/post/2026-02-12-markdown-for-agents/) |
+| 2026-07-01 | Trafic IA classé en **Search / Agent / Training**, contrôlable par catégorie, y compris en Free ; « Pay Per Crawl évolue vers Pay Per Use » (la doc parle toujours de Pay per crawl, bêta fermée) ; les agents signés (Web Bot Auth) deviennent des bots vérifiés | [blog](https://blog.cloudflare.com/content-independence-day-ai-options/), [communiqué](https://www.cloudflare.com/press/press-releases/2026/cloudflare-allows-the-agentic-internet-to-flourish-with-a-simple-philosophy-your-content-your-rules/) |
+| **2026-09-15** | Sur les **pages avec publicité** : Search autorisé, Training et Agent **bloqués par défaut** — nouveaux clients, nouveaux sites, et clients Free existants qui n'ont pas modifié leurs réglages. Les crawlers « mixtes » qui ne séparent pas recherche et entraînement sont bloqués sur ces pages pour qui bloque Training | mêmes sources (annonce du 2026-07-01) |
+| 2026-08-21 | Bot Preference Sync : les réglages IA sont réécrits dans robots.txt, actif par défaut pour les nouveaux clients | [blog](https://blog.cloudflare.com/bot-preference-sync/) |
+| 2026-09-15 | Statut « Accountable » pour les crawlers mixtes ; engagements attribués à Google, Apple, Microsoft (**CLAIMED** : rapportés par Cloudflare, pas par ces fournisseurs) | [blog](https://blog.cloudflare.com/accountable-mixed-use-ai-crawlers/) |
 
-1. **Réglages par défaut Cloudflare.** Cloudflare a annoncé qu'à partir du
-   **15 septembre 2026**, les nouveaux sites et les comptes gratuits basculent
-   par défaut vers « autoriser la recherche, bloquer l'entraînement et les
-   agents » sur les pages avec publicité, et bloquent les crawlers *mixtes*
-   (à la fois moteur de recherche et agent IA) qui ne laissent pas le choix au
-   site. Un site peut donc changer de comportement sans aucune action de son
-   propriétaire.
-2. **Fonctionnalités activées en un clic** : « Block AI Scrapers and
-   Crawlers », Bot Fight Mode, Super Bot Fight Mode, ou une règle WAF héritée
-   d'une configuration de sécurité passée.
-3. **Confusion entraînement/recherche.** Beaucoup de propriétaires ont
-   activé un blocage global en 2023-2024 pour empêcher l'entraînement, sans
-   réaliser que cela coupe aussi les bots de *citation* (ceux qui vont
-   chercher la page au moment où un utilisateur pose une question). Bloquer
-   `GPTBot` n'empêche pas d'être cité ; bloquer `OAI-SearchBot` si.
+Non vérifié au 2026-09-27 : un changelog Cloudflare confirmant le
+déploiement effectif du 15 septembre. L'annonce est établie, son exécution
+doit être constatée site par site avec le script.
+
+Conséquences pratiques :
+- Un site Cloudflare Free avec publicité peut avoir basculé **sans action**
+  de son propriétaire le 15 septembre 2026. Revérifier tout site audité
+  avant cette date.
+- La catégorie **Agent** couvre les fetchers déclenchés par l'utilisateur
+  (ChatGPT-User, Claude-User, Perplexity-User...) : la bloquer coupe la
+  lecture en direct au moment de la question, même si la catégorie Search
+  reste ouverte.
+
+## Pourquoi ça arrive encore
+1. Réglages par défaut ci-dessus.
+2. Fonctions activées en un clic : « Block AI Scrapers and Crawlers », Bot
+   Fight Mode, Super Bot Fight Mode, règle WAF héritée.
+3. Confusion entraînement/recherche : un blocage global posé en 2023-2024
+   contre l'entraînement coupe aussi les crawlers de citation.
 
 ## Diagnostic
 
 ```bash
-python scripts/check_ai_access.py https://example.com
+python scripts/check_ai_access.py https://example.com/une-page-importante
 ```
 
-Le script distingue trois états, et c'est la distinction qui compte :
-- `robots=allow, HTTP 200` → réellement accessible.
-- `robots=allow, HTTP 403` → **blocage CDN silencieux**, l'intention du site
-  est trahie par l'infrastructure. C'est le cas à traiter en priorité.
-- `robots=DENY` → blocage volontaire et cohérent (à confirmer avec le
-  propriétaire, mais au moins déclaratif et intentionnel).
+Verdicts : `ok`, `blocked-by-robots` (intention déclarée),
+`blocked-upstream` (robots autorise, le CDN refuse : **à traiter en
+premier**), `robots-deny-served`, `token-only`, `inconclusive`. Sortie 2 si
+la page ne répond pas 200 à un navigateur : ne rien conclure.
 
-## Correction côté Cloudflare
+Limite : requête depuis votre machine avec un user-agent simulé. Cloudflare
+identifie les vrais bots par IP, signature Web Bot Auth ou DNS inverse. Un
+`403` ici prouve une règle par user-agent ; un `200` ne garantit pas que le
+vrai bot passe. Confirmer dans **AI Crawl Control** (tableau de bord
+Cloudflare) ou les journaux d'origine.
 
-Ce sont des réglages de compte, à faire par le propriétaire du site — ne
-jamais les modifier sans validation explicite, c'est une décision produit
-(cf. le compromis contenu-gratuit vs monétisation ci-dessous).
+## Correction côté Cloudflare (par le propriétaire, jamais sans validation)
+1. **AI Crawl Control** : état par crawler et par catégorie Search / Agent /
+   Training.
+2. **Security > Bots** : « Block AI Scrapers and Crawlers », Bot Fight Mode.
+3. **Security > WAF > Custom rules** : règles sur `cf.client.bot`,
+   `cf.verified_bot_category` ou des listes d'user-agents.
+4. **robots.txt géré / Bot Preference Sync** : vérifier ce que Cloudflare
+   écrit dans le robots.txt servi.
+5. Revalider avec le script, ne pas se fier au panneau seul.
 
-1. **Security > Bots** : vérifier « Block AI Scrapers and Crawlers » (le
-   désactiver si l'objectif est la visibilité GEO).
-2. **Security > WAF > Custom rules** : chercher toute règle filtrant sur
-   `cf.client.bot`, `http.user_agent contains "Bot"`, ou une liste d'UA IA.
-3. **Security > Settings** : Bot Fight Mode / Super Bot Fight Mode peuvent
-   bloquer des bots vérifiés selon le plan.
-4. Après modification, **revalider avec le script** — ne pas se fier au
-   panneau de configuration seul.
+## La décision de fond (à poser, pas à trancher)
+- **Autoriser Search et Agent** = condition nécessaire pour être cité et lu
+  en direct par les assistants.
+- **Bloquer Training, autoriser Search/Agent** : position intermédiaire
+  cohérente (le contenu reste citable sans nourrir les modèles).
+- **Pay per crawl / Pay Per Use** : pertinent pour un éditeur qui veut
+  monétiser, hors sujet pour un site qui cherche la visibilité.
 
-## La décision de fond (à poser à l'utilisateur, pas à trancher)
-
-Bloquer ou autoriser les crawlers IA est un **arbitrage produit**, pas une
-bonne pratique universelle :
-
-- **Autoriser** = condition nécessaire pour être cité dans ChatGPT, Claude,
-  Perplexity, AI Overviews. Sans accès, aucune optimisation de contenu ne
-  peut compenser.
-- **Bloquer l'entraînement** (`GPTBot`, `ClaudeBot`, `Google-Extended`,
-  `Applebot-Extended`) tout en **autorisant la recherche**
-  (`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`, `*-User`) est une
-  position intermédiaire cohérente : le contenu reste citable sans nourrir
-  les modèles.
-- Cloudflare pousse par ailleurs un modèle de rémunération (« Pay Per
-  Crawl », devenu « Pay Per Use ») où le site est payé quand son contenu
-  apparaît dans une réponse IA. Pertinent pour un éditeur de contenu, hors
-  sujet pour un site vitrine ou SaaS qui cherche de la visibilité.
-
-Présenter ces options et laisser choisir. Pour un site dont l'objectif est
-l'acquisition (SaaS, vitrine, commerce local), autoriser au moins les bots de
-recherche est presque toujours le bon choix — mais ça reste au propriétaire
-de le décider.
-
-## Sources
-- [Cloudflare Will Block AI Crawlers Unless Sites Opt In](https://dataconomy.com/2026/07/03/cloudflare-will-block-ai-crawlers-unless-sites-opt-in/)
-- [Cloudflare's new policy pushes AI companies to pay for publishers' content (TechCrunch)](https://techcrunch.com/2026/07/01/cloudflares-new-policy-pushes-ai-companies-to-pay-for-publishers-content/)
-- [Cloudflare gives AI crawlers a September deadline (TNW)](https://thenextweb.com/news/cloudflare-block-ai-crawlers-pay-publishers)
+Autres CDN : Fastly et Akamai proposent des contrôles par crawler et des
+partenariats de monétisation (TollBit, 2025) ; aucun blocage par défaut
+annoncé à la date de revue.

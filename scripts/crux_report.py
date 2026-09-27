@@ -15,7 +15,9 @@ Cle API gratuite (une fois) :
 1. https://console.cloud.google.com/apis/library/chromeuxreport.googleapis.com
    -> Activer l'API "Chrome UX Report API"
 2. https://console.cloud.google.com/apis/credentials -> Creer une cle API
-3. Aucun quota facture ; limite de debit generreuse pour un usage d'audit.
+3. Gratuite ; limite de debit largement suffisante pour un audit.
+La cle passe en parametre ?key= (seule methode documentee) : ne jamais
+l'ecrire dans un rapport, un log ou un fichier commite.
 
 Usage:
     python crux_report.py --key <API_KEY> --origin https://example.com
@@ -33,13 +35,24 @@ import urllib.request
 
 ENDPOINT = "https://chromeuxreport.googleapis.com/v1/records:queryRecord"
 
-# Seuils officiels Google (verifies 2026-07) : "good" / "needs improvement" / "poor"
+# Seuils officiels (web.dev, verifies 2026-09-27) : "good" <= 1er seuil,
+# "poor" > 2e seuil, au 75e percentile. Seuls LCP, INP et CLS sont des Core
+# Web Vitals ; FCP et TTFB sont des diagnostics (TTFB reste nomme
+# "experimental_time_to_first_byte" dans l'API, doc CrUX API maj 2025-02-11).
 THRESHOLDS = {
     "largest_contentful_paint": (2500, 4000, "ms", "LCP"),
     "interaction_to_next_paint": (200, 500, "ms", "INP"),
     "cumulative_layout_shift": (0.10, 0.25, "", "CLS"),
-    "first_contentful_paint": (1800, 3000, "ms", "FCP"),
-    "experimental_time_to_first_byte": (800, 1800, "ms", "TTFB"),
+    "first_contentful_paint": (1800, 3000, "ms", "FCP (diagnostic)"),
+    "experimental_time_to_first_byte": (800, 1800, "ms", "TTFB (diagnostic)"),
+}
+# Informative metrics without an official threshold.
+INFO_LABELS = {
+    "round_trip_time": ("ms", "RTT reseau"),
+    "largest_contentful_paint_image_time_to_first_byte": ("ms", "LCP image: TTFB"),
+    "largest_contentful_paint_image_resource_load_delay": ("ms", "LCP image: delai de chargement"),
+    "largest_contentful_paint_image_resource_load_duration": ("ms", "LCP image: duree de chargement"),
+    "largest_contentful_paint_image_element_render_delay": ("ms", "LCP image: delai de rendu"),
 }
 
 
@@ -81,7 +94,10 @@ def extract(record: dict) -> list[dict]:
         if p75 is None:
             continue
         p75_num = float(p75)
-        _g, _p, unit, label = THRESHOLDS.get(key, (0, 0, "", key))
+        if key in THRESHOLDS:
+            _g, _p, unit, label = THRESHOLDS[key]
+        else:
+            unit, label = INFO_LABELS.get(key, ("", key))
         out.append({
             "metric": key,
             "label": label,
@@ -93,6 +109,8 @@ def extract(record: dict) -> list[dict]:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--origin", help="Origine entiere, ex: https://example.com")
@@ -117,11 +135,11 @@ def main() -> int:
     metrics = extract(record)
     ff = args.form_factor or "toutes plateformes"
     print(f"CrUX -- {label} ({ff}, 28 derniers jours, donnee terrain reelle)")
-    print(f"{'Metrique':10s} {'p75':>10s}  Etat")
-    print("-" * 36)
+    print(f"{'Metrique':34s} {'p75':>10s}  Etat")
+    print("-" * 60)
     for m in metrics:
         value = f"{m['p75']:.2f}" if m["unit"] == "" else f"{m['p75']:.0f}{m['unit']}"
-        print(f"{m['label']:10s} {value:>10s}  {m['rating']}")
+        print(f"{m['label']:34s} {value:>10s}  {m['rating']}")
 
     failing = [m["label"] for m in metrics if m["rating"] == "MAUVAIS"]
     if failing:

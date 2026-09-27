@@ -8,10 +8,13 @@ references/indexing-rules.md). Google ne participe pas a IndexNow -- pour
 Google, seul le sitemap + Search Console font foi.
 
 Mise en place (une fois par site) :
-1. Generer une cle : chaine hexadecimale de 8 a 128 caracteres.
-   python -c "import uuid; print(uuid.uuid4().hex)"
-2. Publier un fichier <cle>.txt a la racine du site, contenant uniquement
+1. Generer une cle : 8 a 128 caracteres parmi a-z, A-Z, 0-9 et "-"
+   (spec indexnow.org). python -c "import uuid; print(uuid.uuid4().hex)"
+2. Publier un fichier <cle>.txt A LA RACINE du site, contenant uniquement
    la cle en texte brut. Ex : https://example.com/a1b2c3....txt
+   Un fichier de cle hors racine (--key-location) ne couvre QUE les URLs
+   situees sous son repertoire : une cle en /indexnow/<cle>.txt ne peut pas
+   soumettre /fr/page (regle du protocole). Le script refuse ce cas.
 3. Verifier qu'il est accessible publiquement (le script le fait avant tout
    envoi et refuse de soumettre sinon).
 
@@ -22,13 +25,15 @@ Usage:
     # soumission reelle
     python indexnow_submit.py --host example.com --key <cle> --urls urls.txt
 
-Gratuit, sans quota documente, sans authentification autre que la cle.
+Gratuit, sans authentification autre que la cle. Max 10 000 URLs par POST.
+Moteurs participants et regles : references/indexing-rules.md.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -38,6 +43,22 @@ from pathlib import Path
 ENDPOINT = "https://api.indexnow.org/indexnow"
 MAX_URLS_PER_REQUEST = 10_000  # limite du protocole
 USER_AGENT = "seo-geo-optimizer/1.0 (+IndexNow client)"
+
+
+KEY_RE = re.compile(r"^[A-Za-z0-9-]{8,128}$")
+
+
+def urls_outside_key_scope(urls: list[str], key_url: str) -> list[str]:
+    """IndexNow: a key file at https://h/dir/key.txt only covers URLs that
+    start with https://h/dir/ -- anything else is refused by the engines."""
+    parsed = urllib.parse.urlparse(key_url)
+    scope_path = parsed.path.rsplit("/", 1)[0] + "/"
+    out = []
+    for u in urls:
+        p = urllib.parse.urlparse(u)
+        if p.netloc != parsed.netloc or not p.path.startswith(scope_path):
+            out.append(u)
+    return out
 
 
 def verify_key_file(host: str, key: str, key_location: str | None) -> tuple[bool, str]:
@@ -83,7 +104,7 @@ def interpret_status(code: int) -> str:
         400: "Requete invalide (format)",
         403: "Cle refusee -- le fichier de cle n'est pas valide cote moteur",
         422: "URLs invalides (ne correspondent pas au host, ou schema incorrect)",
-        429: "Trop de requetes -- ralentir",
+        429: "Trop de requetes (detection de spam possible) -- ralentir",
     }.get(code, f"Code inattendu {code}")
 
 
@@ -96,8 +117,8 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Verifie la cle et les URLs, ne soumet rien")
     args = parser.parse_args()
 
-    if not (8 <= len(args.key) <= 128) or not all(c in "0123456789abcdefABCDEF-" for c in args.key):
-        print("Cle invalide : attendu 8 a 128 caracteres hexadecimaux.", file=sys.stderr)
+    if not KEY_RE.match(args.key):
+        print("Cle invalide : attendu 8 a 128 caracteres parmi a-z, A-Z, 0-9 et '-'.", file=sys.stderr)
         return 1
 
     urls = [u.strip() for u in args.urls.read_text(encoding="utf-8").splitlines() if u.strip()]
@@ -112,6 +133,15 @@ def main() -> int:
     foreign = [u for u in urls if urllib.parse.urlparse(u).netloc != args.host]
     if foreign:
         print(f"{len(foreign)} URL(s) hors du host '{args.host}', ex: {foreign[0]}", file=sys.stderr)
+        return 1
+
+    key_url = args.key_location or f"https://{args.host}/{args.key}.txt"
+    out_of_scope = urls_outside_key_scope(urls, key_url)
+    if out_of_scope:
+        print(f"{len(out_of_scope)} URL(s) hors du perimetre du fichier de cle {key_url}, ex: {out_of_scope[0]}",
+              file=sys.stderr)
+        print("Le protocole limite une cle hors racine a son repertoire : publier la cle a la racine.",
+              file=sys.stderr)
         return 1
 
     ok, key_info = verify_key_file(args.host, args.key, args.key_location)

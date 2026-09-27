@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Verifie les liens presents sur une page vers un domaine cible :
-# dofollow vs nofollow, et repetition des ancres (signal de sur-optimisation).
+# suivi vs non suivi (nofollow, sponsored, ugc), et repetition des ancres
+# (signal de sur-optimisation). Google traite nofollow/sponsored/ugc comme des
+# indications ("hints") depuis 2020 : un tel lien transmet peu ou pas
+# d'autorite, sans garantie dans un sens ou dans l'autre.
 #
 # Usage:
 #   ./check_backlinks.sh <url_ou_fichier_html> <domaine_cible>
@@ -51,9 +54,9 @@ trap 'rm -f "$TMP_HTML" "$ANCHORS_FILE"' EXIT
 while IFS= read -r tag; do
   [ -z "$tag" ] && continue
   TOTAL=$((TOTAL + 1))
-  if echo "$tag" | grep -qi 'rel="[^"]*nofollow'; then
+  if echo "$tag" | grep -qiE "rel=[\"']?[^\"'>]*(nofollow|sponsored|ugc)"; then
     NOFOLLOW=$((NOFOLLOW + 1))
-    STATUS="nofollow"
+    STATUS=$(echo "$tag" | grep -oiE '(nofollow|sponsored|ugc)' | tr 'A-Z' 'a-z' | sort -u | paste -sd+ -)
   else
     DOFOLLOW=$((DOFOLLOW + 1))
     STATUS="dofollow"
@@ -65,9 +68,9 @@ done <<< "$LINKS"
 
 echo ""
 echo "=== Resume ==="
-echo "Liens trouves vers $TARGET_DOMAIN : $TOTAL (dofollow: $DOFOLLOW, nofollow: $NOFOLLOW)"
+echo "Liens trouves vers $TARGET_DOMAIN : $TOTAL (suivis: $DOFOLLOW, nofollow/sponsored/ugc: $NOFOLLOW)"
 if [ "$DOFOLLOW" -eq 0 ]; then
-  echo "-> Aucun lien dofollow : valeur SEO quasi nulle depuis cette source."
+  echo "-> Aucun lien suivi : peu ou pas d'autorite transmise depuis cette source."
 fi
 
 echo ""

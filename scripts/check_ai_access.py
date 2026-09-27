@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
-"""Verifie qu'un site est REELLEMENT accessible aux crawlers IA.
+"""Verifie qu'une page est REELLEMENT accessible aux crawlers de recherche
+et d'IA, en separant deux couches souvent confondues :
 
-Deux couches distinctes, souvent confondues :
-1. `robots.txt` autorise-t-il le bot ? (declaratif, ce que le site dit)
-2. Le serveur/CDN sert-il vraiment la page a ce bot ? (reel, ce qui se passe)
+1. robots.txt autorise-t-il le crawler ? (declaratif, RFC 9309 applique
+   strictement : groupes, plus long motif, jokers -- voir robotstxt.py)
+2. Le serveur/CDN sert-il la page a une requete portant son user-agent ?
+   (mesure, comparee a une requete navigateur de reference)
 
-Un site peut avoir un robots.txt parfaitement permissif ET renvoyer 403 aux
-bots IA parce que le CDN (Cloudflare, Akamai, Fastly...) les bloque en amont.
-Ce script detecte ce cas -- invisible avec un simple `curl` classique.
+Verdicts par crawler :
+- ok                 : robots autorise, page servie (200).
+- blocked-by-robots  : robots.txt l'interdit (intention declaree).
+- blocked-upstream   : robots autorise, mais 401/403/429/503 alors que la
+                       reference navigateur recoit 200 -> regle CDN/WAF par
+                       user-agent (cas Cloudflare, voir references/).
+- robots-deny-served : robots interdit mais le serveur repond 200 (normal :
+                       robots.txt n'est pas un controle d'acces).
+- token-only         : jeton robots.txt sans user-agent propre
+                       (Google-Extended, Applebot-Extended) : seul robots.txt
+                       compte, aucun test HTTP n'a de sens.
+- inconclusive       : la reference navigateur echoue elle-meme, ou erreur
+                       reseau : on ne peut rien attribuer au crawler.
 
-Contexte 2026 : Cloudflare bascule les nouveaux sites et les plans gratuits
-vers un blocage par defaut des crawlers d'entrainement/agents IA a partir du
-15 septembre 2026 (voir references/cloudflare-ai-access.md). Un site qui
-depend de la visibilite dans les moteurs generatifs doit verifier son etat
-reel, pas seulement son robots.txt.
+Limite a garder en tete : la requete part de cette machine, pas des IP du
+fournisseur. Un CDN qui verifie les bots par IP (Cloudflare "verified bots")
+peut traiter differemment le vrai crawler. Un 403 ici prouve une regle par
+user-agent ; un 200 ne prouve pas que le vrai bot passe. Confirmer dans les
+journaux serveur ou le tableau de bord du CDN.
 
 Usage:
-    python check_ai_access.py https://example.com [--json out.json]
+    python check_ai_access.py https://example.com/page [--json out.json] [--roles search,user,engine]
 
-Aucune authentification requise. Fait 1 requete par bot teste (~12 requetes).
+Code de sortie : 0 aucun blocage, 1 blocage detecte, 2 non concluant.
+Aucune authentification. ~25 requetes (1 robots.txt, 1 reference, 1 par
+crawler dote d'un user-agent). Catalogue : ai_bots.py.
 """
 
 from __future__ import annotations
@@ -26,194 +40,206 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 
-# User-agents reels des principaux crawlers IA, groupes par fonction.
-# "search" = utilise au moment de la requete pour citer une source (impact
-# direct sur la visibilite GEO). "training" = alimente le modele (impact
-# indirect, long terme).
-AI_BOTS = [
-    ("OAI-SearchBot", "search", "OpenAI / ChatGPT Search"),
-    ("ChatGPT-User", "search", "OpenAI / navigation utilisateur ChatGPT"),
-    ("GPTBot", "training", "OpenAI / entrainement"),
-    ("Claude-SearchBot", "search", "Anthropic / recherche"),
-    ("Claude-User", "search", "Anthropic / navigation utilisateur"),
-    ("ClaudeBot", "training", "Anthropic / entrainement"),
-    ("PerplexityBot", "search", "Perplexity / index"),
-    ("Perplexity-User", "search", "Perplexity / navigation utilisateur"),
-    ("Google-Extended", "training", "Google / Gemini + AI Overviews (grounding)"),
-    ("Applebot-Extended", "training", "Apple Intelligence"),
-    ("Googlebot", "search", "Google Search classique (reference de controle)"),
-    ("Bingbot", "search", "Bing + partenaires (reference de controle)"),
-]
+sys.path.insert(0, str(Path(__file__).parent))
+import robotstxt  # noqa: E402
+from ai_bots import AI_BOTS, CHECKED_ON, CITATION_ROLES  # noqa: E402
 
 TIMEOUT = 20.0
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/140.0.0.0 Safari/537.36")
+BLOCK_CODES = {401, 403, 406, 429, 451, 503}
+
+
+@dataclass
+class Probe:
+    status: int | None
+    error: str | None
+    cdn: str | None
+    mitigated: str | None
 
 
 @dataclass
 class BotResult:
-    user_agent: str
+    vendor: str
+    token: str
     role: str
-    label: str
-    robots_allows: bool | None  # None = robots.txt illisible
+    robots_allows: bool | None
     http_status: int | None
-    served: bool
-    note: str = ""
+    verdict: str
+    note: str
+    ua_documented: bool
 
 
-def fetch(url: str, user_agent: str) -> tuple[int | None, str | None, str]:
-    """Retourne (status_code, body, error). Ne leve jamais."""
-    req = urllib.request.Request(url, headers={"User-Agent": user_agent})
+def _detect_cdn(headers) -> str | None:
+    server = (headers.get("Server") or "").lower()
+    if "cloudflare" in server or headers.get("CF-RAY"):
+        return "cloudflare"
+    if headers.get("X-Served-By") and "cache" in (headers.get("X-Served-By") or "").lower():
+        return "fastly"
+    if "akamai" in server or headers.get("X-Akamai-Transformed"):
+        return "akamai"
+    if headers.get("X-Amz-Cf-Id"):
+        return "cloudfront"
+    return None
+
+
+def probe(url: str, user_agent: str) -> Probe:
+    req = urllib.request.Request(url, headers={"User-Agent": user_agent, "Accept": "text/html,*/*;q=0.8"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-            return resp.status, resp.read().decode("utf-8", errors="replace"), ""
+            resp.read(2048)
+            return Probe(resp.status, None, _detect_cdn(resp.headers), resp.headers.get("cf-mitigated"))
+    except urllib.error.HTTPError as e:
+        return Probe(e.code, f"HTTP {e.code}", _detect_cdn(e.headers), e.headers.get("cf-mitigated"))
+    except Exception as e:  # DNS, TLS, timeout
+        return Probe(None, str(e), None, None)
+
+
+def fetch_robots(origin: str) -> tuple[int | None, robotstxt.RobotsTxt | None, str | None]:
+    url = f"{origin}/robots.txt"
+    req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            return resp.status, robotstxt.parse(resp.read().decode("utf-8", errors="replace")), None
     except urllib.error.HTTPError as e:
         return e.code, None, f"HTTP {e.code}"
-    except Exception as e:  # DNS, TLS, timeout...
+    except Exception as e:
         return None, None, str(e)
 
 
-def parse_robots(robots_txt: str) -> dict[str, list[tuple[str, str]]]:
-    """Parse minimaliste : {user_agent_lower: [(directive, path), ...]}.
-
-    Suffisant pour un diagnostic Allow/Disallow simple. Ne gere pas les
-    subtilites de priorite par longueur de pattern du protocole complet --
-    en cas de robots.txt complexe, verifier manuellement.
-    """
-    rules: dict[str, list[tuple[str, str]]] = {}
-    current_agents: list[str] = []
-    for raw_line in robots_txt.splitlines():
-        line = raw_line.split("#", 1)[0].strip()
-        if not line or ":" not in line:
-            continue
-        field, _, value = line.partition(":")
-        field = field.strip().lower()
-        value = value.strip()
-        if field == "user-agent":
-            current_agents.append(value.lower())
-            rules.setdefault(value.lower(), [])
-        elif field in ("allow", "disallow"):
-            for agent in current_agents or ["*"]:
-                rules.setdefault(agent, []).append((field, value))
-        else:
-            current_agents = []
-    return rules
+def _robots_verdict(robots_status: int | None, robots: robotstxt.RobotsTxt | None, token: str, path: str) -> bool | None:
+    fallback = robotstxt.verdict_for_status(robots_status)
+    if fallback == "allow-all":
+        return True
+    if fallback == "disallow-all":
+        return False
+    return robotstxt.is_allowed(robots, token, path) if robots else None
 
 
-def robots_allows_path(rules: dict[str, list[tuple[str, str]]], user_agent: str, path: str = "/") -> bool:
-    """Applique les regles du groupe le plus specifique (le bot, sinon '*')."""
-    group = rules.get(user_agent.lower())
-    if group is None:
-        group = rules.get("*", [])
-
-    best_match: tuple[int, bool] | None = None  # (longueur du pattern, autorise)
-    for directive, pattern in group:
-        if pattern == "":
-            # "Disallow:" vide = tout autoriser
-            candidate = (0, True) if directive == "disallow" else (0, True)
-        elif path.startswith(pattern.rstrip("*")):
-            candidate = (len(pattern), directive == "allow")
-        else:
-            continue
-        if best_match is None or candidate[0] > best_match[0]:
-            best_match = candidate
-
-    return True if best_match is None else best_match[1]
-
-
-def check_site(base_url: str) -> dict:
-    parsed = urllib.parse.urlparse(base_url)
+def check_site(url: str, roles: tuple[str, ...] | None = None, pause: float = 0.2) -> dict:
+    parsed = urllib.parse.urlparse(url)
     origin = f"{parsed.scheme}://{parsed.netloc}"
-    robots_url = f"{origin}/robots.txt"
+    path = (parsed.path or "/") + (f"?{parsed.query}" if parsed.query else "")
 
-    robots_status, robots_body, robots_err = fetch(robots_url, "Mozilla/5.0 (seo-geo-optimizer)")
-    rules = parse_robots(robots_body) if robots_body else {}
-    robots_readable = bool(robots_body)
+    robots_status, robots, robots_err = fetch_robots(origin)
+    baseline = probe(url, BROWSER_UA)
+    baseline_ok = baseline.status == 200
 
     results: list[BotResult] = []
-    for ua, role, label in AI_BOTS:
-        allowed = robots_allows_path(rules, ua) if robots_readable else None
-        status, _body, err = fetch(base_url, ua)
-        served = status == 200
-        note = ""
-        if allowed and not served:
-            note = "BLOQUE EN AMONT (CDN/pare-feu) malgre un robots.txt permissif"
-        elif allowed is False and served:
-            note = "robots.txt interdit mais le serveur repond quand meme (les bots respectueux s'abstiendront)"
-        elif err and not served:
-            note = err
-        results.append(
-            BotResult(
-                user_agent=ua, role=role, label=label,
-                robots_allows=allowed, http_status=status, served=served, note=note,
-            )
-        )
+    for bot in AI_BOTS:
+        if roles and bot.role not in roles:
+            continue
+        allowed = _robots_verdict(robots_status, robots, bot.robots_token, path)
+        if bot.ua is None:
+            results.append(BotResult(bot.vendor, bot.robots_token, bot.role, allowed, None, "token-only",
+                                     bot.robots_note, bot.ua_documented))
+            continue
+        p = probe(url, bot.ua)
+        time.sleep(pause)
+        if p.status is None or not baseline_ok:
+            verdict = "inconclusive"
+            note = p.error or f"reference navigateur en echec (HTTP {baseline.status})"
+        elif allowed is False:
+            verdict = "robots-deny-served" if p.status == 200 else "blocked-by-robots"
+            note = bot.robots_note
+        elif p.status == 200:
+            verdict, note = "ok", bot.robots_note
+        elif p.status in BLOCK_CODES:
+            verdict = "blocked-upstream"
+            note = f"HTTP {p.status} pour ce user-agent, 200 pour un navigateur"
+            if p.mitigated:
+                note += f" (cf-mitigated: {p.mitigated})"
+        else:
+            verdict, note = "inconclusive", f"HTTP {p.status}"
+        results.append(BotResult(bot.vendor, bot.robots_token, bot.role, allowed, p.status, verdict, note,
+                                 bot.ua_documented))
 
     return {
-        "url": base_url,
+        "url": url,
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "catalog_checked_on": CHECKED_ON,
         "robots_txt": {
-            "url": robots_url,
+            "url": f"{origin}/robots.txt",
             "status": robots_status,
-            "readable": robots_readable,
-            "error": robots_err or None,
+            "error": robots_err,
+            "fallback": robotstxt.verdict_for_status(robots_status),
+            "sitemaps": robots.records("sitemap") if robots else [],
+            "license": robots.records("license") if robots else [],
+            "content_signal": robots.records("content-signal") if robots else [],
+            "content_usage": robots.records("content-usage") if robots else [],
         },
+        "baseline": {"user_agent": BROWSER_UA, "http_status": baseline.status, "error": baseline.error, "cdn": baseline.cdn},
         "bots": [asdict(r) for r in results],
     }
 
 
 def print_report(data: dict) -> int:
-    print(f"Cible : {data['url']}")
     r = data["robots_txt"]
-    print(f"robots.txt : HTTP {r['status']} ({'lisible' if r['readable'] else 'ILLISIBLE'})")
+    print(f"Cible : {data['url']}  ({data['checked_at'][:19]}Z, catalogue du {data['catalog_checked_on']})")
+    print(f"robots.txt : HTTP {r['status']}"
+          + (f" -> traite comme '{r['fallback']}' (RFC 9309)" if r["fallback"] else ""))
+    for key, label in (("sitemaps", "Sitemap"), ("license", "License (RSL)"),
+                       ("content_signal", "Content-Signal"), ("content_usage", "Content-Usage (aipref)")):
+        for value in r[key]:
+            print(f"  {label}: {value}")
+    b = data["baseline"]
+    print(f"Reference navigateur : HTTP {b['http_status'] or 'erreur'}" + (f", CDN : {b['cdn']}" if b["cdn"] else ""))
     print()
-    print(f"{'Bot':22s} {'Role':9s} {'robots':8s} {'HTTP':6s} {'Servi'}")
-    print("-" * 62)
+    print(f"{'Crawler':22s} {'Fournisseur':12s} {'Role':9s} {'robots':7s} {'HTTP':5s} Verdict")
+    print("-" * 78)
+    for bot in data["bots"]:
+        robots_col = {True: "allow", False: "DENY", None: "?"}[bot["robots_allows"]]
+        print(f"{bot['token']:22s} {bot['vendor']:12s} {bot['role']:9s} {robots_col:7s} "
+              f"{str(bot['http_status'] or '-'):5s} {bot['verdict']}")
+        if bot["note"]:
+            print(f"  -> {bot['note']}")
 
-    blocked_search = []
-    silent_blocks = []
-    for b in data["bots"]:
-        robots_txt_col = {True: "allow", False: "DENY", None: "?"}[b["robots_allows"]]
-        status_col = str(b["http_status"]) if b["http_status"] else "err"
-        print(f"{b['user_agent']:22s} {b['role']:9s} {robots_txt_col:8s} {status_col:6s} {'oui' if b['served'] else 'NON'}")
-        if b["note"]:
-            print(f"  -> {b['note']}")
-        if b["role"] == "search" and not b["served"]:
-            blocked_search.append(b["user_agent"])
-        if b["robots_allows"] and not b["served"]:
-            silent_blocks.append(b["user_agent"])
+    if data["baseline"]["http_status"] != 200:
+        print()
+        print(f"NON CONCLUANT : la page ne repond pas 200 a un navigateur (HTTP {b['http_status'] or 'erreur'}). "
+              "Aucun verdict par crawler n'est attribuable ; relancer quand le site repond.")
+        return 2
 
+    upstream = [x["token"] for x in data["bots"] if x["verdict"] == "blocked-upstream"]
+    citation_blocked = [x["token"] for x in data["bots"]
+                        if x["role"] in CITATION_ROLES and x["verdict"] in ("blocked-upstream", "blocked-by-robots")]
     print()
-    if silent_blocks:
-        print(f"ALERTE : {len(silent_blocks)} bot(s) autorise(s) par robots.txt mais bloque(s) en amont :")
-        print(f"  {', '.join(silent_blocks)}")
-        print("  Cause probable : regle CDN/WAF (Cloudflare, Akamai...) devant le serveur.")
-        print("  Voir references/cloudflare-ai-access.md")
-    if blocked_search:
-        print(f"IMPACT GEO : {len(blocked_search)} bot(s) de RECHERCHE inaccessible(s) -- "
-              f"le site ne peut pas etre cite par ces moteurs : {', '.join(blocked_search)}")
-    if not silent_blocks and not blocked_search:
-        print("Aucun blocage detecte : tous les crawlers IA testes accedent au site.")
-
-    return 1 if (silent_blocks or blocked_search) else 0
+    if upstream:
+        print(f"ALERTE : {len(upstream)} crawler(s) autorise(s) par robots.txt mais refuse(s) par le serveur/CDN : "
+              f"{', '.join(upstream)}")
+        print("  Regle par user-agent probable (CDN/WAF). Voir references/cloudflare-ai-access.md.")
+    if citation_blocked:
+        print(f"IMPACT : {len(citation_blocked)} crawler(s) de recherche/citation bloque(s) : {', '.join(citation_blocked)}")
+    if not upstream and not citation_blocked:
+        print("Aucun blocage detecte sur les crawlers de recherche/citation (user-agents simules).")
+    print("Rappel : test depuis cette machine, pas depuis les IP des fournisseurs ; confirmer dans les logs/CDN.")
+    return 1 if (upstream or citation_blocked) else 0
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("url", help="URL a tester, ex: https://example.com")
+    parser.add_argument("url", help="Page a tester, ex: https://example.com/fr/produit")
     parser.add_argument("--json", dest="json_out", default=None, help="Ecrit le resultat brut en JSON")
+    parser.add_argument("--roles", default=None,
+                        help="Filtre de roles, ex: search,user,engine (defaut : tous)")
     args = parser.parse_args()
 
-    data = check_site(args.url)
+    roles = tuple(x.strip() for x in args.roles.split(",")) if args.roles else None
+    data = check_site(args.url, roles=roles)
     exit_code = print_report(data)
-
     if args.json_out:
-        with open(args.json_out, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        print(f"\nJSON ecrit : {args.json_out}")
-
+        Path(args.json_out).write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"JSON ecrit : {args.json_out}")
     return exit_code
 
 

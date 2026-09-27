@@ -1,5 +1,7 @@
 # Backlinks — cadre d'évaluation technique
 
+Revu le 2026-09-27.
+
 Ce fichier sert à **évaluer** un lien existant ou une opportunité de lien
 (qualité, risque, conformité) — pas à en trouver ou à en acquérir. La
 prospection, le choix des cibles éditoriales, la rédaction et l'envoi de
@@ -13,12 +15,19 @@ pitchs/outreach relèvent du skill `SEO` (`/SEO`), pas de ce skill.
 - **Liens externes** (autre domaine, autre propriétaire réel) : seule
   source de vraie valeur SEO/GEO.
 
-## Dofollow vs nofollow
-Un lien `nofollow` (ou `sponsored`/`ugc`) transmet peu de valeur
-d'autorité — un lien est utile pour le PageRank principalement s'il est
-cliquable **et** dofollow. Vérifier avec
+## Suivi vs nofollow / sponsored / ugc
+Google traite `nofollow`, `sponsored` et `ugc` comme des **indications**
+(« hints ») pour le classement depuis septembre 2019, et pour le crawl depuis
+le 2020-03-01 (ESTABLISHED, [Google, 2019-09](https://developers.google.com/search/blog/2019/09/evolving-nofollow-new-ways-to-identify)) : ces liens transmettent peu ou pas d'autorité, sans garantie
+dans un sens ou dans l'autre. Un lien payé ou sponsorisé **doit** porter
+`sponsored` (ou `nofollow`). Vérifier avec
 [scripts/check_backlinks.sh](../scripts/check_backlinks.sh) plutôt que de
 supposer.
+
+Côté moteurs IA, les **mentions** de marque (même sans lien) corrèlent plus
+à la visibilité dans AI Overviews que les backlinks (Ahrefs, 2025, CLAIMED
+méthode publiée, corrélation) : un lien n'est pas le seul signal de
+réputation. Voir [evidence.md](evidence.md).
 
 ## Variation des ancres
 Des ancres de lien identiques répétées sur de nombreux sites externes sont
@@ -52,10 +61,8 @@ Utiles pour l'autorité de domaine, pas seulement pour le trafic direct :
 
 ## À bannir sans exception
 - Achat de backlinks, fermes de liens, réseaux d'échange massif —
-  pénalité Google Search Central documentée (Link Spam / netlinking
-  manipulateur). Liste complète des politiques anti-spam actuelles (aucune
-  nouvelle catégorie depuis juin 2026, juste un raffinement de la
-  détection) : [spam-policies.md](spam-policies.md).
+  politique « Link spam » de Google. Politiques anti-spam actuelles :
+  [spam-policies.md](spam-policies.md).
 - Toute automatisation de soumission de masse vers des annuaires ou
   plateformes tierces.
 
@@ -63,7 +70,8 @@ Utiles pour l'autorité de domaine, pas seulement pour le trafic direct :
 Le contenu qui génère des backlinks sans démarchage actif (outils gratuits
 interactifs, articles de référence sourcés et datés) est aussi ce qui a le
 plus de chances d'être cité par les moteurs génératifs — cf. les signaux GEO
-dans [audit-framework.md](audit-framework.md#signaux-geo-retrieval-par-ia-génératives).
+dans [audit-framework.md](audit-framework.md#signaux-geo-retrieval-par-ia-génératives)
+et [evidence.md](evidence.md).
 **Produire ce type d'actif citable est le travail du skill `SEO`** (phase
 "production de l'actif citable" de `/SEO`) — ce skill-ci se limite à
 vérifier qu'un actif déjà publié respecte les fondamentaux techniques

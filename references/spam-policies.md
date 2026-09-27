@@ -1,36 +1,36 @@
 # Politiques anti-spam Google — ce qu'il ne faut jamais recommander
 
-Liste officielle actuelle (source primaire :
-[Google Search Central](https://developers.google.com/search/docs/essentials/spam-policies),
-16 catégories). Le point important pour ce skill : la mise à jour de
-juin 2026 **n'a ajouté aucune nouvelle catégorie** — c'est un raffinement de
-la détection existante, pas un changement de règles. Les catégories les plus
-pertinentes pour un audit SEO/GEO courant :
+Revu le 2026-09-27. Source primaire :
+[Google Search Central, spam policies](https://developers.google.com/search/docs/essentials/spam-policies)
+(maj 2026-08-28). **ESTABLISHED.**
 
-- **Scaled content abuse** : « de nombreuses pages générées dans le but
-  principal de manipuler le classement, pas d'aider l'utilisateur ». C'est
-  la catégorie la plus activement sanctionnée depuis 2024, et elle recoupe
-  de plus en plus le contenu IA produit en masse sans édition humaine.
-  **Pertinent directement pour ce skill** : ne jamais recommander de générer
-  du contenu à grande échelle sans révision éditoriale réelle, même pour du
-  contenu "citable" GEO.
-- **Expired domain abuse** : racheter un domaine expiré pour son autorité et
-  y héberger du contenu sans rapport ou de faible valeur. Une redirection
-  301 depuis un domaine expiré reste défendable **si l'alignement
-  thématique est réel** entre source et destination — critère qui
-  détermine désormais l'abus, pas la redirection elle-même.
-- **Site reputation abuse** : publier du contenu tiers sur un site établi
-  principalement pour profiter de son autorité existante (ex. une section
-  "coupons" ou "avis" sous-traitée à un tiers sur un site d'actualité).
-  Pertinent si un projet envisage d'héberger du contenu partenaire.
-- **Link spam** : achat, échange ou automatisation de liens dans un but de
-  manipulation — couvre ce que [backlinks.md](backlinks.md) bannit déjà
-  (fermes de liens, PBN, achat de dofollow).
-- **Thin affiliation** : contenu affilié copié des descriptions produit du
-  marchand sans valeur ajoutée ni contenu original.
-- **Cloaking, sneaky redirects, hidden text, keyword stuffing, doorway
-  abuse** : bases classiques, déjà implicitement exclues par les
-  recommandations on-page de ce skill.
+État : **16 politiques nommées**, plus une section « Other practices »
+(retraits légaux, retraits d'informations personnelles, contournement des
+règles, arnaques). Aucune nouvelle catégorie en 2026 ; deux renommées
+(« Malicious practices », « Site reputation policy »). Mises à jour de
+détection récentes : spam updates de juin (24-26), août (18-21) et
+septembre 2026 (démarrée le 24, en cours au 2026-09-27).
 
-Liste complète et définitions exactes : voir la source primaire ci-dessus,
-ne pas se fier à des résumés de blogs SEO qui datent vite sur ce sujet.
+Les plus pertinentes pour un audit SEO/GEO :
+
+- **Scaled content abuse** : beaucoup de pages produites surtout pour
+  manipuler le classement. La définition cite nommément l'IA générative.
+  Google range explicitement dans cette catégorie le fait de créer une page
+  par requête « fan-out » pour manipuler les réponses IA (guide IA, maj
+  2026-07-10). Ne jamais recommander de produire du contenu en masse sans
+  révision éditoriale réelle, même « pour être cité ».
+- **Site reputation abuse** : contenu tiers hébergé pour profiter de
+  l'autorité d'un site établi. Depuis le 2026-08-30, les actions manuelles
+  de cette politique ne s'appliquent plus aux utilisateurs de l'EEE ; la
+  politique reste en vigueur ailleurs et la détection algorithmique aussi.
+- **Expired domain abuse** : racheter un domaine expiré pour son autorité
+  et y mettre un contenu sans rapport.
+- **Link spam** : achat, échange ou automatisation de liens —
+  cf. [backlinks.md](backlinks.md).
+- **Malicious practices** : inclut le « back button hijacking »,
+  sanctionné depuis le 2026-06-15.
+- **Thin affiliation**, **cloaking**, **sneaky redirects**, **hidden
+  text**, **keyword stuffing**, **doorway abuse** : bases classiques.
+
+Liste complète et définitions exactes : la source primaire ci-dessus, pas
+un résumé de blog.
