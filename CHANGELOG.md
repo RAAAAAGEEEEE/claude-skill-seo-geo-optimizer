@@ -3,6 +3,65 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.2.0] — 2026-09-28
+
+Techniques automatisables, journaux serveur et glossaire. Aucune rupture :
+les sorties de `run_audit.py`, `generate_report.py` et `check_ai_access.py`
+sont inchangées (seuls la version et le user-agent passent à 2.2).
+
+### Ajouté
+- `scripts/crawler_logs.py` : analyse des journaux serveur (*combined* ou
+  JSON lines, `.gz` accepté). Pour chaque crawler, il compte les requêtes,
+  les statuts et les pages les plus demandées. Il vérifie les IP contre les
+  17 listes JSON publiées (Google, Bing, OpenAI, Perplexity, Anthropic,
+  Apple, DuckDuckGo, Common Crawl, Mistral) et signale :
+  - les 5xx et 429 servis aux crawlers ;
+  - un robots.txt servi hors 200 ;
+  - les usurpations de user-agent ;
+  - les 404 les plus demandés ;
+  - les URLs du sitemap jamais récupérées.
+
+  Aucune adresse IP n'est écrite dans la sortie.
+- `scripts/glossary_check.py` : `build` (HTML `<dl>` et JSON-LD
+  `DefinedTermSet` depuis un fichier de termes, sans rien inventer), `audit`
+  (balisage invisible, ancres cassées, définitions courtes, occasions de
+  liens sur un échantillon du sitemap, termes jamais cités), `suggest`
+  (sigles, `<abbr>`, `<dfn>` présents sur plusieurs pages).
+- `references/automation.md` : ce qu'un script ou un agent planifié peut
+  faire seul au 2026-09-28, classé par valeur et effort. Couvre :
+  - les API Search Console et Bing, et ce qu'elles n'exposent pas (rapports
+    IA) ;
+  - la vérification des crawlers ;
+  - les flux de fraîcheur ;
+  - le suivi des citations IA : ce que renvoient les API d'OpenAI, de
+    Perplexity et d'Anthropic, et pourquoi le grounding Gemini et le
+    scraping de Google sont exclus par leurs conditions ;
+  - la veille de mentions ;
+  - la liste de ce que Google interdit quand on automatise.
+- `references/glossary.md` : verdict sur les glossaires. SEO : utile sous
+  conditions (ESTABLISHED, règles générales). Citations IA : non démontré.
+  `DefinedTerm` : aucun rich result. Recette en 9 points, risques, et
+  contrôles du script.
+- `tests/test_glossary_logs.py` : 14 tests hors ligne et leurs fixtures
+  (`tests/fixtures/glossary/`, `tests/fixtures/logs/`). 66 tests au total.
+
+### Modifié
+- `SKILL.md` : glossaire et journaux dans l'étape 3 ; leviers « Glossaire »
+  et « Automatisation » ; deux scripts ; replis et confidentialité.
+- `references/checklist.md` : glossaire, journaux serveur, limites du suivi
+  des citations par API.
+- `references/evidence.md` : deux croyances démenties (glossaire « 3 à 5
+  fois plus cité », suivi des citations par scraping de Google).
+- `references/schema-templates.md` : statut de `DefinedTermSet` et gabarit.
+- `references/french-practitioners.md` : comptes X confirmés depuis leurs
+  sites (`@laurentbourelly`, `@stephdelgado`). La lecture des posts a
+  échoué : le jeton API a été refusé (401). Aucun post n'a été lu, et rien
+  de ce fichier ne vient de X.
+- `docs/` : USAGE (deux sections, commandes exécutées), ARCHITECTURE,
+  LIMITATIONS, PRIVACY_AND_SECURITY (listes d'IP, journaux), TROUBLESHOOTING,
+  LEGAL_AND_ATTRIBUTION (définitions ISO et Wikipedia), INSTALLATION ;
+  README et CONTRIBUTING.
+
 ## [2.1.0] — 2026-09-28
 
 Audit complet sans intervention, méthodes des praticiens français, et

@@ -1,0 +1,11 @@
+66.249.66.1 - - [27/Sep/2026:10:00:00 +0000] "GET /robots.txt HTTP/1.1" 200 120 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+66.249.66.1 - - [27/Sep/2026:10:00:05 +0000] "GET /fr/robots/atlas HTTP/1.1" 200 5120 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+66.249.66.1 - - [27/Sep/2026:10:01:00 +0000] "GET /fr/robots/ancien HTTP/1.1" 404 300 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+66.249.66.1 - - [27/Sep/2026:10:02:00 +0000] "GET /fr/guides HTTP/1.1" 503 0 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+203.0.113.7 - - [27/Sep/2026:10:03:00 +0000] "GET /fr HTTP/1.1" 200 4000 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+20.171.207.5 - - [27/Sep/2026:11:00:00 +0000] "GET /fr/robots/atlas HTTP/1.1" 200 5120 "-" "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.4; +https://openai.com/gptbot"
+20.42.10.180 - - [27/Sep/2026:11:05:00 +0000] "GET /fr/robots/ancien HTTP/1.1" 404 300 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36; compatible; OAI-SearchBot/1.4; +https://openai.com/searchbot"
+57.141.0.9 - - [27/Sep/2026:12:00:00 +0000] "GET /fr HTTP/1.1" 200 4000 "-" "meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/web-crawlers)"
+198.51.100.20 - - [27/Sep/2026:12:30:00 +0000] "GET /fr/app.js HTTP/1.1" 200 900 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 Safari/537.36"
+this line is not a log line
+{"remote_addr":"157.55.39.10","time":"2026-09-27T13:00:00+00:00","request":"GET /robots.txt HTTP/1.1","status":500,"http_user_agent":"Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/140.0.0.0 Safari/537.36"}

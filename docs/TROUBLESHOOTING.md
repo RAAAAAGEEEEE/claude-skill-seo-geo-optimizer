@@ -18,4 +18,8 @@ Retour : [README](../README.md) · Voir aussi : [CONFIGURATION](CONFIGURATION.md
 | Beaucoup d'orphelines alors que le menu lie tout | Menu rendu en JavaScript, ou crawl incomplet (`crawl_complete: false`) | Vérifier le HTML servi (`curl`). Augmenter `--max-pages`. |
 | Le crawl ignore des pages | Pages interdites par robots.txt (listées dans `skipped_by_robots`), URLs à paramètres (`--include-query`), fichiers non HTML | Comportement voulu. Ajuster les options si besoin. |
 | Accès crawlers : 403 pour un bot, 200 pour le navigateur | Règle CDN/WAF par user-agent | Voir [cloudflare-ai-access.md](../references/cloudflare-ai-access.md). Confirmer dans les journaux. |
+| `crawler_logs.py` : « Aucune ligne reconnue » (code 2) | Format de journal autre que *combined* ou JSON lines | Exporter au format *combined*, ou en JSON lines avec `remote_addr`, `time`, `request`, `status`, `http_user_agent`. |
+| `crawler_logs.py` : liste d'un fournisseur en `erreur` | Réseau, ou URL déplacée par le fournisseur | Relancer ; sinon vérifier l'URL dans la page « bots » du fournisseur et mettre à jour `RANGES`. En attendant, ses requêtes sont « non vérifiables ». |
+| `glossary_check.py audit` trouve 0 ou 1 terme | Hub qui lie une page par terme, sans `<dt>`/`<dfn>` | Ajouter `--term-links '<motif d'URL des définitions>'`. |
+| Git Bash : `--term-links '/fr/definition/'` ne trouve rien | Git Bash convertit un argument qui commence par `/` en chemin Windows | Préfixer la commande par `MSYS_NO_PATHCONV=1`, ou écrire le motif sans `/` initial (`fr/definition/`). |
 | Caractères accentués illisibles dans la console Windows | Console en cp1252 | Les scripts forcent UTF-8 sur stdout. Sinon : `set PYTHONIOENCODING=utf-8`. |

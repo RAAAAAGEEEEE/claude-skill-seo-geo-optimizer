@@ -146,6 +146,70 @@ donc que pour l'audit sans clé, ou avec des secrets configurés côté cloud.
 `--indexnow-submit` dans une tâche planifiée envoie des URLs à des tiers à
 chaque passage. Ne l'ajouter qu'après accord explicite du propriétaire.
 
+## Journaux serveur : `crawler_logs.py`
+
+```bash
+python scripts/crawler_logs.py tests/fixtures/logs/access.log --md crawlers.md --json crawlers.json
+```
+Exécuté le 2026-09-28 sur le journal de test (un vrai journal de production
+n'a **pas** encore été analysé : il faut que le propriétaire le fournisse).
+Le script a téléchargé les 17 listes d'IP des fournisseurs (toutes « ok »),
+puis a sorti le code 1 à cause des problèmes plantés dans la fixture :
+```
+| Googlebot | Google | engine | 5 | 4 | 1 | 2xx:3 4xx:1 5xx:1 | 4 | 1 | 0 |
+- crawler-5xx-429 [ESTABLISHED, bloquant] Googlebot : 1 réponse(s) 5xx et 0 429 sur 5 requête(s)
+- spoofed-crawler [ESTABLISHED] Googlebot : 1 requête(s) hors des plages publiées par Google (sources : 203.0.113.0/24)
+- robots-txt-not-200 [ESTABLISHED, bloquant] bingbot : robots.txt servi en {500: 1}
+```
+Options :
+- plusieurs fichiers, `.gz` compris : `access.log access.log.1.gz` ;
+- `--site https://example.com` ou `--sitemap-urls urls.txt` : URLs du
+  sitemap jamais récupérées par Googlebot, bingbot ou OAI-SearchBot ;
+- `--no-verify` : aucune requête réseau, rien n'est « vérifié » ;
+- `--ranges-dir DOSSIER` : listes JSON locales (usage hors ligne).
+
+Codes de sortie : 0 analysé, 1 constat bloquant (5xx/429 servi à Googlebot
+ou bingbot, robots.txt en 5xx), 2 aucune ligne reconnue.
+
+## Glossaire : `glossary_check.py`
+
+Termes candidats relevés sur le site (exécuté le 2026-09-28 13:29 UTC) :
+```bash
+python scripts/glossary_check.py suggest --site https://example.com/fr --max-pages 30
+```
+```
+10 page(s) lue(s) ; 7 candidat(s) présent(s) sur >= 2 pages (heuristique : sigles, <abbr>, <dfn> ; à trier à la main)
+  IA                 5 page(s)  [sigle]  ex. https://example.com/fr
+  MCP                4 page(s)  [sigle]  ex. https://example.com/fr
+  ...
+  ROS                2 page(s)  [sigle]  ex. https://example.com/fr/methodologie
+```
+
+Audit d'un glossaire existant et occasions de liens (exécuté le 2026-09-28
+sur le hub public de la CNIL, 15 pages de son sitemap, une par seconde) :
+```bash
+python scripts/glossary_check.py audit --url https://www.cnil.fr/fr/glossaire --term-links 'fr/definition/' --site https://www.cnil.fr/fr --max-pages 15 --delay 1
+```
+```
+Glossaire https://www.cnil.fr/fr/glossaire : HTTP 200, 6 terme(s), 0 en JSON-LD DefinedTerm
+Maillage : 15 page(s) lue(s) (1763 URL(s) au sitemap, crawl partiel)
+  « Accountability » cité sans lien vers sa définition sur 1 page(s) : https://www.cnil.fr/fr/les-cnil-mondiales-...
+```
+`--term-links` sert quand le hub lie une page par terme ; sans lui, les
+termes viennent de `DefinedTerm`, `<dfn>`, `<dt>` ou des titres avec `id`.
+
+Construire le glossaire depuis un fichier de termes (CSV ou JSON : `term`,
+`definition`, et en option `slug`, `url`, `same_as`, `code`,
+`alternate_names`) :
+```bash
+python scripts/glossary_check.py build --terms tests/fixtures/glossary/terms.csv --set-name "Lexique" --set-url https://example.com/fr/lexique --lang fr --out-dir glossary-out
+```
+Sorties : `glossary.html` (un `<dl>` avec une ancre par terme) et
+`glossary.jsonld` (`DefinedTermSet`), tirés des mêmes lignes. Les lignes
+sans définition ou en double sont signalées et **non publiées** ; code 1
+dans ce cas (c'est le cas du fichier de test). Valider ensuite avec
+`python scripts/validate_schema.py glossary-out/glossary.jsonld`.
+
 ## Autres scripts
 
 | Besoin | Commande |

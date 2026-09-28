@@ -1,0 +1,6 @@
+term,definition,slug,same_as,code
+Cobot,"Robot collaboratif conçu pour travailler à côté d'un opérateur humain, sans cage, avec des limites de force et de vitesse.",,https://www.wikidata.org/wiki/Q1142726,
+LiDAR,Capteur laser.,,,
+Préhenseur,,,,
+cobot,Doublon.,,,
+Degré de liberté,"Nombre de mouvements indépendants qu'un mécanisme peut effectuer ; un bras industriel courant en compte six.",ddl,,DoF

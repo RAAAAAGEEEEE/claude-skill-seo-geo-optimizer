@@ -18,6 +18,13 @@ Le contenu de leurs formations payantes n'a été ni consulté ni repris.
 Les noms des praticiens servent à l'attribution. Ils n'impliquent **aucune**
 approbation de ce skill de leur part.
 
+## Définitions de glossaire
+`glossary_check.py` ne rédige aucune définition. Les définitions que vous
+publiez doivent être les vôtres : les normes ISO (dont ISO 8373,
+vocabulaire de la robotique) interdisent la copie, et Wikipedia impose
+attribution et licence CC BY-SA 4.0
+([glossary.md](../references/glossary.md)).
+
 ## Documentation de tiers
 Les règles s'appuient sur des documents publics :
 - Google Search Central et web.dev ;

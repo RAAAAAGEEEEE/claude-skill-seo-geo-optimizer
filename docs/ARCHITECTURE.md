@@ -43,6 +43,17 @@ run_audit.py
 | `gsc_report.py` | API Search Console | `google-auth`, `requests` |
 | `report_markdown.py`, `diff_reports.py` | Rendu du rapport et comparaison, fonctions pures du JSON | stdlib |
 
+## Outils autonomes (hors `run_audit.py`)
+
+| Script | Rôle | Dépendances |
+|---|---|---|
+| `crawler_logs.py` | Journaux serveur : identifie les crawlers (catalogue `ai_bots.py` + moteurs et outils SEO), vérifie leurs IP contre les listes JSON des fournisseurs, produit des constats étiquetés. Les IP ne sortent jamais du processus : compteurs et agrégats /24, /48 | stdlib |
+| `glossary_check.py` | Glossaire : `build` (HTML `<dl>` et JSON-LD `DefinedTermSet` depuis les mêmes lignes), `audit` (termes, balisage visible, ancres, occasions de liens sur un échantillon du sitemap), `suggest` (sigles, `<abbr>`, `<dfn>` présents sur plusieurs pages). Réutilise `robotstxt.py` et `sitemaps.py` | stdlib |
+
+Ces deux outils restent séparés de `run_audit.py` : le premier lit des
+fichiers que seul le propriétaire possède, le second demande un choix
+éditorial (quel glossaire, quels termes).
+
 ## Choix de conception
 - **Un constat par code de règle**, URLs agrégées, avec un identifiant
   stable (`sha1(code)`). Le diff compare des identifiants, puis des
@@ -62,7 +73,9 @@ run_audit.py
   censé y écrire une clé.
 
 ## Tests
-`tests/` contient 52 tests hors ligne. `test_automation.py` sert
+`tests/` contient 66 tests hors ligne. `test_glossary_logs.py` couvre
+`glossary_check.py` et `crawler_logs.py` sur des fixtures (`tests/fixtures/glossary/`,
+`tests/fixtures/logs/`), sans réseau. `test_automation.py` sert
 `tests/fixtures/site/` sur 127.0.0.1 et lance `run_audit.main()` deux fois.
 Les deux passages vérifient les problèmes plantés dans le site de test,
 l'écriture du diff et l'absence de la clé IndexNow de test dans toutes les

@@ -4,3 +4,6 @@ seo-reports/
 .env
 *.env
 !.env.example
+glossary-out/
+crawlers.json
+crawlers.md

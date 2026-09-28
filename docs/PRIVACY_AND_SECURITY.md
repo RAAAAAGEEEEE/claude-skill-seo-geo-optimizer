@@ -12,6 +12,8 @@ Retour : [README](../README.md) · Voir aussi : [SECURITY.md](../SECURITY.md),
 | `CRUX_API_KEY` ou `PAGESPEED_API_KEY` présente | chromeuxreport.googleapis.com | Origine du site + clé |
 | `GSC_SERVICE_ACCOUNT_FILE` + propriété | oauth2.googleapis.com, googleapis.com | Assertion signée du compte de service, puis requête Search Analytics en lecture seule |
 | `INDEXNOW_KEY` présente | Le site audité | GET de `/<clé>.txt` : vérification seulement |
+| `crawler_logs.py` sans `--no-verify` | Serveurs des fournisseurs (Google, Bing, OpenAI, Perplexity, Anthropic, Apple, DuckDuckGo, Common Crawl, Mistral) | GET des listes d'IP publiques. Rien du journal n'est envoyé. |
+| `glossary_check.py audit --site` ou `suggest` | Le site indiqué | GET publics : robots.txt, sitemaps, pages (au plus `--max-pages`, pause `--delay`, robots.txt respecté) |
 | `--indexnow-submit` **et** clé vérifiée **et** rapport précédent | api.indexnow.org | Hôte, clé, URLs nouvelles ou modifiées. Elles sont partagées avec tous les moteurs participants. **Action externe, à approuver.** |
 
 Rien d'autre. Pas de télémétrie, pas d'appel à une API payante. L'API X
@@ -46,8 +48,16 @@ Ils ne contiennent aucune donnée personnelle de visiteurs. Les rapports
 Search Console restent confidentiels pour le propriétaire du site : ne pas
 les publier.
 
+## Journaux serveur
+Un journal d'accès contient des adresses IP, qui sont des données
+personnelles. `crawler_logs.py` les lit en mémoire et ne les écrit jamais :
+la sortie contient des compteurs, et les sources usurpées sont agrégées en
+/24 (IPv4) ou /48 (IPv6). Un test le vérifie
+(`tests/test_glossary_logs.py`). Ne pas copier un journal brut dans un
+rapport, un ticket ou le dépôt.
+
 ## Charge sur le site audité
 Par défaut, au plus 60 pages, 20 sondes 404 et environ 27 requêtes d'accès
 crawlers, avec 0,5 s entre deux requêtes. Pour un site réel le 2026-09-27 :
-80 requêtes en 40 à 50 s. Le user-agent `seo-geo-optimizer-audit/2.1` est
+80 requêtes en 40 à 50 s. Le user-agent `seo-geo-optimizer-audit/2.2` est
 identifiable dans les journaux du site.

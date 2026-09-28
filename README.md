@@ -6,9 +6,9 @@ les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
 Mistral). L'audit complet tourne sans intervention, se planifie, et compare
 chaque rapport au précédent.
 
-**Statut : bêta.** Version 2.1.0, connaissances revues le 2026-09-28
+**Statut : bêta.** Version 2.2.0, connaissances revues le 2026-09-28
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (52 tests hors ligne), mais le
+sur quelques sites. Ses scripts sont testés (66 tests hors ligne), mais le
 comportement du skill lui-même n'a pas de suite d'évaluation.
 
 ## Le problème
@@ -46,6 +46,12 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
   Bourrelly (cocon sémantique) et de Stéphane Delgado (GEO, maillage) sont
   intégrées comme CLAIMED, confrontées à la documentation de Google
   ([references/french-practitioners.md](references/french-practitioners.md)).
+- **Ce qui s'automatise, et ce qui est interdit** : analyse des journaux
+  serveur avec vérification des IP des crawlers (`crawler_logs.py`),
+  glossaire construit et audité depuis les données du site
+  (`glossary_check.py`), et les limites posées par Google
+  ([references/automation.md](references/automation.md),
+  [references/glossary.md](references/glossary.md)).
 
 ## Exemple de sortie
 Extrait réel de `run_audit.py` sur un site réel, le 2026-09-27 à 22:32 UTC
@@ -123,6 +129,8 @@ Voir [SECURITY.md](SECURITY.md) et
 - Le maillage « contextuel » dépend des balises `<main>`/`<nav>`, et les
   rubriques sont déduites des répertoires d'URL.
 - Aucune mesure directe des citations dans ChatGPT, Claude ou Perplexity.
+- Journaux serveur : vérification par listes d'IP seulement (Meta et Amazon
+  restent non vérifiables).
 - Les seuils de praticiens restent des heuristiques.
 
 Liste complète : [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
@@ -131,8 +139,8 @@ Liste complète : [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 - Lecture du rapport IA de Search Console, si Google l'expose dans l'API.
 - Rendu JavaScript optionnel (navigateur sans interface) pour les sites en
   rendu client.
-- Vérification optionnelle des IP réelles des crawlers dans des journaux
-  serveur fournis par l'utilisateur.
+- Vérification des crawlers par DNS inverse et signatures Web Bot Auth,
+  en complément des listes d'IP.
 
 ## Contribution
 Voir [CONTRIBUTING.md](CONTRIBUTING.md).

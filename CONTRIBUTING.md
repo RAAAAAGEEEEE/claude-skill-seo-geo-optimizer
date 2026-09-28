@@ -3,8 +3,8 @@
 Merci de votre intérêt. Issues et pull requests sont bienvenues.
 
 ## Avant d'ouvrir une pull request
-1. `python -m unittest discover -s tests` doit passer. À la version 2.1.0,
-   52 tests hors ligne passent.
+1. `python -m unittest discover -s tests` doit passer. À la version 2.2.0,
+   66 tests hors ligne passent.
 2. Tout script ajouté ou modifié a un test dans `tests/`. Si le script fait
    du réseau, le tester sur le site de test local (`tests/fixtures/site/`,
    servi en 127.0.0.1) ou avec un appel simulé, jamais contre un site tiers.

@@ -21,7 +21,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.1)"
+USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.2)"
 MAX_SITEMAPS = 50
 MAX_BYTES = 50 * 1024 * 1024  # protocol limit: 50 MB uncompressed per file
 

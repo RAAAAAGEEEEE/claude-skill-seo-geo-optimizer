@@ -6,20 +6,20 @@ description: >
   réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès
   réel des crawlers (robots.txt RFC 9309 et blocage CDN), indexabilité et
   extraits, cohérence sitemap/canonical/hreflang, JSON-LD, maillage interne
-  et cocon sémantique, Core Web Vitals mesurés, Search Console, IndexNow.
-  Audit complet automatisable (une commande, rapport daté, diff dans le
+  et cocon sémantique, glossaire/lexique, journaux serveur des crawlers,
+  Core Web Vitals mesurés, Search Console, IndexNow. Audit complet automatisable (une commande, rapport daté, diff dans le
   temps, planifiable). Chaque recommandation porte une source datée et une
   étiquette ESTABLISHED/SUPPORTED/CLAIMED. À utiliser pour « auditer le
   SEO/GEO », « pourquoi mon site n'est pas cité par ChatGPT/AI Overviews »,
-  « vérifier robots.txt, sitemap, schema, maillage, cocon », « planifier un
-  audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
+  « vérifier robots.txt, sitemap, schema, maillage, cocon », « faut-il un
+  glossaire », « quels bots viennent vraiment », « planifier un audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
   outreach via `/SEO`) : celui-ci audite et modifie le site courant, sans
   prospection ni outreach.
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.1.0 — connaissances revues le **2026-09-28** (historique :
+Version 2.2.0 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -47,6 +47,8 @@ restent humains.
 - migration, ajout de schema, préparation d'un lancement ;
 - revue d'un `llms.txt`/RSL ;
 - maillage interne ou cocon sémantique ;
+- glossaire ou lexique (créer, auditer, lier) ;
+- journaux serveur : quels crawlers viennent vraiment ;
 - suivi planifié d'un site.
 
 Pas pour rédiger du marketing (skill `copywriting`).
@@ -75,6 +77,13 @@ Pas pour rédiger du marketing (skill `copywriting`).
 3. **Compléter** avec [checklist.md](references/checklist.md) : réglages de
    comptes, jugement éditorial, carte de la demande et définition canonique
    ([french-practitioners.md](references/french-practitioners.md)).
+   - Vocabulaire propre au site (sigles, termes techniques) : proposer un
+     glossaire. `glossary_check.py suggest` liste les candidats, `audit`
+     contrôle un glossaire existant et ses occasions de liens
+     ([glossary.md](references/glossary.md)).
+   - Journaux serveur fournis : `crawler_logs.py` (crawlers réels,
+     usurpations, 5xx, couverture du sitemap)
+     ([automation.md](references/automation.md)).
 4. **PLAN** : reprendre le plan P0/P1/P2 du rapport. Un constat CLAIMED
    (maillage de praticien, seuils) reste P2. **Attendre le GO** avant de
    coder.
@@ -106,6 +115,8 @@ Pas pour rédiger du marketing (skill `copywriting`).
 | E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
 | Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, au p75 terrain (CrUX). | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
 | Indexation | Google : sitemap exact (lastmod vrai) et Search Console. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md) |
+| Glossaire | Utile pour le SEO si chaque définition est originale et liée depuis les articles (ESTABLISHED, règles générales). Effet sur les citations IA : non démontré. `DefinedTerm` : aucun rich result. | [glossary.md](references/glossary.md) |
+| Automatisation | Mesurer, détecter, préparer : oui. Publier du contenu, des liens ou du balisage sans relecture : non (spam policies). Pas de suivi de citations par grounding Gemini ni par scraping de Google (conditions). | [automation.md](references/automation.md) |
 | Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
 | Agents | MCP, API catalog, WebMCP : impact marginal au 2026-09-27. | [agent-discovery.md](references/agent-discovery.md) |
 | Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
@@ -143,6 +154,10 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   extrapoler une mesure de citation.
 - Page en 403 ou rendue en JS lors d'une vérification de source : noter
   « non vérifié ».
+- Journal serveur : un crawler sans liste d'IP publiée (Meta, Amazon) reste
+  « non vérifiable », jamais « vérifié ». Format non reconnu : code 2.
+- Glossaire : `glossary_check.py` n'insère aucun lien et n'écrit aucune
+  définition ; il liste, le propriétaire décide.
 
 ## Sécurité et confidentialité
 - Par défaut, uniquement des **GET publics** vers le site audité. Le crawl
@@ -154,6 +169,10 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   - `--indexnow-submit` : URLs envoyées à api.indexnow.org et partagées
     avec tous les moteurs participants. C'est une **action externe :
     confirmation requise**.
+- `crawler_logs.py` télécharge les listes d'IP publiques des fournisseurs
+  (GET, rien n'est envoyé) ; `--no-verify` l'évite. Les IP du journal sont
+  des données personnelles : jamais écrites, seulement comptées ou agrégées
+  en /24 et /48.
 - Les clés ne passent jamais en argument. Elles ne sont jamais affichées ni
   écrites : le rapport est masqué avant écriture, et un test le vérifie.
   Détail : [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md).
@@ -168,6 +187,8 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   « Cocon / silos » du rapport, puis
   [french-practitioners.md](references/french-practitioners.md).
 - « Lance cet audit chaque lundi » → étape 7, après confirmation.
+- « Faut-il un lexique ? » → `glossary_check.py suggest`, puis
+  [glossary.md](references/glossary.md) ; décision au propriétaire.
 - « Ajoute le schema produit » →
   [schema-templates.md](references/schema-templates.md), puis
   `validate_schema.py`.
@@ -206,6 +227,8 @@ L'URL orpheline est `https://example.com/fr/guides`.
 | [pagespeed.py](scripts/pagespeed.py) | PageSpeed Insights : labo + terrain | `PAGESPEED_API_KEY` |
 | [crux_report.py](scripts/crux_report.py) | Core Web Vitals terrain | `CRUX_API_KEY` |
 | [gsc_report.py](scripts/gsc_report.py) | Search Console (web, discover, googleNews, news, image, video) | compte de service |
+| [crawler_logs.py](scripts/crawler_logs.py) | Journaux serveur : crawlers réels, IP vérifiées contre les listes des fournisseurs, 5xx, 404, couverture du sitemap ; aucune IP écrite | aucun (lit les listes publiques) |
+| [glossary_check.py](scripts/glossary_check.py) | Glossaire : `build` (HTML + JSON-LD depuis un fichier de termes), `audit` (balisage visible, ancres, occasions de liens), `suggest` (termes candidats) | aucun |
 | [audit_site.sh](scripts/audit_site.sh), [check_backlinks.sh](scripts/check_backlinks.sh) | Passe curl rapide ; liens suivis/nofollow d'une page | aucun |
 
 Modules partagés :

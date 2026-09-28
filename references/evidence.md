@@ -63,6 +63,8 @@ Traduction opérationnelle, sans surinterpréter :
 | « 75 % des sites internationaux ont une erreur hreflang (étude 2026) » | Étude SEMrush **2017** ; Ahrefs 2023 : 67 % en comptant l'absence de `x-default`, que Google n'exige pas (CLAIMED, méthode publiée) |
 | « ~65 % de recherches zéro clic en 2026 » | Chiffre 2020 ; 68,01 % US début 2026 (CLAIMED, méthode publiée) |
 | « Le seuil LCP est passé à 2,0 s » | Toujours 2,5 s |
+| « Un glossaire fait citer par les IA (3 à 5 fois plus) » | Aucune étude avec méthode ; effet non démontré ([glossary.md](glossary.md), 2026-09-28) |
+| « On peut suivre ses citations AI Overviews en scrapant Google, ou via le grounding Gemini » | Interdit par les conditions de Google et de l'API Gemini ([automation.md](automation.md), 2026-09-28) |
 | « Les IA respectent RSL / Content Signals / aipref » | Aucun engagement public |
 | « Les AI Overviews sont invisibles dans Search Console » | Type Web + rapport Generative AI (impressions) |
 

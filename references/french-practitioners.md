@@ -145,11 +145,28 @@ verdict.
   page (D9). Ils restent des paramètres, jamais des exigences.
 - Les statistiques sans source (D8).
 
+## Posts X : tentative du 2026-09-28
+
+Le propriétaire a autorisé la lecture des posts via ses identifiants API X
+(v2, jeton applicatif), limitée aux 100 derniers posts originaux de chacun.
+
+| Personne | Compte lié depuis son propre site | Vérification |
+|---|---|---|
+| Laurent Bourrelly | `@laurentbourelly` (un seul « r »), lien « Twitter » de [contact.php](https://www.laurentbourrelly.com/contact.php) et de la page de formation | lu le 2026-09-28 |
+| Stéphane Delgado | `@stephdelgado`, liens du pied de page de [stephanedelgado.fr](https://www.stephanedelgado.fr/) | lu le 2026-09-28. Un moteur de recherche affiche aussi un profil `@Stephanedelgado` (botSEO) : lien du site peut-être ancien, **non vérifié** |
+
+**Résultat : aucun post lu.** Les deux appels de recherche de compte
+(`GET /2/users/by/username/:u`) ont renvoyé **401 Unauthorized** : le jeton
+présent sur le serveur est refusé par l'API. Aucun appel de timeline n'a
+donc été fait (2 appels au total). Rien de ce fichier ne vient de X.
+
+Pour relancer : régénérer le *bearer token* dans la console développeur X,
+le remplacer sur le serveur, puis refaire les 4 appels (2 comptes × recherche
++ timeline). Vérifier d'abord le compte actuel de Stéphane Delgado.
+
 ## Sources non lues
 
-- **X (Twitter)** : non consulté. L'API est payante, et les règles du
-  propriétaire interdisent de l'appeler sans ordre explicite. Aucun post
-  réservé à X n'a été utilisé.
+- **X (Twitter)** : voir la section précédente (jeton refusé, 401).
 - LinkedIn et Malt de Stéphane Delgado : mur de connexion, non ouverts.
 - Interview de Bourrelly sur `cocon.se` : erreur SSL.
 - Vidéos YouTube : description non récupérable.

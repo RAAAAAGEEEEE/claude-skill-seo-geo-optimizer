@@ -1,6 +1,6 @@
 # Données structurées : statut Google et gabarits JSON-LD
 
-Revu le 2026-09-27. Statuts **ESTABLISHED** d'après la
+Revu le 2026-09-28. Statuts **ESTABLISHED** d'après la
 [galerie Google](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)
 (maj 2026-06-15) et le [journal des mises à jour](https://developers.google.com/search/updates).
 
@@ -34,6 +34,7 @@ Règles :
 | `HowTo` | Retiré le 2023-09-13 | Idem |
 | `ClaimReview`, `SpecialAnnouncement`, `EstimatedSalary`, Course info, Vehicle listing, Learning video, Practice problem | Retirés (2025) ; ClaimReview reste lu par Fact Check Explorer | Ne pas vendre comme gain SERP |
 | `Speakable` | Bêta, US anglais, Google Home | Hors sujet en France |
+| `DefinedTermSet` / `DefinedTerm` | **Aucun** rich result (absent de la galerie) ; vocabulaire stable de schema.org | Facultatif sur un glossaire, généré depuis les mêmes données que le HTML ([glossary.md](glossary.md)) |
 
 Google et Bing restent libres d'utiliser tout schema.org valide pour
 comprendre une page ; « pas de rich result » ne veut pas dire « nuisible ».
@@ -151,6 +152,31 @@ livraison au niveau Organization).
     { "@type": "ListItem", "position": 1, "name": "{{accueil}}", "item": "{{url_accueil}}" },
     { "@type": "ListItem", "position": 2, "name": "{{page_courante}}", "item": "{{url_page_courante}}" }
   ]
+}
+</script>
+```
+
+## DefinedTermSet (glossaire, facultatif)
+Ne pas l'écrire à la main : `python scripts/glossary_check.py build --terms
+termes.csv --set-name "Lexique" --set-url {{url_du_lexique}}` produit ce
+bloc **et** le `<dl>` visible depuis les mêmes lignes, et refuse une ligne
+sans définition.
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "@id": "{{url_du_lexique}}#lexique",
+  "name": "{{nom_du_lexique}}",
+  "url": "{{url_du_lexique}}",
+  "hasDefinedTerm": [{
+    "@type": "DefinedTerm",
+    "@id": "{{url_du_lexique}}#{{ancre}}",
+    "name": "{{terme}}",
+    "description": "{{definition_identique_au_texte_visible}}",
+    "url": "{{url_du_lexique}}#{{ancre}}",
+    "inDefinedTermSet": { "@id": "{{url_du_lexique}}#lexique" }
+  }]
 }
 </script>
 ```

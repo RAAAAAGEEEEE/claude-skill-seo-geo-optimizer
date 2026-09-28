@@ -16,7 +16,9 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
   orphelines et la profondeur deviennent alors des estimations, et le
   rapport le signale.
 - **Aucune mesure directe des citations** dans ChatGPT, Claude ou
-  Perplexity. Les rapports IA de Search Console (« Generative AI
+  Perplexity. Un panel par API (OpenAI, Perplexity, Anthropic) serait
+  payant et ne reproduit pas l'application grand public ; le skill n'en
+  fournit pas ([automation.md](../references/automation.md)). Les rapports IA de Search Console (« Generative AI
   performance ») et de Bing (« AI Performance ») n'existent que dans les
   interfaces, pas dans les API.
 - PageSpeed : sans clé, le quota partagé est souvent épuisé. Le module n'a
@@ -24,6 +26,28 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
   version 2.1.0 (quota sans clé épuisé le 2026-09-28). Le parseur est testé
   sur une réponse de structure documentée ; l'appel réel avec une clé invalide
   a été exécuté pour vérifier le masquage.
+
+## Journaux serveur (`crawler_logs.py`)
+- Vérification par listes d'IP seulement. Pas de DNS inverse ni de
+  signature Web Bot Auth : Meta et Amazon (listes en HTML) restent « non
+  vérifiables ». La liste de Bing date du 2024-01-03 : un vrai bingbot hors
+  de cette liste serait compté comme usurpé. Confirmer par DNS inverse
+  (`search.msn.com`) avant d'agir.
+- Formats lus : *combined* (Apache, nginx) et JSON lines. Un format CDN
+  différent donne le code 2.
+- La couverture du sitemap ne vaut que pour la période du journal.
+
+## Glossaire (`glossary_check.py`)
+- Les termes sont reconnus par `DefinedTerm`, `<dfn>`, `<dt>`, titres avec
+  `id`, ou liens du hub (`--term-links`). Un glossaire rendu en JavaScript
+  ou paginé n'est lu que sur la page donnée.
+- La détection des mentions est lexicale (mot entier, accents et casse
+  ignorés, pluriel en s/x). Elle ne comprend pas le sens : un terme
+  homonyme donne un faux positif.
+- `suggest` ne relève que des sigles et des balises `<abbr>`/`<dfn>` : un
+  terme ordinaire (« préhenseur ») n'y apparaît pas.
+- Aucun effet d'un glossaire sur les citations IA n'est démontré
+  ([glossary.md](../references/glossary.md)).
 
 ## Maillage et cocon
 - **Liens contextuels.** Un lien est « contextuel » s'il se trouve dans

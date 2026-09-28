@@ -1,6 +1,6 @@
 # Checklist — uniquement ce que les scripts ne peuvent PAS vérifier
 
-Revu le 2026-09-28.
+Revu le 2026-09-28 (v2.2.0).
 
 Tout ce qui est automatisable en est retiré. Ne pas revérifier à la main ce
 que `run_audit.py` contrôle :
@@ -48,6 +48,14 @@ que `run_audit.py` contrôle :
       (CLAIMED).
 - [ ] Définition canonique de l'entité (nom et description) identique sur
       le site et les profils externes (CLAIMED, D2).
+- [ ] Glossaire : le site emploie-t-il un vocabulaire que ses visiteurs
+      cherchent (sigles, termes techniques) ? Si oui, proposer un lexique
+      (`glossary_check.py suggest`). S'il existe : définitions originales,
+      une URL propre seulement pour un terme qui a sa propre intention,
+      première mention des articles liée à la définition
+      (`glossary_check.py audit --site`). SEO : ESTABLISHED (règles
+      générales) ; citations IA : non démontré. Voir
+      [glossary.md](glossary.md).
 - [ ] Contenu non rafraîchi depuis > 12 mois sur un sujet qui bouge ? (mettre
       à jour le fond, pas seulement la date)
 - [ ] Pages « vides » indexables (liste sans résultat, rubrique sans
@@ -68,10 +76,17 @@ que `run_audit.py` contrôle :
 - [ ] Search Console : pages attendues sans impression → indexation.
 - [ ] CrUX : Core Web Vitals terrain (`crux_report.py`) ; pas de données =
       trafic insuffisant, pas un problème de performance.
+- [ ] Journaux serveur (si le propriétaire les fournit) : `crawler_logs.py`
+      — crawlers réels et usurpés, 5xx/429 servis à Googlebot ou bingbot,
+      URLs du sitemap jamais récupérées, hits des fetchers « utilisateur »
+      (ChatGPT-User, Perplexity-User…). Voir [automation.md](automation.md).
 - [ ] IndexNow : clé publiée **à la racine** (vérifiée par `run_audit.py`
       si la clé est dans l'environnement), URLs récentes soumises.
 - [ ] Citations IA : relevé manuel daté de 10 à 20 questions réelles
-      (ligne de base, puis mensuel) — facultatif, CLAIMED (D1, D4).
+      (ligne de base, puis mensuel) — facultatif, CLAIMED (D1, D4). Un
+      panel par API (OpenAI, Perplexity, Anthropic) n'est qu'un indicateur
+      approché ; jamais par grounding Gemini ni scraping de Google
+      (interdit par leurs conditions, [automation.md](automation.md)).
 
 ## Décisions à remonter (ne jamais trancher seul)
 - [ ] Ouvrir ou fermer les crawlers IA, par rôle (recherche, utilisateur,
