@@ -3,6 +3,21 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.3.2] — 2026-09-28
+
+Posts X de Laurent Bourrelly. Aucun script modifié. 66 tests.
+
+### Modifié
+- `references/french-practitioners.md` : les 100 derniers posts originaux
+  de `@aibloodmoon`, compte actif de Laurent Bourrelly (l'ancien est
+  suspendu), lus le 2026-09-28 avec l'outil de lecture du propriétaire
+  (comptes utilisateur, pas l'API X). 14 portent sur le SEO/GEO ; 9
+  méthodes reprises avec lien et date (BX1 à BX9, CLAIMED). Ajouts : étape
+  manuelle « lecture de la SERP » (BX2) ; confirmation Google datée de la
+  neutralisation des liens achetés (BX5, 2022-12-14). Conflits signalés :
+  réseau de liens privé et achat d'un lien « pour tester » (*link spam*),
+  et contradiction entre BX4 (0 achat de lien) et BX6.
+
 ## [2.3.1] — 2026-09-28
 
 Renvois vers le nouveau skill `redaction`. Aucun script modifié. 66 tests.

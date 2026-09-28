@@ -20,7 +20,7 @@ description: >
 
 # SEO / GEO Optimizer
 
-Version 2.3.1 — connaissances revues le **2026-09-28** (historique :
+Version 2.3.2 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 

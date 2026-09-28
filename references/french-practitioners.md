@@ -16,7 +16,9 @@ conflit avec la documentation primaire de Google, **suivre Google**.
 Consultant français, auteur du concept de « cocon sémantique ». Son site
 [laurentbourrelly.com](https://www.laurentbourrelly.com/) se présente en
 2026 comme un cabinet de conseil en « IA souveraine ». Ses articles sur le
-cocon restent en ligne sous `/blog/`.
+cocon restent en ligne sous `/blog/`. Son compte X actif est
+[`@aibloodmoon`](https://x.com/aibloodmoon) (l'ancien `@laurentbourelly`
+est suspendu) : voir la lecture de ses posts plus bas.
 
 **Ce qui est public et ce qui ne l'est pas.** Ses pages publiques décrivent
 des principes. Les règles opératoires sont réservées à sa formation payante :
@@ -134,11 +136,15 @@ verdict.
 3. **Définition canonique** (D2) : vérifier que le nom et la description de
    l'entité sont identiques sur le site (JSON-LD `Organization`, page
    À propos) et sur les profils externes.
+4. **Lecture de la SERP** (BX2) : avant d'écrire une page, noter ce que
+   Google montre pour la requête visée (types de pages, formats, angles).
+   La page produite doit répondre à cette intention, pas la copier.
 
 ## Ce qui n'entre pas
 
-- Le PBN ou « cocon off-site » (B7) et toute mention achetée ou fabriquée
-  (limite de D3) : *link spam*.
+- Le PBN ou « cocon off-site » (B7), le « réseau de liens privé » (BX6),
+  l'achat d'un lien « pour tester » (BX5) et toute mention achetée ou
+  fabriquée (limite de D3) : *link spam*.
 - La déclinaison d'un sujet en dizaines de pages sans valeur propre (B7) :
   *scaled content abuse*.
 - Les seuils présentés comme des règles : 150 mots (D6), nombre de liens par
@@ -149,7 +155,8 @@ verdict.
 
 Lecture faite avec l'outil de lecture du propriétaire, sur ses propres
 comptes utilisateur X (pas l'API X), au rythme de l'outil : une requête à la
-fois, 10 s au moins entre deux requêtes. Posts publics seulement, au plus
+fois, 10 s au moins entre deux requêtes. Les posts de `@aibloodmoon` ont été
+lus le même jour, après réparation de l'outil (bibliothèque Scweet 5.8.0). Posts publics seulement, au plus
 les 100 derniers posts originaux par compte (ni retweet, ni réponse à un
 tiers). La tentative précédente par l'API X avait échoué (401, aucun post
 lu).
@@ -157,6 +164,7 @@ lu).
 | Personne | Compte | Constat du 2026-09-28 | Posts lus |
 |---|---|---|---|
 | Laurent Bourrelly | `@laurentbourelly` (un seul « r »), lié depuis [contact.php](https://www.laurentbourrelly.com/contact.php) | X répond « User is suspended » (`UserUnavailable`, raison `Suspended`). La variante `@laurentbourrelly` (deux « r ») ne renvoie aucun compte. | **0** : compte suspendu |
+| Laurent Bourrelly | [`@aibloodmoon`](https://x.com/aibloodmoon), compte actif signalé par le propriétaire du skill | Nom affiché « Laurent Bourrelly », compte créé en 2018, lien de bio vers `aibloodmoon.com`. **Identité confirmée** par ses posts : liens vers laurentbourrelly.com ([2101670733050937414](https://x.com/aibloodmoon/status/2101670733050937414), [2098068083789168836](https://x.com/aibloodmoon/status/2098068083789168836)), revendication du cocon sémantique, et mention de son ancien compte banni qu'il n'a pas cherché à récupérer ([2098389504021180570](https://x.com/aibloodmoon/status/2098389504021180570), 2026-09-11). | 160 posts renvoyés par la timeline publique (sans les réponses) : 23 retweets, 137 originaux. **Les 100 plus récents sont lus** (du 2026-09-01 au 2026-09-28). |
 | Stéphane Delgado | `@stephdelgado`, lié depuis le pied de page de [stephanedelgado.fr](https://www.stephanedelgado.fr/) | Compte inactif : 2 posts, 3 abonnés, créé en 2014, sans bio | non lu (inactif) |
 | Stéphane Delgado | [`@Stephanedelgado`](https://x.com/Stephanedelgado) | **Compte actif retenu.** Bio « Stratège en visibilité IA (SEO/GEO) », fondateur d'un service d'agents IA SEO. Le lien de la bio redirige vers `https://www.stephanedelgado.fr/` (vérifié le 2026-09-28). 65 posts au compteur, réponses comprises. | 10 posts renvoyés par la timeline publique (sans les réponses) : 1 retweet, **9 originaux**. Le plafond de 100 n'est pas atteint. |
 
@@ -179,10 +187,44 @@ et aucune méthode opératoire n'apparaissent dans les posts. L'affirmation
 « ChatGPT ignore les backlinks » reste CLAIMED et n'entre ni dans les
 règles ni dans la checklist.
 
+### Laurent Bourrelly (`@aibloodmoon`), 100 posts originaux du 2026-09-01 au 2026-09-28
+
+**14 posts sur 100 portent sur le SEO/GEO.** Parmi eux, 5 ne font que
+relancer ou annoncer un live sans méthode. Les autres parlent surtout d'IA
+(modèles locaux, critique des laboratoires), de vidéo et de YouTube, de
+musique techno et de sa vie personnelle. Beaucoup de
+posts annoncent un live vidéo, non consulté : seul le texte du post est
+repris, plus l'article du blog vers lequel pointe un post (BX3).
+
+| # | Post (date) | Méthode (paraphrase) | Étiquette | Rapport à Google |
+|---|---|---|---|---|
+| BX1 | [status/2101990146035843437](https://x.com/aibloodmoon/status/2101990146035843437) (2026-09-21) | Le GEO est surtout une nouvelle étiquette sur un ancien travail. AI Overviews et *query fan-out* changent la distribution du trafic, pas les fondamentaux. La vraie question : pourquoi Google choisirait cette page comme réponse, et pourquoi les pages voisines confirment qu'elle appartient au sujet. | CLAIMED | Compatible : l'optimisation pour l'IA « reste du SEO » ([guide IA](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), maj 2026-07-10). La confirmation par les pages voisines reprend B1 et B5. |
+| BX2 | idem | « Sentir la SERP » avant de produire : regarder ce que Google montre déjà pour la requête, puis écrire. | CLAIMED | Compatible (contenu utile, intention de recherche). Aucune méthode opératoire publiée. |
+| BX3 | [status/2101670733050937414](https://x.com/aibloodmoon/status/2101670733050937414) (2026-09-20), qui renvoie vers [blog/59274](https://www.laurentbourrelly.com/blog/59274.php) (non daté, lu le 2026-09-28) | Trois distances : sur la page, rendre le sujet identifiable sans bourrage (le « mot mystère ») ; sur le site, entourer la page de contenus vraiment liés, avec un lien seulement quand la page suivante est le prochain indice du sujet ; hors du site, occuper le même voisinage sémantique (mentions, citations, liens). Ni `llms.txt` obligatoire ni format spécial pour l'IA. | CLAIMED ; l'article ne cite aucune étude | Compatible : Google ne demande aucun fichier ni balisage propre à l'IA ([AI features](https://developers.google.com/search/docs/appearance/ai-features), maj 2025-12-10). Les chiffres d'audience d'AI Overviews de l'article ne sont pas repris ici. |
+| BX4 | [status/2098783129116742097](https://x.com/aibloodmoon/status/2098783129116742097) (2026-09-12) | Le cocon n'a jamais été qu'une technique de maillage interne. Il faut construire une marque, un profil de liens sans aucun achat, et un cocon multimédia et omnicanal (vidéo, YouTube, recherche visuelle). | CLAIMED | Compatible pour l'absence d'achat de liens ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies), maj 2026-08-28). **Contredit par BX6.** |
+| BX5 | [status/2102740976963908009](https://x.com/aibloodmoon/status/2102740976963908009) (2026-09-23) | Achat de liens : Google ne pénalise pas le site vendeur de liens, il coupe le PageRank de tous ses liens sortants, « depuis plus de 15 ans ». Pour savoir si un lien acheté marche : acheter un seul lien, attendre 3 à 6 mois sans rien changer, observer. Le lien resterait le levier le plus puissant du SEO. Le marché français de la vente de liens dépasserait 10 M€ par an. | CLAIMED ; chiffre de marché sans source | La neutralisation est **confirmée** par Google : SpamBrain détecte les sites qui achètent des liens et ceux qui servent à en passer, et les liens non naturels perdent leur crédit ([link spam update](https://developers.google.com/search/blog/2022/12/december-22-link-spam-update), 2022-12-14). **Conflit** : acheter un lien pour le classement, même « pour tester », relève du *link spam*. Le test à une variable n'est pas reproductible (mises à jour, concurrents). **Ne jamais recommander.** Google ne classe pas publiquement ses facteurs : « le levier le plus puissant » n'est pas vérifiable. |
+| BX6 | [status/2095902263197802761](https://x.com/aibloodmoon/status/2095902263197802761) (2026-09-04) | Construire un réseau de liens privé (« Private Links Network ») plutôt qu'un PBN de blogs ; toute entreprise ambitieuse en aurait un. | CLAIMED | **Conflit** : un réseau de sites monté pour passer des liens relève du *link spam* ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies), maj 2026-08-28), et SpamBrain détecte les sites qui passent des liens (BX5). Confirme B7. **Ne jamais recommander.** |
+| BX7 | [status/2102050599499952199](https://x.com/aibloodmoon/status/2102050599499952199) (2026-09-21) ; [status/2102792553833902478](https://x.com/aibloodmoon/status/2102792553833902478) (2026-09-23) | Faire indexer des notebooks NotebookLM partagés, c'est du *parasite SEO*, une nouvelle version des réseaux de liens. Le second post relaie Glenn Gabe : Google a retiré l'annuaire des notebooks partagés de ses résultats. | CLAIMED (constat relayé, non vérifié à la source) | Aligné : publier sur le site d'un tiers pour profiter de sa réputation relève du *site reputation abuse* ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies)). |
+| BX8 | [status/2096587638207566061](https://x.com/aibloodmoon/status/2096587638207566061) (2026-09-06) | YouTube : l'algorithme regroupe les vidéos en grappes sémantiques tirées de l'historique de visionnage ; le cocon s'y applique. Pas d'impressions = sujet mal ciblé ; ensuite le CTR (titre, miniature) décide. | CLAIMED ; les annonces YouTube évoquées ne sont pas liées | Hors du périmètre de la recherche Google. Rien à contrôler dans le code d'un site. |
+| BX9 | [status/2100142497007599866](https://x.com/aibloodmoon/status/2100142497007599866) (2026-09-16) | Relaie un test : coller un extrait de sa page dans ChatGPT et lui demander l'URL correspondante, pour voir s'il la retrouve. Il rappelle que le *New York Times* a procédé ainsi en 2023. | CLAIMED ; test manuel, non reproductible | Compatible avec la ligne de base D1. Ne mesure pas une citation réelle. |
+
+**Ce que ces posts ajoutent au skill.**
+- Une étape manuelle : lire la page de résultats avant de produire (BX2,
+  étape 4 ci-dessous).
+- Une confirmation Google datée (BX5) : les liens non naturels sont
+  neutralisés et SpamBrain repère les sites qui en vendent. Cela renforce le
+  refus du PBN et de l'achat de liens déjà écrit pour B7.
+- Un conflit interne à noter : BX4 prône « 0 achat de lien », BX6 prône un
+  réseau de liens privé. Le skill suit Google et écarte BX6.
+- Aucun nouveau contrôle automatique : BX1 et BX3 reprennent B1, B2, B5 et
+  B6 ; aucun seuil ni aucune donnée n'est publié.
+
 ## Sources non lues
 
-- **X (Twitter)** : compte de Bourrelly suspendu (0 post) ; vidéos jointes
-  aux posts de Delgado non consultées. Voir la section précédente.
+- **X (Twitter)** : ancien compte de Bourrelly suspendu ; les 100 derniers
+  posts originaux de `@aibloodmoon` sont lus, mais ses lives et vidéos ne
+  le sont pas, ni les réponses de ses fils (la timeline publique les
+  exclut). Vidéos jointes aux posts de Delgado non consultées.
 - LinkedIn et Malt de Stéphane Delgado : mur de connexion, non ouverts.
 - Interview de Bourrelly sur `cocon.se` : erreur SSL.
 - Vidéos YouTube : description non récupérable.
