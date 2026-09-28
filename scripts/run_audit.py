@@ -72,7 +72,7 @@ from audit_rules import RULES, finding_id, hreflang_checks, page_checks  # noqa:
 from htmlsignals import USER_AGENT, PageSignals, fetch_signals  # noqa: E402
 from validate_schema import validate_blocks  # noqa: E402
 
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 AUDIT_TOKEN = "seo-geo-optimizer-audit"
 SKIP_EXT = (".pdf", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".svg", ".ico", ".zip", ".gz", ".xml",
             ".json", ".txt", ".csv", ".mp4", ".webm", ".mp3", ".css", ".js", ".woff", ".woff2")

@@ -49,6 +49,17 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
 - Aucun effet d'un glossaire sur les citations IA n'est démontré
   ([glossary.md](../references/glossary.md)).
 
+## Formats de contenu
+- La table de [content-formats.md](../references/content-formats.md) est
+  un guide de planification, pas un contrôle automatique : aucun script ne
+  détecte le format d'une page ni ne juge la qualité d'un test.
+- Les parts de citation par format viennent d'études de vendeurs d'outils
+  (CLAIMED, méthode publiée ou partielle), faites surtout en anglais et aux
+  États-Unis. Ce sont des corrélations : publier un format n'entraîne pas
+  une citation.
+- Google ne publie aucune règle sur les calculateurs, les chronologies ou
+  les changelogs : ces lignes s'appuient sur les règles générales.
+
 ## Maillage et cocon
 - **Liens contextuels.** Un lien est « contextuel » s'il se trouve dans
   `<main>` ou `<article>`, hors de `<nav>` et `<aside>`. Sans ces balises,

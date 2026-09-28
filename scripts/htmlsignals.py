@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from urllib.parse import urljoin
 
-USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.2)"
+USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.3)"
 
 _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
          "track", "wbr"}

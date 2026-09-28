@@ -210,6 +210,23 @@ sans définition ou en double sont signalées et **non publiées** ; code 1
 dans ce cas (c'est le cas du fichier de test). Valider ensuite avec
 `python scripts/validate_schema.py glossary-out/glossary.jsonld`.
 
+## Planifier du contenu (sans script)
+
+Quand le propriétaire veut créer des pages ou revoir sa ligne éditoriale,
+Claude suit [content-formats.md](../references/content-formats.md) :
+1. la carte de la demande : les intentions des visiteurs, regroupées par
+   sujet ;
+2. un format par intention, choisi dans la table de décision du type de
+   site ;
+3. pour chaque format, la preuve que le site détient (test réel, donnée
+   propre, source datée). Sans cette preuve, le format est écarté ;
+4. un plan soumis au propriétaire, qui décide. Rien n'est publié sans
+   relecture.
+
+Aucune commande n'est associée : le choix d'un format n'est pas mesurable
+par un script. Après publication, `run_audit.py` vérifie la partie technique
+(indexation, maillage, JSON-LD).
+
 ## Autres scripts
 
 | Besoin | Commande |

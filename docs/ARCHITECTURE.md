@@ -12,6 +12,12 @@ Retour : [README](../README.md) · Voir aussi : [USAGE](USAGE.md),
    ESTABLISHED / SUPPORTED / CLAIMED. Claude ne les charge qu'au besoin.
 3. **`scripts/`** : tout ce qui se mesure sans humain.
 
+Certaines références ne pilotent aucun script : elles servent au jugement
+humain de l'étape 3 de la procédure. C'est le cas de
+[content-formats.md](../references/content-formats.md) (quels formats de
+contenu publier selon le type de site) : choisir un format est une décision
+éditoriale, qu'aucun script ne peut vérifier.
+
 ## Flux de `run_audit.py`
 
 ```

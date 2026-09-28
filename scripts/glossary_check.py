@@ -66,7 +66,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import robotstxt  # noqa: E402
 import sitemaps as sitemaps_mod  # noqa: E402
 
-USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.2)"
+USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.3)"
 AUDIT_TOKEN = "seo-geo-optimizer-audit"
 MIN_DEF_WORDS = 12  # heuristic (CLAIMED): below this a definition rarely stands on its own
 MAX_BYTES = 5 * 1024 * 1024

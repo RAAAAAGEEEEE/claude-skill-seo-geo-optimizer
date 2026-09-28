@@ -27,7 +27,7 @@ python -m unittest discover -s tests
 Résultat attendu : `Ran 66 tests` puis `OK`. Aucune requête ne sort de la
 machine : le test de bout en bout sert un site de test sur 127.0.0.1.
 
-Vérification faite le 2026-09-28 (version 2.2.0) dans un environnement propre :
+Vérification faite le 2026-09-28 (version 2.3.0) dans un environnement propre :
 1. copie du dépôt sans `.git` ni caches dans un dossier temporaire ;
 2. environnement virtuel neuf (`python -m venv`), sans `google-auth`.
 

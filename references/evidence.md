@@ -45,7 +45,9 @@ Traduction opérationnelle, sans surinterpréter :
    (le rôle du skill `SEO`, pas de celui-ci).
 4. **Fraîcheur réelle** : mettre à jour le contenu, pas seulement la date.
 5. Le reste (formats de page, longueur, schema « pour l'IA ») n'est pas
-   démontré : le présenter comme hypothèse.
+   démontré : le présenter comme hypothèse. Parts de citation par format
+   et conflits entre études : [content-formats.md](content-formats.md)
+   (2026-09-28).
 
 ## Croyances répandues démenties ou non soutenues
 

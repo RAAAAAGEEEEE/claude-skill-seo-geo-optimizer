@@ -12,14 +12,15 @@ description: >
   étiquette ESTABLISHED/SUPPORTED/CLAIMED. À utiliser pour « auditer le
   SEO/GEO », « pourquoi mon site n'est pas cité par ChatGPT/AI Overviews »,
   « vérifier robots.txt, sitemap, schema, maillage, cocon », « faut-il un
-  glossaire », « quels bots viennent vraiment », « planifier un audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
+  glossaire », « quels bots viennent vraiment », « quels contenus publier
+  (comparatifs, guides d'achat, tests, données) », « planifier un audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
   outreach via `/SEO`) : celui-ci audite et modifie le site courant, sans
   prospection ni outreach.
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.2.0 — connaissances revues le **2026-09-28** (historique :
+Version 2.3.0 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -48,6 +49,8 @@ restent humains.
 - revue d'un `llms.txt`/RSL ;
 - maillage interne ou cocon sémantique ;
 - glossaire ou lexique (créer, auditer, lier) ;
+- choix des formats de contenu à publier (comparatif, guide d'achat, test,
+  fiche technique, données originales, tutoriel…) ;
 - journaux serveur : quels crawlers viennent vraiment ;
 - suivi planifié d'un site.
 
@@ -84,6 +87,12 @@ Pas pour rédiger du marketing (skill `copywriting`).
    - Journaux serveur fournis : `crawler_logs.py` (crawlers réels,
      usurpations, 5xx, couverture du sitemap)
      ([automation.md](references/automation.md)).
+   - **Planification de contenu** (nouvelles pages, refonte éditoriale) :
+     partir de la carte de la demande, puis choisir un format par
+     intention avec la table de décision par type de site
+     ([content-formats.md](references/content-formats.md)). Un format ne
+     se publie que si le site détient la preuve qu'il exige (test réel,
+     donnée propre, source datée). Jamais une page par variante de requête.
 4. **PLAN** : reprendre le plan P0/P1/P2 du rapport. Un constat CLAIMED
    (maillage de praticien, seuils) reste P2. **Attendre le GO** avant de
    coder.
@@ -112,6 +121,7 @@ Pas pour rédiger du marketing (skill `copywriting`).
 | Maillage / cocon | Google : `<a href>`, au moins un lien vers chaque page importante, ancres descriptives, aucun nombre idéal de liens. Cocon, liens contextuels et profondeur ≤ 3 : méthodes de praticiens, CLAIMED. | [french-practitioners.md](references/french-practitioners.md) |
 | Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». | [schema-templates.md](references/schema-templates.md) |
 | Contenu citable | Preuves vérifiables (chiffres, sources, dates), fraîcheur réelle, structure lisible, pas de découpage artificiel. | [evidence.md](references/evidence.md) |
+| Formats de contenu | Google ne favorise aucun format en soi : il récompense l'information originale, l'expérience de première main et les sources claires. Tests, comparatifs et classements relèvent du reviews system. FAQ : texte visible oui, rich result non. Les parts de citation par format viennent d'études de vendeurs (CLAIMED), varient selon l'intention et le moteur, et se contredisent. | [content-formats.md](references/content-formats.md) |
 | E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
 | Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, au p75 terrain (CrUX). | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
 | Indexation | Google : sitemap exact (lastmod vrai) et Search Console. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md) |
@@ -187,6 +197,9 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   « Cocon / silos » du rapport, puis
   [french-practitioners.md](references/french-practitioners.md).
 - « Lance cet audit chaque lundi » → étape 7, après confirmation.
+- « Quels contenus publier pour être classé et cité ? » → carte de la
+  demande, puis [content-formats.md](references/content-formats.md) ;
+  plan soumis au propriétaire.
 - « Faut-il un lexique ? » → `glossary_check.py suggest`, puis
   [glossary.md](references/glossary.md) ; décision au propriétaire.
 - « Ajoute le schema produit » →

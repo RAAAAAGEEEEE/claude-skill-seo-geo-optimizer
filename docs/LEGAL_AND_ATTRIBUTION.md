@@ -12,6 +12,8 @@ Code et documentation sous licence MIT ([LICENSE](../LICENSE)).
 Leurs méthodes sont **résumées et paraphrasées**, avec un lien vers la page
 source et sa date, dans
 [references/french-practitioners.md](../references/french-practitioners.md).
+Leurs posts publics sur X (lus le 2026-09-28) sont paraphrasés avec un
+lien vers chaque post ; les vidéos jointes n'ont pas été consultées.
 Aucun contenu n'est reproduit au-delà de très courtes citations attribuées.
 Le contenu de leurs formations payantes n'a été ni consulté ni repris.
 

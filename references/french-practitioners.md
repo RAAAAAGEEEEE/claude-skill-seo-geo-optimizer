@@ -1,6 +1,6 @@
 # Praticiens SEO français : Laurent Bourrelly et Stéphane Delgado
 
-Revu le 2026-09-28. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-28 (posts X lus le 2026-09-28). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 Ce fichier reprend les méthodes publiques de deux praticiens suivis par le
 propriétaire du skill. Il dit ce qui est vérifiable et ce qui ne l'est pas, et
@@ -145,28 +145,44 @@ verdict.
   page (D9). Ils restent des paramètres, jamais des exigences.
 - Les statistiques sans source (D8).
 
-## Posts X : tentative du 2026-09-28
+## Posts X : lecture du 2026-09-28
 
-Le propriétaire a autorisé la lecture des posts via ses identifiants API X
-(v2, jeton applicatif), limitée aux 100 derniers posts originaux de chacun.
+Lecture faite avec l'outil de lecture du propriétaire, sur ses propres
+comptes utilisateur X (pas l'API X), au rythme de l'outil : une requête à la
+fois, 10 s au moins entre deux requêtes. Posts publics seulement, au plus
+les 100 derniers posts originaux par compte (ni retweet, ni réponse à un
+tiers). La tentative précédente par l'API X avait échoué (401, aucun post
+lu).
 
-| Personne | Compte lié depuis son propre site | Vérification |
-|---|---|---|
-| Laurent Bourrelly | `@laurentbourelly` (un seul « r »), lien « Twitter » de [contact.php](https://www.laurentbourrelly.com/contact.php) et de la page de formation | lu le 2026-09-28 |
-| Stéphane Delgado | `@stephdelgado`, liens du pied de page de [stephanedelgado.fr](https://www.stephanedelgado.fr/) | lu le 2026-09-28. Un moteur de recherche affiche aussi un profil `@Stephanedelgado` (botSEO) : lien du site peut-être ancien, **non vérifié** |
+| Personne | Compte | Constat du 2026-09-28 | Posts lus |
+|---|---|---|---|
+| Laurent Bourrelly | `@laurentbourelly` (un seul « r »), lié depuis [contact.php](https://www.laurentbourrelly.com/contact.php) | X répond « User is suspended » (`UserUnavailable`, raison `Suspended`). La variante `@laurentbourrelly` (deux « r ») ne renvoie aucun compte. | **0** : compte suspendu |
+| Stéphane Delgado | `@stephdelgado`, lié depuis le pied de page de [stephanedelgado.fr](https://www.stephanedelgado.fr/) | Compte inactif : 2 posts, 3 abonnés, créé en 2014, sans bio | non lu (inactif) |
+| Stéphane Delgado | [`@Stephanedelgado`](https://x.com/Stephanedelgado) | **Compte actif retenu.** Bio « Stratège en visibilité IA (SEO/GEO) », fondateur d'un service d'agents IA SEO. Le lien de la bio redirige vers `https://www.stephanedelgado.fr/` (vérifié le 2026-09-28). 65 posts au compteur, réponses comprises. | 10 posts renvoyés par la timeline publique (sans les réponses) : 1 retweet, **9 originaux**. Le plafond de 100 n'est pas atteint. |
 
-**Résultat : aucun post lu.** Les deux appels de recherche de compte
-(`GET /2/users/by/username/:u`) ont renvoyé **401 Unauthorized** : le jeton
-présent sur le serveur est refusé par l'API. Aucun appel de timeline n'a
-donc été fait (2 appels au total). Rien de ce fichier ne vient de X.
+Sur les 9 posts originaux de `@Stephanedelgado` (du 2026-07-25 au
+2026-09-12) :
+- 6 portent sur un outil de cartographie des incendies de juillet 2026. Ils
+  ne contiennent aucune méthode SEO/GEO et ne sont pas repris.
+- 3 portent sur le SEO/GEO. Chacun accompagne une vidéo, non consultée :
+  seul le texte du post est repris.
 
-Pour relancer : régénérer le *bearer token* dans la console développeur X,
-le remplacer sur le serveur, puis refaire les 4 appels (2 comptes × recherche
-+ timeline). Vérifier d'abord le compte actuel de Stéphane Delgado.
+| # | Post (date) | Méthode (paraphrase) | Étiquette | Rapport à Google et aux fournisseurs |
+|---|---|---|---|---|
+| X1 | [status/2098747024120164661](https://x.com/Stephanedelgado/status/2098747024120164661) (2026-09-12) | ChatGPT « ignore les backlinks ». Il se poserait trois questions : sait-il qui vous êtes, peut-il reprendre ce que vous dites, d'autres sources le confirment-elles ? | CLAIMED, sans données | Les trois questions reprennent D2 (entité claire), D6 (texte réutilisable) et D3 (confirmation par des tiers). **« Ignore les backlinks » n'est pas vérifiable** : OpenAI ne publie aucun critère de sélection des sources ([evidence.md](evidence.md)). D'après un extrait de recherche (page d'aide OpenAI en 403, **non vérifié**), ChatGPT search s'appuie sur des moteurs de recherche tiers, dont Bing : l'affirmation porte donc sur un système dont on ne connaît pas les critères. Ne pas reprendre comme règle. |
+| X2 | [status/2098444001338638429](https://x.com/Stephanedelgado/status/2098444001338638429) (2026-09-11) | « Le GEO, c'est du SEO bien fait. » Le netlinking perd sa place au profit « d'autres piliers », que le post ne nomme pas. | CLAIMED | La première phrase rejoint Google : l'optimisation pour l'IA « reste du SEO » ([guide IA](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), maj 2026-07-10). La seconde n'est pas étayée. |
+| X3 | [status/2098347778401321012](https://x.com/Stephanedelgado/status/2098347778401321012) (2026-09-11) | Annonce d'un entretien vidéo sur le SEO, le GEO et la visibilité dans les IA. | — | Aucune méthode dans le texte : non repris. |
+
+**Ce que X ajoute au skill : rien de nouveau à contrôler.** X1 résume en
+une phrase la démarche déjà décrite par D1 à D6. Aucun seuil, aucune donnée
+et aucune méthode opératoire n'apparaissent dans les posts. L'affirmation
+« ChatGPT ignore les backlinks » reste CLAIMED et n'entre ni dans les
+règles ni dans la checklist.
 
 ## Sources non lues
 
-- **X (Twitter)** : voir la section précédente (jeton refusé, 401).
+- **X (Twitter)** : compte de Bourrelly suspendu (0 post) ; vidéos jointes
+  aux posts de Delgado non consultées. Voir la section précédente.
 - LinkedIn et Malt de Stéphane Delgado : mur de connexion, non ouverts.
 - Interview de Bourrelly sur `cocon.se` : erreur SSL.
 - Vidéos YouTube : description non récupérable.

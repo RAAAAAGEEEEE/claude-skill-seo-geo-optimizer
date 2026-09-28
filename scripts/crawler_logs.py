@@ -59,7 +59,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import ai_bots  # noqa: E402
 
-USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.2)"
+USER_AGENT = "Mozilla/5.0 (compatible; seo-geo-optimizer-audit/2.3)"
 CHECKED_ON = "2026-09-28"
 
 _G = "https://developers.google.com/static/crawling/ipranges/"

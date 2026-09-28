@@ -6,7 +6,7 @@ les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
 Mistral). L'audit complet tourne sans intervention, se planifie, et compare
 chaque rapport au précédent.
 
-**Statut : bêta.** Version 2.2.0, connaissances revues le 2026-09-28
+**Statut : bêta.** Version 2.3.0, connaissances revues le 2026-09-28
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
 sur quelques sites. Ses scripts sont testés (66 tests hors ligne), mais le
 comportement du skill lui-même n'a pas de suite d'évaluation.
@@ -52,6 +52,12 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
   (`glossary_check.py`), et les limites posées par Google
   ([references/automation.md](references/automation.md),
   [references/glossary.md](references/glossary.md)).
+- **Quels contenus publier** : table de décision par type de site (site de
+  référence ou base de produits, média, SaaS, e-commerce, local, site de
+  données) pour les comparatifs, guides d'achat, tests, fiches techniques,
+  données originales, tutoriels, FAQ, définitions, outils et pages auteur.
+  Chaque ligne dit ce que Google documente et ce que mesurent les études
+  de citations IA ([references/content-formats.md](references/content-formats.md)).
 
 ## Exemple de sortie
 Extrait réel de `run_audit.py` sur un site réel, le 2026-09-27 à 22:32 UTC
@@ -132,6 +138,8 @@ Voir [SECURITY.md](SECURITY.md) et
 - Journaux serveur : vérification par listes d'IP seulement (Meta et Amazon
   restent non vérifiables).
 - Les seuils de praticiens restent des heuristiques.
+- Les parts de citation IA par format viennent d'études de vendeurs
+  d'outils (CLAIMED) : des corrélations, pas des causes.
 
 Liste complète : [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 

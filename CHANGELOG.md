@@ -3,6 +3,47 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.3.0] — 2026-09-28
+
+Formats de contenu et lecture des posts X des praticiens. Aucune rupture :
+aucun script ne change de comportement (seuls la version et le user-agent
+passent à 2.3). Aucun test ajouté : aucun script ajouté. 66 tests.
+
+### Ajouté
+- `references/content-formats.md` : quels formats publier pour être classé
+  par Google et cité par les moteurs IA, au 2026-09-28.
+  - Ce que Google documente : helpful content, guide IA (contenu non
+    banal, test de première main), *reviews system* (tests, comparatifs,
+    classements ; français inclus), bonnes pratiques des tests, *thin
+    affiliation*, dates, données structurées encore utiles par format.
+  - Ce que mesurent les études de citations : 4 déclarations de moteurs
+    (ESTABLISHED), 7 études indépendantes (SUPPORTED), 8 études de vendeurs
+    (CLAIMED), avec leurs conflits (comparatifs, listes « best », FAQ,
+    réécriture pour l'IA) et les formats sans aucune donnée.
+  - 13 fiches de format (fiche produit, comparatif, classement, guide
+    d'achat, test, données originales, chronologie, tutoriel, FAQ,
+    définitions, changelog, calculateur, page auteur) : Google, études,
+    condition pour publier, risque de spam.
+  - Table de décision pour 6 types de site : référence ou base de
+    produits, média, SaaS, e-commerce, local, données ou observatoire.
+
+### Modifié
+- `SKILL.md` : planification de contenu dans l'étape 3, levier « Formats
+  de contenu », déclencheur et exemple d'invocation.
+- `references/checklist.md` : contrôles avant de planifier un format.
+- `references/evidence.md` : renvoi vers les études par format.
+- `references/french-practitioners.md` : posts X lus le 2026-09-28 avec
+  l'outil de lecture du propriétaire (comptes utilisateur, pas l'API X).
+  - `@laurentbourelly` : compte suspendu, 0 post lu.
+  - `@stephdelgado` (lien du site) : compte inactif. Compte actif :
+    `@Stephanedelgado`, confirmé par le lien de sa bio vers son site.
+    10 posts renvoyés, 9 originaux, 3 sur le SEO/GEO, repris avec lien et
+    date (X1 à X3, CLAIMED). Aucun nouveau contrôle : X1 résume D1 à D6 ;
+    « ChatGPT ignore les backlinks » reste non vérifiable.
+- `docs/` : USAGE (planifier du contenu), ARCHITECTURE, LIMITATIONS,
+  LEGAL_AND_ATTRIBUTION, INSTALLATION, PRIVACY_AND_SECURITY ; README et
+  CONTRIBUTING.
+
 ## [2.2.0] — 2026-09-28
 
 Techniques automatisables, journaux serveur et glossaire. Aucune rupture :

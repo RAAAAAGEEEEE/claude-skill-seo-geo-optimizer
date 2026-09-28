@@ -59,5 +59,5 @@ rapport, un ticket ou le dépôt.
 ## Charge sur le site audité
 Par défaut, au plus 60 pages, 20 sondes 404 et environ 27 requêtes d'accès
 crawlers, avec 0,5 s entre deux requêtes. Pour un site réel le 2026-09-27 :
-80 requêtes en 40 à 50 s. Le user-agent `seo-geo-optimizer-audit/2.2` est
+80 requêtes en 40 à 50 s. Le user-agent `seo-geo-optimizer-audit/2.3` est
 identifiable dans les journaux du site.
