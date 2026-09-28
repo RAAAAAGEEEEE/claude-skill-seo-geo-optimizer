@@ -3,6 +3,17 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.3.1] — 2026-09-28
+
+Renvois vers le nouveau skill `redaction`. Aucun script modifié. 66 tests.
+
+### Modifié
+- `SKILL.md` : la rédaction des pages planifiées renvoie au skill
+  `redaction` (périmètre et « Quand l'utiliser ») ; `copywriting` reste
+  cité pour la structure des pages de vente.
+- `references/content-formats.md` : renvoi vers `redaction` pour écrire
+  les formats retenus.
+
 ## [2.3.0] — 2026-09-28
 
 Formats de contenu et lecture des posts X des praticiens. Aucune rupture :

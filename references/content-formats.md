@@ -8,7 +8,9 @@ lue le 2026-09-28.
 éditoriale, choix entre deux formats pour une même intention. Ce fichier
 ne remplace ni la carte de la demande
 ([french-practitioners.md](french-practitioners.md), B2) ni le registre des
-preuves ([evidence.md](evidence.md)).
+preuves ([evidence.md](evidence.md)). La rédaction des pages retenues
+relève du skill `redaction` (règles de langue, relecture, aucun fait
+inventé).
 
 ## Verdict
 

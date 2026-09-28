@@ -6,7 +6,7 @@ les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
 Mistral). L'audit complet tourne sans intervention, se planifie, et compare
 chaque rapport au précédent.
 
-**Statut : bêta.** Version 2.3.0, connaissances revues le 2026-09-28
+**Statut : bêta.** Version 2.3.1, connaissances revues le 2026-09-28
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
 sur quelques sites. Ses scripts sont testés (66 tests hors ligne), mais le
 comportement du skill lui-même n'a pas de suite d'évaluation.

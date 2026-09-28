@@ -20,7 +20,7 @@ description: >
 
 # SEO / GEO Optimizer
 
-Version 2.3.0 — connaissances revues le **2026-09-28** (historique :
+Version 2.3.1 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -39,7 +39,8 @@ restent humains.
   robots.txt, sitemap, meta, JSON-LD, en-têtes, maillage interne), mesure via
   APIs gratuites, audit planifié.
 - **Hors** : prospection, netlinking, digital PR, outreach → skill `SEO`
-  (`/SEO`). Production massive de contenu → jamais (scaled content abuse).
+  (`/SEO`). Rédaction des pages planifiées → skill `redaction`. Production
+  massive de contenu → jamais (scaled content abuse).
 - Sur un même projet : ce skill d'abord, `/SEO` ensuite.
 
 ## Quand l'utiliser
@@ -54,7 +55,8 @@ restent humains.
 - journaux serveur : quels crawlers viennent vraiment ;
 - suivi planifié d'un site.
 
-Pas pour rédiger du marketing (skill `copywriting`).
+Pas pour rédiger : la prose en français (articles, pages, fiches) relève
+du skill `redaction`, la structure d'une page de vente de `copywriting`.
 
 ## Entrées et sorties
 - **Entrée** : l'URL du site ; le dépôt du site si des corrections sont
