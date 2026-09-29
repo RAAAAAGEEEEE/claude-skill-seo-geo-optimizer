@@ -130,7 +130,7 @@ Lecture :
 
 ## 6. Veille des mentions (digital PR)
 
-Hors périmètre de modification de ce skill (le skill `SEO` s'occupe de la
+Hors périmètre de modification de ce skill (le skill `seo` s'occupe de la
 prospection). Sources automatisables, à titre d'information :
 
 | Source | Ce qu'elle offre | Niveau |

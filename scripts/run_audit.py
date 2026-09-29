@@ -347,7 +347,7 @@ class Audit:
         self.log("[6/9] URLs inexistantes (404 attendu)")
         # Probe below the root and below every HTML page of one or two path segments:
         # dynamic routes (/fr/robots/<slug>) live under listing pages, and an unknown
-        # slug there must give 404, not 500 (the case found on a real site on 2026-09-27).
+        # slug there must give 404, not 500 (a case found on a real site on 2026-09-27).
         inbound: dict[str, int] = defaultdict(int)
         for s in self.pages.values():
             for a in s.anchors:

@@ -42,7 +42,7 @@ Traduction opérationnelle, sans surinterpréter :
    dates de vérification) : seul levier de contenu appuyé par une étude
    causale, en cadre simulé.
 3. **Exister ailleurs que chez soi** : mentions et reprises par des tiers
-   (le rôle du skill `SEO`, pas de celui-ci).
+   (le rôle du skill `seo`, pas de celui-ci).
 4. **Fraîcheur réelle** : mettre à jour le contenu, pas seulement la date.
 5. Le reste (formats de page, longueur, schema « pour l'IA ») n'est pas
    démontré : le présenter comme hypothèse. Parts de citation par format

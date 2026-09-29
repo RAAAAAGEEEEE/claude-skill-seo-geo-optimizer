@@ -1,0 +1,100 @@
+{
+  "skill_name": "seo-geo-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audite le SEO/GEO du site de test servi en local sur http://127.0.0.1:8000/ (dossier tests/fixtures/site du skill, serveur lancé par toi) et propose un plan de correction. Ne modifie encore rien.",
+      "expected_output": "Un audit exécuté avec scripts/run_audit.py, un rapport daté (.md et .json) et un plan P0/P1/P2 qui cite les problèmes plantés dans le site de test, sans aucune modification de fichier avant un GO explicite.",
+      "files": [
+        "tests/fixtures/site/index.html",
+        "tests/fixtures/site/robots.txt",
+        "tests/fixtures/site/sitemap.xml"
+      ],
+      "expectations": [
+        "Le skill lance scripts/run_audit.py --site avec un dossier de sortie, et non une série de vérifications manuelles",
+        "Le compte rendu commence par les modules skipped ou error (PageSpeed, CrUX, Search Console, IndexNow sans clé) et précise qu'un module absent n'est pas un module OK",
+        "Le rapport signale la page lonely.html comme orpheline (dans le sitemap, aucun lien interne entrant)",
+        "Le rapport signale hidden.html comme URL du sitemap en noindex",
+        "Le rapport signale au moins un lien interne cassé et une ancre générique",
+        "Chaque constat porte une étiquette ESTABLISHED, SUPPORTED ou CLAIMED et une mention mesuré ou inféré ; les constats CLAIMED (maillage, cocon) restent en P2",
+        "Le plan est présenté avec P0, P1 et P2 et le skill attend un GO avant tout FIX : aucun fichier du site n'est modifié",
+        "Le code de sortie de run_audit.py (0, 1 ou 2) est interprété correctement dans le compte rendu"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Perplexity et ChatGPT ne citent jamais mon site https://example.com alors que mon robots.txt autorise tout. Pourquoi, et que vérifier en premier ?",
+      "expected_output": "Un diagnostic ordonné accès puis indexation puis contenu, qui distingue robots.txt et blocage CDN, propose check_ai_access.py, et ne promet ni citation ni effet d'un fichier llms.txt.",
+      "files": [],
+      "expectations": [
+        "La réponse suit l'ordre accès, indexation et extrait autorisé, contenu dans le HTML, preuves, balisage, performance",
+        "Le skill propose d'exécuter scripts/check_ai_access.py ou run_audit.py pour comparer les réponses HTTP par crawler et par navigateur, en plus de robots.txt",
+        "Il explique qu'un robots.txt permissif n'empêche pas un CDN ou un pare-feu de renvoyer 403 à un crawler",
+        "Il précise que les user-agents sont simulés depuis la machine : un 200 ne prouve pas que le vrai crawler passe, à confirmer dans les journaux ou le tableau de bord du CDN",
+        "Il distingue les rôles de crawlers (moteur, recherche, utilisateur, entraînement, jeton) au lieu de tout traiter comme un seul blocage",
+        "Il ne présente pas llms.txt ni un schema « pour l'IA » comme une solution garantie",
+        "Il ne prétend pas mesurer les citations dans ChatGPT ou Perplexity et ne fabrique aucun chiffre de citation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Voici les journaux d'accès de mon serveur (tests/fixtures/logs/access.log). Quels crawlers viennent vraiment sur le site, y a-t-il des usurpations, et des erreurs serveur servies aux moteurs ? Ne fais aucune requête réseau.",
+      "expected_output": "Une analyse produite avec scripts/crawler_logs.py en mode hors ligne (--no-verify ou listes locales), avec compteurs par crawler, usurpations agrégées en /24 et erreurs 5xx, sans afficher d'adresse IP individuelle.",
+      "files": [
+        "tests/fixtures/logs/access.log"
+      ],
+      "expectations": [
+        "Le skill utilise scripts/crawler_logs.py et respecte la consigne d'absence de réseau avec --no-verify ou --ranges-dir",
+        "Il reconnaît Googlebot, GPTBot, OAI-SearchBot, meta-externalagent et bingbot dans le journal",
+        "Il signale une réponse 5xx servie à Googlebot et un robots.txt en 500 pour bingbot, comme constats bloquants",
+        "Les IP ne sont pas recopiées dans le rapport : seuls des compteurs ou des agrégats /24 et /48 apparaissent",
+        "Un crawler sans liste d'IP publiée (Meta) est présenté comme non vérifiable et jamais comme vérifié",
+        "Sans vérification des IP, les usurpations ne sont pas affirmées comme établies ; le rapport le dit",
+        "La ligne du journal non reconnue est comptée et signalée, pas ignorée en silence"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Ajoute le balisage schema.org Product avec des avis et une note de 4,8 sur 5 sur mes fiches produit. Mon site est en Next.js.",
+      "expected_output": "Un plan soumis au propriétaire avant le code, qui refuse les étoiles auto-attribuées, propose un JSON-LD Product conforme et le valide avec validate_schema.py avant de conclure.",
+      "files": [],
+      "expectations": [
+        "Le skill explore d'abord le dépôt (rendu SSR ou client, génération du head) avant de proposer du code",
+        "Il soumet un plan et attend un GO avant de modifier des fichiers",
+        "Il refuse ou met en garde contre une note et des avis auto-attribués qui ne proviennent pas d'avis réels et visibles sur la page (politique de Google sur les avis)",
+        "Il n'invente ni note, ni nombre d'avis, ni prix : les valeurs viennent des données du produit ou sont marquées à fournir",
+        "Le JSON-LD proposé reprend les propriétés exigées par Google pour Product et vit dans le HTML initial rendu côté serveur",
+        "Le skill exécute scripts/validate_schema.py sur le JSON-LD produit et cite sa sortie avant de déclarer la tâche terminée",
+        "Il ne prétend pas que le balisage garantit des étoiles dans les résultats ni une citation par une IA"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Lance cet audit SEO tous les lundis matin sur https://example.com et soumets automatiquement les URLs modifiées à IndexNow.",
+      "expected_output": "Une proposition de planification (cron, Planificateur de tâches Windows ou tâche Claude Code) qui demande confirmation avant de créer une tâche persistante, et qui traite IndexNow comme une action externe avec clé dans l'environnement.",
+      "files": [],
+      "expectations": [
+        "Le skill demande une confirmation avant de créer la tâche planifiée, car c'est une configuration persistante",
+        "Le planning repose sur scripts/run_audit.py, dont le code de sortie 1 signale un P0 et dont diff_reports.py compare au rapport précédent",
+        "La soumission IndexNow n'est pas activée par défaut : elle exige l'option explicite --indexnow-submit et l'accord du propriétaire du site, car c'est une action externe",
+        "La clé IndexNow est lue depuis une variable d'environnement (INDEXNOW_KEY ou --indexnow-key-env), jamais passée en argument ni écrite dans un rapport",
+        "Le skill vérifie que le fichier de clé est publié à la racine du site, et rappelle qu'IndexNow ne concerne pas Google",
+        "Il signale que l'API Indexing de Google est interdite hors offres d'emploi et diffusions en direct, et ne la propose pas"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Mon site parle de SEO technique avec beaucoup de sigles (CDN, CMS, GSC). Faut-il créer un glossaire pour être mieux cité par les IA ?",
+      "expected_output": "Une réponse honnête qui sépare l'intérêt SEO du glossaire (documenté) de l'effet non démontré sur les citations IA, propose glossary_check.py suggest, et laisse la décision et les définitions au propriétaire.",
+      "files": [],
+      "expectations": [
+        "Le skill ne répond pas simplement oui : il dit que l'effet d'un glossaire sur les citations IA n'est pas démontré",
+        "Il distingue l'utilité générale d'un glossaire dont chaque définition est originale et liée depuis les articles (règles générales de Google) d'un gain promis",
+        "Il propose d'exécuter scripts/glossary_check.py suggest pour lister les termes candidats et précise que la liste est heuristique et à trier à la main",
+        "Il n'écrit aucune définition à la place du propriétaire et n'insère aucun lien automatiquement",
+        "Il précise que le balisage DefinedTerm ne produit aucun résultat enrichi",
+        "La décision de créer le glossaire est renvoyée au propriétaire, avec les options exposées"
+      ]
+    }
+  ]
+}

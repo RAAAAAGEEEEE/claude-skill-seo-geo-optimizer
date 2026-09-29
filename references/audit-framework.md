@@ -162,7 +162,7 @@ Ensuite, ce qui est établi ou soutenu (détail et sources :
   Bing ; principe de rédaction robuste, pas une garantie).
 - Fraîcheur réelle : mettre à jour le fond, pas seulement la date.
 - Les moteurs IA citent beaucoup de sources tierces : la présence ailleurs
-  (mentions, reprises) relève du skill `SEO`.
+  (mentions, reprises) relève du skill `seo`.
 
 Les statistiques de « lift de citation » par type de schema reprises dans
 les blogs SEO ne reposent sur aucune donnée primaire publiée (vérifié le

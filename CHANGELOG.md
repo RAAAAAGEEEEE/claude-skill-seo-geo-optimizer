@@ -3,6 +3,28 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.3.3] — 2026-09-29
+
+Préparation à la publication communautaire. Aucun comportement de script
+modifié. 66 tests.
+
+### Ajouté
+- `evals/evals.json` : 6 cas d'évaluation du comportement du skill, au
+  format du skill-creator d'Anthropic.
+- Front-matter de `SKILL.md` portable : `license`, `compatibility`,
+  `metadata` (auteur, version, dépôt). Description ramenée sous 1024
+  caractères.
+- Section « Compatibilité » du README et lien vers le skill compagnon
+  `seo` ([citation-engine-skill](https://github.com/RAAAAAGEEEEE/citation-engine-skill)).
+
+### Modifié
+- Exemples de sortie : remplacés par des exécutions réelles sur les sites de
+  démonstration locaux (`tests/fixtures/site/`), datées du 2026-09-29.
+- Anonymisation : noms de sites et de serveurs privés remplacés par
+  `example.com` et `acme` dans la documentation, `.env.example`, les
+  commentaires et les tests.
+- Le skill compagnon s'appelle désormais `seo` (commande `/seo`).
+
 ## [2.3.2] — 2026-09-28
 
 Posts X de Laurent Bourrelly. Aucun script modifié. 66 tests.

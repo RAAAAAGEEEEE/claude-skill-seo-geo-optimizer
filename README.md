@@ -6,10 +6,12 @@ les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
 Mistral). L'audit complet tourne sans intervention, se planifie, et compare
 chaque rapport au précédent.
 
-**Statut : bêta.** Version 2.3.2, connaissances revues le 2026-09-28
+**Statut : bêta.** Version 2.3.3, connaissances revues le 2026-09-28
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (66 tests hors ligne), mais le
-comportement du skill lui-même n'a pas de suite d'évaluation.
+sur quelques sites. Ses scripts sont testés (66 tests hors ligne). Le
+comportement du skill lui-même est décrit par 6 cas d'évaluation
+([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
+skill-creator d'Anthropic : il n'existe pas de exécution automatique.
 
 ## Le problème
 Un site peut être invisible pour les moteurs de réponse IA sans que personne
@@ -60,18 +62,22 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
   de citations IA ([references/content-formats.md](references/content-formats.md)).
 
 ## Exemple de sortie
-Extrait réel de `run_audit.py` sur un site réel, le 2026-09-27 à 22:32 UTC
-(aucune clé fournie) :
+Sortie réelle de `run_audit.py` sur le site de test du dépôt
+(`tests/fixtures/site/`, servi sur 127.0.0.1), exécutée le 2026-09-29, sans
+aucune clé. Les problèmes de ce site sont plantés volontairement :
 ```
-Resultat : P0=0 P1=1 P2=4 ; 25 page(s), 80 requete(s)
+Resultat : P0=0 P1=4 P2=6 ; 7 page(s), 42 requete(s)
+  P1 URL du sitemap en noindex (1) [ESTABLISHED, mesuré]
+  P1 Page auditée hors 200 (1) [ESTABLISHED, inféré]
+  P1 Lien interne vers une URL en erreur (4xx/5xx) (1) [ESTABLISHED, mesuré]
   P1 Page du sitemap sans aucun lien interne entrant (orpheline) (1) [ESTABLISHED, inféré]
-  P2 Page indexable quasi vide (risque de soft 404) (6) [ESTABLISHED, inféré]
-  P2 Page en noindex liée en interne : vérifier que c'est voulu (4) [ESTABLISHED, inféré]
-  P2 Page sans lien contextuel sortant (11) [CLAIMED, inféré]
-  P2 Page liée uniquement depuis la navigation (aucun lien contextuel entrant) (6) [CLAIMED, inféré]
+  P2 Page indexable quasi vide (risque de soft 404) (4) [ESTABLISHED, inféré]
+  P2 Page fille sans lien vers sa page mère (cocon) (1) [CLAIMED, inféré]
+  P2 Page sans lien contextuel sortant (1) [CLAIMED, inféré]
   module ai_access: ran -- 25 crawlers, 0 bloqué(s)
   module pagespeed: skipped -- PAGESPEED_API_KEY absente
 ```
+(Extrait : 3 constats P2 et 8 modules ne sont pas repris.)
 
 ## Prérequis
 - Python 3.10+. Tous les scripts se contentent de la bibliothèque standard,
@@ -103,12 +109,24 @@ Codes de sortie de `run_audit.py` : 0 = aucun P0, 1 = au moins un P0,
 2 = accueil injoignable. Planification (cron, Windows, Claude Code) :
 [docs/USAGE.md](docs/USAGE.md#planifier-laudit).
 
+## Compatibilité
+Le skill suit le format ouvert des Agent Skills (`name`, `description`,
+`license`, `compatibility`, `metadata` dans le front-matter de
+[SKILL.md](SKILL.md)). Il est conçu et testé avec Claude Code. Les scripts
+de `scripts/` s'exécutent aussi seuls, sans agent. Le front-matter ne
+contient aucun champ propre à Claude Code.
+
+Skill compagnon : [citation-engine-skill](https://github.com/RAAAAAGEEEEE/citation-engine-skill)
+(prospection et digital PR, commande `/seo`). Ce skill-ci audite et modifie
+le site courant ; l'autre ne touche pas au code du site.
+
 ## Architecture
 - `SKILL.md` : la procédure que suit Claude (PLAN → FIX → VERIFY).
 - `references/` : le détail daté et sourcé, chargé à la demande.
 - `scripts/` : `run_audit.py` orchestre des modules testables (règles,
   sitemaps, maillage, secrets).
 - `tests/` : tests hors ligne.
+- `evals/` : cas d'évaluation du comportement du skill.
 
 Détail : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

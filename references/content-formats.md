@@ -134,7 +134,7 @@ Recoupement des citations avec le top 10 de Google : voir
    (C-SEO Bench). Google demande de ne pas le faire.
 4. **Reddit, Wikipedia** : parts très variables selon la période, l'outil et
    le moteur. Ce sont des sources tierces : y être présent relève des
-   mentions (skill `SEO`), pas de ce skill.
+   mentions (skill `seo`), pas de ce skill.
 
 ### Formats sans aucune donnée publiée (au 2026-09-28)
 

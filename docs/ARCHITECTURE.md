@@ -78,6 +78,11 @@ fichiers que seul le propriétaire possède, le second demande un choix
   `envkeys.redact_obj` / `redact` avant écriture, même si aucun module n'est
   censé y écrire une clé.
 
+## Évaluations
+`evals/evals.json` : 6 cas au format du skill-creator d'Anthropic (prompt,
+sortie attendue, critères vérifiables). Ils s'appuient sur les fixtures de
+`tests/fixtures/` et ne s'exécutent pas seuls.
+
 ## Tests
 `tests/` contient 66 tests hors ligne. `test_glossary_logs.py` couvre
 `glossary_check.py` et `crawler_logs.py` sur des fixtures (`tests/fixtures/glossary/`,

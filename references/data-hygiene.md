@@ -43,7 +43,7 @@ Dans un audit, marquer chaque constat :
 
 Risque de boucle : une IA génère une statistique plausible, qui est citée
 comme vérifiée, puis reprise par d'autres contenus IA. Le garde-fou du skill
-`SEO` (« ne jamais inventer une donnée manquante, utiliser `null` ou
+`seo` (« ne jamais inventer une donnée manquante, utiliser `null` ou
 `[À VÉRIFIER]` ») s'applique ici aussi.
 
 ## Péremption

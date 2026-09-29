@@ -5,7 +5,7 @@ Revu le 2026-09-27.
 Ce fichier sert à **évaluer** un lien existant ou une opportunité de lien
 (qualité, risque, conformité) — pas à en trouver ou à en acquérir. La
 prospection, le choix des cibles éditoriales, la rédaction et l'envoi de
-pitchs/outreach relèvent du skill `SEO` (`/SEO`), pas de ce skill.
+pitchs/outreach relèvent du skill `seo` (`/seo`), pas de ce skill.
 
 ## Interne vs externe
 - **Liens internes** (sous-domaines d'un même domaine racine, ex.
@@ -44,7 +44,7 @@ comme un réseau artificiel — risque de pénalité manuelle ou algorithmique
 sur tous les domaines concernés, pas seulement celui visé.
 - Ne jamais faire se lier entre eux les différents SaaS/sites d'un même
   propriétaire sans raison éditoriale réelle qui existerait même sans
-  objectif SEO (cf. garde-fous du skill `SEO`).
+  objectif SEO (cf. garde-fous du skill `seo`).
 - Si plusieurs domaines sont légitimement liés (marque ombrelle), varier les
   empreintes techniques et être transparent sur la propriété plutôt que de
   la dissimuler.
@@ -72,7 +72,7 @@ interactifs, articles de référence sourcés et datés) est aussi ce qui a le
 plus de chances d'être cité par les moteurs génératifs — cf. les signaux GEO
 dans [audit-framework.md](audit-framework.md#signaux-geo-retrieval-par-ia-génératives)
 et [evidence.md](evidence.md).
-**Produire ce type d'actif citable est le travail du skill `SEO`** (phase
-"production de l'actif citable" de `/SEO`) — ce skill-ci se limite à
+**Produire ce type d'actif citable est le travail du skill `seo`** (phase
+"production de l'actif citable" de `/seo`) — ce skill-ci se limite à
 vérifier qu'un actif déjà publié respecte les fondamentaux techniques
-(schema, structure, E-E-A-T) une fois que `/SEO` l'a produit.
+(schema, structure, E-E-A-T) une fois que `/seo` l'a produit.

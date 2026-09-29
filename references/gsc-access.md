@@ -27,8 +27,7 @@ comme un substitut de l'autre.
    directement (étape 5).
 4. Sur ce compte de service : **Clés > Ajouter une clé > JSON** → télécharge
    le fichier. C'est un secret : jamais commité, jamais dans un dossier
-   public du repo (convention déjà en place sur le VPS :
-   `secrets/gsc-service-account.json`, permissions `600`).
+   public du repo (exemple : `~/secrets/gsc-service-account.json`, permissions `600`).
 5. Dans [Search Console](https://search.google.com/search-console) sur la
    propriété visée : **Paramètres > Utilisateurs et autorisations > Ajouter
    un utilisateur**. Coller l'email du compte de service (visible dans le
@@ -55,8 +54,8 @@ sous-domaines** — si le projet a des sous-domaines clients ou applicatifs
 (ex. `*.example.com`), les requêtes remontent mélangées. Toujours filtrer
 avec `--path-filter https://example.com/` (ou l'équivalent
 `--gsc-path-filter` dans `generate_report.py`) pour isoler un domaine
-racine précis. Confirmé empiriquement sur un SaaS : sans filtre, les
-résultats mélangeaient le site marketing et ~2800 sous-domaines clients.
+racine précis. Constaté sur un site réel (dont le nom n'est pas publié) : sans filtre,
+les résultats mélangeaient le site marketing et ~2800 sous-domaines clients.
 
 ## Ce que l'API ne donne pas (au 2026-09-27)
 - Le rapport **« Generative AI performance »** (impressions dans AI

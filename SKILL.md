@@ -2,25 +2,28 @@
 name: seo-geo-optimizer
 description: >
   Audite puis corrige, dans le code d'un site, sa visibilité dans Google
-  (dont AI Overviews, AI Mode, Discover, Actualités) et dans les moteurs de
-  réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès
-  réel des crawlers (robots.txt RFC 9309 et blocage CDN), indexabilité et
-  extraits, cohérence sitemap/canonical/hreflang, JSON-LD, maillage interne
-  et cocon sémantique, glossaire/lexique, journaux serveur des crawlers,
-  Core Web Vitals mesurés, Search Console, IndexNow. Audit complet automatisable (une commande, rapport daté, diff dans le
-  temps, planifiable). Chaque recommandation porte une source datée et une
-  étiquette ESTABLISHED/SUPPORTED/CLAIMED. À utiliser pour « auditer le
-  SEO/GEO », « pourquoi mon site n'est pas cité par ChatGPT/AI Overviews »,
-  « vérifier robots.txt, sitemap, schema, maillage, cocon », « faut-il un
-  glossaire », « quels bots viennent vraiment », « quels contenus publier
-  (comparatifs, guides d'achat, tests, données) », « planifier un audit SEO ». Ne pas confondre avec le skill `SEO` (prospection, digital PR,
-  outreach via `/SEO`) : celui-ci audite et modifie le site courant, sans
-  prospection ni outreach.
+  (AI Overviews, AI Mode, Discover) et dans les moteurs de réponse IA
+  (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès réel des
+  crawlers (robots.txt, blocage CDN), indexabilité, sitemap, canonical,
+  hreflang, JSON-LD, maillage interne et cocon, glossaire, journaux serveur,
+  Core Web Vitals, Search Console, IndexNow. Audit complet en une commande,
+  rapport daté, diff dans le temps, planifiable ; chaque recommandation porte
+  une source datée et une étiquette ESTABLISHED, SUPPORTED ou CLAIMED. À
+  utiliser pour « auditer le SEO/GEO », « pourquoi mon site n'est pas cité
+  par ChatGPT », « vérifier robots.txt, sitemap, schema, maillage »,
+  « quels bots viennent vraiment », « planifier un audit SEO ». Ne fait ni
+  prospection ni outreach (skill compagnon `seo`).
+license: MIT
+compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
+metadata:
+  author: Anto1nx
+  version: "2.3.3"
+  repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.3.2 — connaissances revues le **2026-09-28** (historique :
+Version 2.3.3 — connaissances revues le **2026-09-28** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -38,10 +41,11 @@ restent humains.
 - **Dans** : audit et modification du site courant (code, templates,
   robots.txt, sitemap, meta, JSON-LD, en-têtes, maillage interne), mesure via
   APIs gratuites, audit planifié.
-- **Hors** : prospection, netlinking, digital PR, outreach → skill `SEO`
-  (`/SEO`). Rédaction des pages planifiées → skill `redaction`. Production
+- **Hors** : prospection, netlinking, digital PR, outreach → skill `seo`
+  ([citation-engine-skill](https://github.com/RAAAAAGEEEEE/citation-engine-skill),
+  commande `/seo`). Rédaction des pages planifiées → skill `redaction`. Production
   massive de contenu → jamais (scaled content abuse).
-- Sur un même projet : ce skill d'abord, `/SEO` ensuite.
+- Sur un même projet : ce skill d'abord, `/seo` ensuite.
 
 ## Quand l'utiliser
 - audit SEO/GEO, ou site absent des réponses IA ;
@@ -208,20 +212,31 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   [schema-templates.md](references/schema-templates.md), puis
   `validate_schema.py`.
 
-## Exemple de sortie (réelle, site anonymisé, 2026-09-27 22:32 UTC)
+## Exemple de sortie
+Sortie réelle de `run_audit.py` sur le site de test du dépôt
+(`tests/fixtures/site/`, servi sur 127.0.0.1, exécuté le 2026-09-29, sans
+aucune clé) :
 ```
-Resultat : P0=0 P1=1 P2=4 ; 25 page(s), 80 requete(s)
+Resultat : P0=0 P1=4 P2=6 ; 7 page(s), 42 requete(s)
+  P1 URL du sitemap en noindex (1) [ESTABLISHED, mesuré]
+  P1 Page auditée hors 200 (1) [ESTABLISHED, inféré]
+  P1 Lien interne vers une URL en erreur (4xx/5xx) (1) [ESTABLISHED, mesuré]
   P1 Page du sitemap sans aucun lien interne entrant (orpheline) (1) [ESTABLISHED, inféré]
-  P2 Page indexable quasi vide (risque de soft 404) (6) [ESTABLISHED, inféré]
-  P2 Page en noindex liée en interne : vérifier que c'est voulu (4) [ESTABLISHED, inféré]
-  P2 Page sans lien contextuel sortant (11) [CLAIMED, inféré]
-  P2 Page liée uniquement depuis la navigation (aucun lien contextuel entrant) (6) [CLAIMED, inféré]
+  P2 Page indexable quasi vide (risque de soft 404) (4) [ESTABLISHED, inféré]
+  P2 Page fille sans lien vers sa page mère (cocon) (1) [CLAIMED, inféré]
+  P2 Ancre générique (« cliquez ici », « en savoir plus ») (1) [ESTABLISHED, inféré]
+  P2 Page sans lien contextuel sortant (1) [CLAIMED, inféré]
+  P2 <a> sans href exploitable (javascript:, absent) (1) [ESTABLISHED, inféré]
+  P2 meta description manquante (1) [ESTABLISHED, inféré]
   module ai_access: ran -- 25 crawlers, 0 bloqué(s)
-  module crawl: ran -- 25 page(s) récupérée(s), 14/14 URL(s) du sitemap, ...
-  module probes_404: ran -- 19 URL(s) sondée(s)
+  module crawl: ran -- 7 page(s) récupérée(s), 6/6 URL(s) du sitemap, 0 lien(s) découvert(s) non visité(s)
+  module link_graph: ran -- 13 lien(s) interne(s), 1 rubrique(s)
   module pagespeed: skipped -- PAGESPEED_API_KEY absente
+  module indexnow: skipped -- variable INDEXNOW_KEY absente
 ```
-L'URL orpheline est `https://example.com/fr/guides`.
+L'URL orpheline est `/lonely.html` : présente dans le sitemap, liée par
+aucune page. Les problèmes de ce site sont plantés volontairement pour les
+tests.
 
 ## Livrables
 - Le rapport `audit_*.md` + `.json` de `run_audit.py`, et `diff_*.md` au
@@ -257,8 +272,14 @@ Modules partagés :
 - [report_markdown.py](scripts/report_markdown.py).
 
 Tests hors ligne, dont un audit complet sur un site de test servi en
-127.0.0.1 : `python -m unittest discover -s tests`. Il n'existe pas d'évaluation du
-comportement du skill lui-même.
+127.0.0.1 : `python -m unittest discover -s tests`.
+
+## Évaluations
+[evals/evals.json](evals/evals.json) : 6 cas (audit complet, site non cité
+par les IA, journaux serveur, schema Product, planification et IndexNow,
+glossaire), au format du skill-creator d'Anthropic (`prompt`,
+`expected_output`, `expectations`). Ce sont des critères à faire vérifier
+par un relecteur ou par le skill-creator ; ils ne s'exécutent pas seuls.
 
 ## Installation
 - Personnelle : `~/.claude/skills/seo-geo-optimizer/`.

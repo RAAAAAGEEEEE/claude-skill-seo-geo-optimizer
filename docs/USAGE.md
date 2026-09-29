@@ -73,9 +73,10 @@ Options utiles :
 
 Liste complète : `python scripts/run_audit.py --help`.
 
-Exemple réel (site anonymisé, 2026-09-27 22:32 UTC, sans clé) : P0=0, P1=1,
-P2=4 ; 25 pages et 80 requêtes en 40 à 50 s. Le P1 est `/fr/guides`, présente
-dans le sitemap mais liée par aucune page.
+Exemple réel sur un site de 25 pages (2026-09-27, sans clé) : P0=0, P1=1,
+P2=4 ; 80 requêtes en 40 à 50 s. Le P1 était une page présente dans le
+sitemap mais liée par aucune page. Un exemple complet, exécuté sur le site
+de test du dépôt, est dans le [README](../README.md#exemple-de-sortie).
 
 ## Comparer deux rapports : `diff_reports.py`
 
@@ -173,16 +174,17 @@ ou bingbot, robots.txt en 5xx), 2 aucune ligne reconnue.
 
 ## Glossaire : `glossary_check.py`
 
-Termes candidats relevés sur le site (exécuté le 2026-09-28 13:29 UTC) :
+Termes candidats relevés sur un petit site de démonstration servi en local
+(3 pages, exécuté le 2026-09-29) :
 ```bash
-python scripts/glossary_check.py suggest --site https://example.com/fr --max-pages 30
+python scripts/glossary_check.py suggest --site http://127.0.0.1:8766/ --max-pages 30
 ```
 ```
-10 page(s) lue(s) ; 7 candidat(s) présent(s) sur >= 2 pages (heuristique : sigles, <abbr>, <dfn> ; à trier à la main)
-  IA                 5 page(s)  [sigle]  ex. https://example.com/fr
-  MCP                4 page(s)  [sigle]  ex. https://example.com/fr
-  ...
-  ROS                2 page(s)  [sigle]  ex. https://example.com/fr/methodologie
+3 page(s) lue(s) ; 4 candidat(s) présent(s) sur >= 2 pages (heuristique : sigles, <abbr>, <dfn> ; à trier à la main)
+  CDN                3 page(s)  [sigle]  ex. http://127.0.0.1:8766/
+  CMS                3 page(s)  [sigle]  ex. http://127.0.0.1:8766/
+  GEO                3 page(s)  [sigle]  ex. http://127.0.0.1:8766/
+  GSC                3 page(s)  [abbr]  ex. http://127.0.0.1:8766/
 ```
 
 Audit d'un glossaire existant et occasions de liens (exécuté le 2026-09-28

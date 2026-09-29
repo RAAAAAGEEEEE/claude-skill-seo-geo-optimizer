@@ -78,6 +78,7 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
 - Le skill ne modifie ni le site en production, ni un compte (Search
   Console, CDN, Google Business Profile). Il produit des rapports et des
   artefacts. Les corrections de code passent par la procédure avec GO.
-- Pas de suite d'évaluation du comportement de Claude avec ce skill :
-  seuls les scripts sont testés.
+- Les 6 cas de [evals/evals.json](../evals/evals.json) décrivent le
+  comportement attendu de Claude avec ce skill, mais ne s'exécutent pas
+  automatiquement : seuls les scripts sont testés par `unittest`.
 - Connaissances datées : au-delà de 3 mois, revérifier les références.
