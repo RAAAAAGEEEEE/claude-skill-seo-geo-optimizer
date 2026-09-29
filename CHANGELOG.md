@@ -3,6 +3,60 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.4.0] — 2026-09-30
+
+Search Console opérée par l'agent et découverte automatique des nouvelles
+URL, sans navigateur. Aucune rupture : les scripts existants gardent leur
+comportement. 91 tests (25 nouveaux).
+
+### Ajouté
+- `scripts/search_console.py` : client REST de l'API Search Console au nom
+  du compte de service du propriétaire. Sous-commandes `sites`, `sitemaps`,
+  `submit-sitemap` (`sitemaps.submit`, action externe, `--dry-run`),
+  `inspect` (URL Inspection API : URL non indexées classées par cause,
+  plafond de 2 000 par jour, arrêt au premier refus de quota, état local,
+  10 URL au plus proposées à la demande manuelle), `mark-requested`,
+  `stats`. Accès par `GSC_SERVICE_ACCOUNT_FILE` ou `GSC_ACCESS_TOKEN`.
+- `scripts/url_discovery.py` : découverte des nouvelles URL à chaque
+  publication ou chaque jour. Contrôle `Sitemap:` dans robots.txt,
+  `lastmod`, sitemap connu de Search Console, lien depuis l'accueil, hub
+  WebSub des flux ; avec `--submit` : re-soumission du sitemap par l'API,
+  notification WebSub (`hub.mode=publish`), IndexNow des URL nouvelles,
+  modifiées et retirées ; avec `--inspect` : inspection, nouvelles URL
+  d'abord. Les URL restent en attente tant qu'aucune annonce n'a réussi.
+- `references/url-discovery.md` : la méthode par ordre de valeur, sources
+  datées (build sitemap maj 2026-07-08, ask Google to recrawl maj
+  2025-12-10, dépréciation du ping du 2023-06-26, hub WebSub de Google),
+  catégories de non-indexation, bonus de demande manuelle via Claude in
+  Chrome (méthode testée le 2026-09-29), mode planifiable et consigne type.
+- `tests/test_discovery.py` : 25 tests hors ligne (transports simulés).
+- `evals/evals.json` : cas 7 (faire découvrir de nouvelles pages) et 8
+  (pages non indexées via Search Console).
+- `GSC_ACCESS_TOKEN` dans `.env.example` et `docs/CONFIGURATION.md`.
+
+### Modifié
+- `references/gsc-access.md` : tutoriel numéroté, liens et libellés
+  vérifiés sur la documentation officielle le 2026-09-30 (projet, API,
+  compte de service, clé JSON, ajout comme **Propriétaire**, rangement de
+  la clé, vérification). Remplace la consigne « jamais Propriétaire » :
+  Propriétaire pour que l'agent soumette les sitemaps, Accès complet pour
+  le moindre privilège, avec les risques de chaque choix.
+- `references/indexing-rules.md` : ping sitemap déprécié (sourcé et daté),
+  API Search Console et WebSub comme canaux documentés.
+- `references/automation.md` : URL Inspection API et découverte désormais
+  fournies.
+- `scripts/gsc_report.py` : bibliothèques Google importées à l'appel
+  seulement ; renvoi vers le tutoriel au lieu de le dupliquer.
+- `SKILL.md` : mode « découverte des URL », leviers, sécurité, scripts,
+  exemples ; auteur `Anto1nx`.
+
+### Vérifié
+- Exécuté en lecture seule sur une propriété réelle (nom non publié) le
+  2026-09-30 : `sites`, `sitemaps`, `stats`, `inspect` (3 URL),
+  `url_discovery.py` sans `--submit`.
+- Non exécuté en réel : `submit-sitemap`, notification WebSub, `--submit`
+  (actions externes ; tests hors ligne seulement).
+
 ## [2.3.3] — 2026-09-29
 
 Préparation à la publication communautaire. Aucun comportement de script

@@ -1,10 +1,13 @@
 # Indexation — ce qui est autorisé, ce qui est interdit
 
-Revu le 2026-09-28. Tout est **ESTABLISHED** sauf mention.
+Revu le 2026-09-30. Tout est **ESTABLISHED** sauf mention.
 
-## Google : sitemap + Search Console, rien d'autre
+## Google : sitemap, Search Console, WebSub
 `sitemap.xml` à jour, référencé dans `robots.txt`, soumis dans Search
-Console. Inspection d'URL manuelle et ponctuelle pour une page importante.
+Console (interface ou API `sitemaps.submit`), flux Atom/RSS avec WebSub.
+Inspection d'URL manuelle et ponctuelle pour une page importante. Méthode
+complète et automatisée (`url_discovery.py`, `search_console.py`) :
+[url-discovery.md](url-discovery.md).
 
 Règles du sitemap ([Google](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), maj 2026-07-08) :
 - `lastmod` utilisé seulement s'il est exact de façon constante et
@@ -13,7 +16,12 @@ Règles du sitemap ([Google](https://developers.google.com/search/docs/crawling-
   apprend à Google à ignorer le champ.
 - `priority` et `changefreq` : ignorés par Google.
 - 50 000 URLs ou 50 Mo non compressés par fichier ; au-delà, un index.
-- Le « ping » sitemap n'existe plus (404 depuis 2023-2024).
+- Le « ping » sitemap (`google.com/ping?sitemap=`) est déprécié depuis le
+  2023-06-26 et répond 404 depuis l'arrêt, six mois plus tard
+  ([Google](https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping)).
+- Soumission : rapport Sitemaps de Search Console, API Search Console, ou
+  ligne `Sitemap:` de robots.txt ; flux Atom/RSS : WebSub « to broadcast
+  your changes to search engines, including Google ».
 - Uniquement des URLs canoniques, indexables, en 200.
 Générateur conforme : [`../scripts/generate_sitemap.py`](../scripts/generate_sitemap.py).
 
@@ -26,8 +34,11 @@ une approbation ([quickstart](https://developers.google.com/search/apis/indexing
 proposer sitemap + Search Console, et IndexNow pour les autres moteurs.
 
 ### Interdit — auto-submit maison
-Pas de mécanisme qui pousse des URLs en boucle hors du flux sitemap →
-crawl : rien de fiable, et proche du spam d'indexation.
+Pas de mécanisme qui pousse des URLs en boucle hors des canaux documentés
+(sitemap, API Search Console, WebSub, IndexNow) : rien de fiable, et proche
+du spam d'indexation. Re-soumettre un sitemap **qui a changé**, notifier un
+hub WebSub à la publication et envoyer à IndexNow les URL changées sont des
+usages documentés ; les répéter sans changement n'apporte rien.
 
 ## Bing, Yandex, Naver, Seznam, Yep, Amazon, Internet Archive : IndexNow
 Mécanisme prévu, gratuit, encouragé par ces moteurs

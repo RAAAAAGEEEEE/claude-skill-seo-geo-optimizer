@@ -27,6 +27,32 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
   sur une réponse de structure documentée ; l'appel réel avec une clé invalide
   a été exécuté pour vérifier le masquage.
 
+## Découverte des URL et Search Console (`url_discovery.py`, `search_console.py`)
+- **Aucune garantie d'indexation.** Sitemap, WebSub et IndexNow informent
+  les moteurs ; ils décident seuls d'explorer et d'indexer. Aucun délai
+  n'est promis.
+- **Soumission de sitemap par l'API : pas exécutée en réel** par ce skill
+  (2026-09-30). Elle suit la référence de Google et les tests hors ligne
+  vérifient la requête (PUT, URL encodées, portée `webmasters`). Les
+  lectures (`sites`, `sitemaps`, `stats`, `inspect`) ont été exécutées sur
+  une propriété réelle le 2026-09-30.
+- **WebSub** : notifié seulement pour les hubs que le flux déclare. Google
+  documente WebSub comme moyen de diffusion, sans dire comment il pèse sur
+  l'exploration. La notification réelle d'un hub n'a pas été exécutée par
+  ce skill : seuls les tests hors ligne la couvrent.
+- **Inspection** : version indexée seulement (pas de test en direct). Les
+  catégories `unknown_to_google`, `discovered_not_crawled` et
+  `crawled_not_indexed` viennent du libellé anglais de `coverageState`
+  (le script demande `en-US`) ; si Google change ces libellés, elles
+  tombent dans `other`.
+- **Maillage** : seuls l'accueil et les pages `--hub-page` sont lus, en
+  HTML statique. Un lien injecté en JavaScript n'est pas vu.
+- **État local** : `discovery_state.json` et l'état d'inspection vivent sur
+  la machine qui lance le script. Deux machines = deux états.
+- **Demande d'indexation manuelle** : dépend de l'interface de Search
+  Console, qui peut changer ; quota non publié (environ 10 par jour
+  constatés, CLAIMED). Méthode testée le 2026-09-29.
+
 ## Journaux serveur (`crawler_logs.py`)
 - Vérification par listes d'IP seulement. Pas de DNS inverse ni de
   signature Web Bot Auth : Meta et Amazon (listes en HTML) restent « non
@@ -75,10 +101,12 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
   publique ([french-practitioners.md](../references/french-practitioners.md)).
 
 ## Portée
-- Le skill ne modifie ni le site en production, ni un compte (Search
-  Console, CDN, Google Business Profile). Il produit des rapports et des
-  artefacts. Les corrections de code passent par la procédure avec GO.
-- Les 6 cas de [evals/evals.json](../evals/evals.json) décrivent le
+- Le skill ne modifie ni le site en production, ni les réglages d'un
+  compte (Search Console, CDN, Google Business Profile). Seules écritures
+  dans Search Console : soumission de sitemap (`--submit`,
+  `submit-sitemap`) et, en bonus, demande d'indexation manuelle. Les
+  corrections de code passent par la procédure avec GO.
+- Les 8 cas de [evals/evals.json](../evals/evals.json) décrivent le
   comportement attendu de Claude avec ce skill, mais ne s'exécutent pas
   automatiquement : seuls les scripts sont testés par `unittest`.
 - Connaissances datées : au-delà de 3 mois, revérifier les références.

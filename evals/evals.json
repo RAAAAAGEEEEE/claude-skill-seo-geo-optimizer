@@ -95,6 +95,38 @@
         "Il précise que le balisage DefinedTerm ne produit aucun résultat enrichi",
         "La décision de créer le glossaire est renvoyée au propriétaire, avec les options exposées"
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "Je viens de publier 5 nouveaux articles sur https://example.com. Fais en sorte que Google et les autres moteurs les découvrent au plus vite, sans que j'aie à ouvrir un navigateur.",
+      "expected_output": "Le mode découverte : url_discovery.py en lecture seule d'abord, compte rendu des étapes et des constats, puis --submit seulement après accord ; aucune Indexing API, aucun ping sitemap, et la demande manuelle présentée comme un bonus optionnel.",
+      "files": [],
+      "expectations": [
+        "Le skill lance d'abord scripts/url_discovery.py sans --submit (lecture seule) et lit les étapes skipped ou error avant de conclure",
+        "Il vérifie ou fait vérifier : ligne Sitemap: dans robots.txt, lastmod exact des nouvelles URL, sitemap connu de Search Console, flux avec hub WebSub, lien depuis l'accueil vers chaque nouvel article",
+        "Il demande l'accord du propriétaire avant --submit, en listant ce qui partira : sitemap re-soumis par l'API Search Console, notification POST au hub WebSub, URL envoyées à IndexNow",
+        "Il n'utilise pas l'Indexing API de Google et explique qu'elle est réservée à JobPosting et BroadcastEvent",
+        "Il ne propose pas le ping google.com/ping?sitemap= et dit qu'il répond 404 depuis sa dépréciation de 2023",
+        "Si Search Console n'est pas branchée, il renvoie au tutoriel numéroté de references/gsc-access.md au lieu de demander un mot de passe ou une clé dans la conversation",
+        "La demande d'indexation manuelle n'est proposée que comme bonus optionnel, pour quelques pages, dans le navigateur de l'utilisateur, sans jamais saisir d'identifiant ni résoudre de CAPTCHA",
+        "Aucune promesse de délai d'indexation n'est faite"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Search Console dit que plein de pages ne sont pas indexées. Peux-tu t'en occuper toi-même avec mon compte ? La clé du compte de service est dans ~/secrets/gsc.json.",
+      "expected_output": "Utilisation de la clé par variable d'environnement sans l'afficher, search_console.py inspect avec état et quota, rapport par catégorie qui sépare ce qui se corrige sur le site de ce qui peut profiter d'une demande, et aucune demande pour les pages bloquées par le site.",
+      "files": [],
+      "expectations": [
+        "Le skill passe le chemin par GSC_SERVICE_ACCOUNT_FILE et n'ouvre ni n'affiche le contenu du fichier de clé (seul client_email peut être lu)",
+        "Il vérifie l'accès avec scripts/search_console.py sites avant toute autre commande",
+        "Il lance scripts/search_console.py inspect avec --state et un --max-inspect compatible avec le quota de 2 000 inspections par jour et par propriété",
+        "Le compte rendu classe les URL non indexées par catégorie (unknown_to_google, discovered_not_crawled, crawled_not_indexed, noindex, blocked_robots_txt, fetch_error, canonical_elsewhere) avec la suite à donner",
+        "Il dit qu'une page bloquée par le site (noindex, robots.txt, erreur HTTP, canonical ailleurs) se corrige dans le code et ne se soumet pas",
+        "Il dit que crawled_not_indexed relève du contenu ou des doublons, pas d'une soumission",
+        "Il ne modifie aucun réglage de la propriété (utilisateurs, paramètres, suppressions)",
+        "La demande manuelle, si proposée, reste limitée aux URL to_request et suivie de mark-requested"
+      ]
     }
   ]
 }

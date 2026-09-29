@@ -5,8 +5,9 @@ Retour : [README](../README.md) · Suite : [USAGE](USAGE.md),
 
 ## Prérequis
 - Python 3.10 ou plus récent. Vérifié avec 3.11.15 le 2026-09-28.
-- Aucune bibliothèque tierce, sauf pour Search Console :
-  `pip install google-auth requests`.
+- Aucune bibliothèque tierce, sauf pour Search Console avec un fichier de
+  clé : `pip install google-auth requests`. Mise en place de l'accès :
+  [gsc-access.md](../references/gsc-access.md).
 - Bash et curl, seulement pour `audit_site.sh` et `check_backlinks.sh`.
 
 ## Installation personnelle (tous les projets)
@@ -24,15 +25,16 @@ Depuis le dossier du skill :
 ```bash
 python -m unittest discover -s tests
 ```
-Résultat attendu : `Ran 66 tests` puis `OK`. Aucune requête ne sort de la
+Résultat attendu : `Ran 91 tests` puis `OK`. Aucune requête ne sort de la
 machine : le test de bout en bout sert un site de test sur 127.0.0.1.
 
-Vérification faite le 2026-09-28 (version 2.3.0) dans un environnement propre :
+Vérification faite le 2026-09-30 (version 2.4.0) dans un environnement propre :
 1. copie du dépôt sans `.git` ni caches dans un dossier temporaire ;
 2. environnement virtuel neuf (`python -m venv`), sans `google-auth`.
 
-Résultat : 66 tests OK. Le module Search Console se déclare `skipped`
-quand ses dépendances manquent.
+Résultat : 91 tests OK. Le module Search Console se déclare `skipped`
+quand ses dépendances manquent ; `search_console.py` fonctionne sans elles
+avec `GSC_ACCESS_TOKEN`.
 
 ## Mise à jour
 ```bash

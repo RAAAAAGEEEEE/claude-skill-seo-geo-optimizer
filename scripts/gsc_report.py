@@ -3,25 +3,16 @@
 
 Donnee MESUREE (pas une inference depuis le HTML public) -- voir
 references/data-hygiene.md. Reutilisable sur n'importe quel site : le
-compte de service doit juste etre ajoute comme utilisateur (Proprietaire ou
-Utilisateur complet) sur la propriete Search Console visee.
+compte de service doit juste etre ajoute a la propriete Search Console visee.
 
 Usage:
     python gsc_report.py --service-account creds.json --site sc-domain:example.com \
         [--path-filter https://example.com/] [--days 28] [--dimension query|page] \
         [--out report.json]
 
-Prerequis compte de service (a faire une fois par site, dans Google Cloud Console) :
-1. Creer un projet GCP (ou reutiliser un existant) + activer l'API
-   "Google Search Console API".
-2. IAM & Admin > Comptes de service > Creer un compte de service.
-3. Creer une cle JSON pour ce compte (Cles > Ajouter une cle > JSON).
-4. Dans Search Console (search.google.com/search-console) : Parametres >
-   Utilisateurs et autorisations > Ajouter un utilisateur > coller l'email
-   du compte de service (ex: xxx@projet.iam.gserviceaccount.com). L'API
-   demande un droit de lecture : "Restreint" devrait suffire (inference depuis
-   la table des permissions, non ecrit par Google) ; "Complet" en cas de doute.
-5. Stocker le fichier JSON hors du repo git (secrets/, jamais commite).
+Mise en place du compte de service (tutoriel numerote, liens verifies) :
+references/gsc-access.md. Pour les sitemaps et l'inspection d'URL :
+scripts/search_console.py.
 
 Necessite : pip install google-auth requests
 """
@@ -34,21 +25,24 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import requests
-from google.oauth2 import service_account
-import google.auth.transport.requests as google_requests
-
 SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
 API_BASE = "https://www.googleapis.com/webmasters/v3"
 
 
 def get_access_token(service_account_path: Path) -> str:
+    # Imported here so that build_query_body stays usable without the
+    # Google libraries (tests, search_console.py).
+    from google.oauth2 import service_account
+    import google.auth.transport.requests as google_requests
+
     creds = service_account.Credentials.from_service_account_file(str(service_account_path), scopes=SCOPES)
     creds.refresh(google_requests.Request())
     return creds.token
 
 
 def list_accessible_sites(token: str) -> list[dict]:
+    import requests
+
     resp = requests.get(f"{API_BASE}/sites", headers={"Authorization": f"Bearer {token}"})
     resp.raise_for_status()
     return resp.json().get("siteEntry", [])
@@ -91,6 +85,8 @@ def query_search_analytics(
 ) -> list[dict]:
     body = build_query_body(start_date, end_date, dimension, path_filter, row_limit, search_type, data_state)
     from urllib.parse import quote
+
+    import requests
 
     resp = requests.post(
         f"{API_BASE}/sites/{quote(site_url, safe='')}/searchAnalytics/query",

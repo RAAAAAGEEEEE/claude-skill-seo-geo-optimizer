@@ -4,12 +4,15 @@ Skill Claude Code qui audite puis corrige, dans le dépôt d'un site, sa
 visibilité dans Google (y compris AI Overviews, AI Mode, Discover) et dans
 les moteurs de réponse IA (ChatGPT, Claude, Perplexity, Gemini, Copilot,
 Mistral). L'audit complet tourne sans intervention, se planifie, et compare
-chaque rapport au précédent.
+chaque rapport au précédent. Le skill opère aussi Search Console avec les
+accès du propriétaire (sitemaps, inspection des URL) et fait découvrir les
+nouvelles pages sans navigateur.
 
-**Statut : bêta.** Version 2.3.3, connaissances revues le 2026-09-28
+**Statut : bêta.** Version 2.4.0, connaissances revues le 2026-09-28,
+découverte des URL et Search Console le 2026-09-30
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (66 tests hors ligne). Le
-comportement du skill lui-même est décrit par 6 cas d'évaluation
+sur quelques sites. Ses scripts sont testés (91 tests hors ligne). Le
+comportement du skill lui-même est décrit par 8 cas d'évaluation
 ([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
 skill-creator d'Anthropic : il n'existe pas de exécution automatique.
 
@@ -39,6 +42,20 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
   - les 404 ;
   - le maillage interne et le cocon ;
   - en option : PageSpeed, CrUX, Search Console et IndexNow.
+- **Découverte des nouvelles URL, sans navigateur** : `url_discovery.py`
+  contrôle `Sitemap:` dans robots.txt, `lastmod`, le lien depuis l'accueil
+  et le hub WebSub des flux ; avec `--submit` (accord du propriétaire), il
+  re-soumet le sitemap par l'API Search Console, notifie le hub WebSub et
+  envoie les URL changées à IndexNow. Pas d'Indexing API (réservée aux
+  offres d'emploi et vidéos en direct), pas de ping sitemap (mort depuis
+  2023). Planifiable chaque jour
+  ([references/url-discovery.md](references/url-discovery.md)).
+- **Search Console opérée par l'agent** : tutoriel numéroté pour brancher
+  un compte de service ([references/gsc-access.md](references/gsc-access.md)),
+  puis `search_console.py` : sitemaps, inspection des URL (quota 2 000 par
+  jour) avec la cause de non-indexation, statistiques. La demande
+  d'indexation manuelle reste un bonus optionnel, dans le navigateur de
+  l'utilisateur.
 - **Suivi dans le temps** : chaque passage est comparé au précédent
   (`diff_*.md`), avec un code de sortie 1 si un problème bloquant apparaît.
   C'est utilisable dans un cron.
@@ -81,7 +98,8 @@ Resultat : P0=0 P1=4 P2=6 ; 7 page(s), 42 requete(s)
 
 ## Prérequis
 - Python 3.10+. Tous les scripts se contentent de la bibliothèque standard,
-  sauf `gsc_report.py`.
+  sauf pour transformer une clé de compte de service Search Console en
+  jeton (`google-auth`).
 - Bash et curl, seulement pour `audit_site.sh` et `check_backlinks.sh`.
 - Optionnel : une clé API Google (PageSpeed / CrUX), un compte de service
   Search Console (`pip install google-auth requests`), une clé IndexNow.
@@ -101,6 +119,9 @@ python scripts/run_audit.py --site https://example.com
 
 # Relancé plus tard : un diff_*.md compare au rapport précédent
 python scripts/diff_reports.py --dir seo-reports/example.com
+
+# Découverte des nouvelles URL, lecture seule (ajouter --submit après accord)
+python scripts/url_discovery.py --site https://example.com
 
 # Tests hors ligne
 python -m unittest discover -s tests
@@ -133,16 +154,19 @@ Détail : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ## Configuration
 Aucune configuration n'est requise pour l'audit de base. Les accès
 optionnels se donnent **uniquement par variables d'environnement** :
-`PAGESPEED_API_KEY`, `CRUX_API_KEY`, `GSC_SERVICE_ACCOUNT_FILE`, `GSC_SITE`,
-`INDEXNOW_KEY`. Voir [.env.example](.env.example) et
+`PAGESPEED_API_KEY`, `CRUX_API_KEY`, `GSC_SERVICE_ACCOUNT_FILE` (ou
+`GSC_ACCESS_TOKEN`), `GSC_SITE`, `INDEXNOW_KEY`. Voir [.env.example](.env.example) et
 [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 ## Sécurité et confidentialité
 Par défaut, le skill n'envoie que des requêtes GET publiques vers le site
 audité, en respectant robots.txt. Des données ne partent vers des tiers que
 si l'accès correspondant est fourni (API Google, Search Console).
-La soumission IndexNow exige une option explicite, car c'est une action
-externe. Les clés ne sont jamais affichées ni écrites dans un rapport.
+La soumission IndexNow, la soumission de sitemap et la notification WebSub
+exigent une option explicite (`--indexnow-submit`, `--submit`,
+`submit-sitemap`), car ce sont des actions externes. La demande
+d'indexation manuelle ne se fait qu'avec l'accord du propriétaire, sans
+jamais saisir d'identifiant ni résoudre de CAPTCHA. Les clés ne sont jamais affichées ni écrites dans un rapport.
 Voir [SECURITY.md](SECURITY.md) et
 [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md).
 
@@ -153,6 +177,9 @@ Voir [SECURITY.md](SECURITY.md) et
 - Le maillage « contextuel » dépend des balises `<main>`/`<nav>`, et les
   rubriques sont déduites des répertoires d'URL.
 - Aucune mesure directe des citations dans ChatGPT, Claude ou Perplexity.
+- Aucune garantie d'indexation : sitemap, WebSub et IndexNow informent les
+  moteurs, qui décident. La soumission de sitemap par l'API et la
+  notification WebSub ne sont couvertes que par des tests hors ligne.
 - Journaux serveur : vérification par listes d'IP seulement (Meta et Amazon
   restent non vérifiables).
 - Les seuils de praticiens restent des heuristiques.

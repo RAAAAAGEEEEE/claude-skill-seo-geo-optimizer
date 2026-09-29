@@ -46,7 +46,7 @@ run_audit.py
 | `robotstxt.py`, `ai_bots.py` | Interprétation RFC 9309, catalogue des crawlers | stdlib |
 | `envkeys.py` | Lecture des secrets (environnement, chemin de fichier), masquage | stdlib |
 | `pagespeed.py`, `crux_report.py` | API Google de performance | stdlib |
-| `gsc_report.py` | API Search Console | `google-auth`, `requests` |
+| `gsc_report.py` | API Search Console (Search Analytics). Dépendances importées à l'appel seulement | `google-auth`, `requests` |
 | `report_markdown.py`, `diff_reports.py` | Rendu du rapport et comparaison, fonctions pures du JSON | stdlib |
 
 ## Outils autonomes (hors `run_audit.py`)
@@ -56,9 +56,29 @@ run_audit.py
 | `crawler_logs.py` | Journaux serveur : identifie les crawlers (catalogue `ai_bots.py` + moteurs et outils SEO), vérifie leurs IP contre les listes JSON des fournisseurs, produit des constats étiquetés. Les IP ne sortent jamais du processus : compteurs et agrégats /24, /48 | stdlib |
 | `glossary_check.py` | Glossaire : `build` (HTML `<dl>` et JSON-LD `DefinedTermSet` depuis les mêmes lignes), `audit` (termes, balisage visible, ancres, occasions de liens sur un échantillon du sitemap), `suggest` (sigles, `<abbr>`, `<dfn>` présents sur plusieurs pages). Réutilise `robotstxt.py` et `sitemaps.py` | stdlib |
 
-Ces deux outils restent séparés de `run_audit.py` : le premier lit des
-fichiers que seul le propriétaire possède, le second demande un choix
-éditorial (quel glossaire, quels termes).
+| `search_console.py` | Client REST de l'API Search Console au nom du compte de service du propriétaire : sites, sitemaps (liste et `sitemaps.submit`), URL Inspection (catégories tirées des champs énumérés, état local, plafond de quota), Search Analytics. Transport injectable : testé sans réseau | stdlib ; `google-auth` + `requests` seulement pour transformer la clé en jeton |
+| `url_discovery.py` | Découverte des nouvelles URL : robots.txt, sitemaps et `lastmod`, différences avec le passage précédent, lien depuis l'accueil, flux et hub WebSub ; avec `--submit` : `sitemaps.submit`, notification WebSub, IndexNow ; avec `--inspect` : inspection. Réutilise `robotstxt.py`, `sitemaps.py`, `search_console.py`, `indexnow_submit.py` | stdlib (+ Search Console comme ci-dessus) |
+
+Ces outils restent séparés de `run_audit.py` : `crawler_logs.py` lit des
+fichiers que seul le propriétaire possède, `glossary_check.py` demande un
+choix éditorial (quel glossaire, quels termes), `url_discovery.py` et
+`search_console.py` agissent au nom du propriétaire et tournent à chaque
+publication plutôt qu'à chaque audit.
+
+Flux de `url_discovery.py` :
+```
+url_discovery.py
+ ├─ accueil                     liens <a href>, flux <link rel=alternate>
+ ├─ robots.txt                  lignes Sitemap:
+ ├─ sitemaps.discover           URL + lastmod ; diff avec discovery_state.json (nouvelles, modifiées, retirées)
+ ├─ maillage                    nouvelles URL liées depuis l'accueil ou --hub-page ?
+ ├─ flux                        hub WebSub déclaré ? (XML ou en-tête Link)
+ ├─ search_console              sitemaps connus ; --submit : sitemaps.submit si changement
+ ├─ websub                      --submit : POST hub.mode=publish au hub déclaré
+ ├─ indexnow                    --submit : URL changées, fichier de clé vérifié avant
+ ├─ inspection                  --inspect N : search_console.run_inspection, nouvelles URL d'abord
+ └─ discovery_<date>.md/.json   sorties masquées ; URL « en attente » gardées tant que l'annonce n'a pas réussi
+```
 
 ## Choix de conception
 - **Un constat par code de règle**, URLs agrégées, avec un identifiant
@@ -79,12 +99,16 @@ fichiers que seul le propriétaire possède, le second demande un choix
   censé y écrire une clé.
 
 ## Évaluations
-`evals/evals.json` : 6 cas au format du skill-creator d'Anthropic (prompt,
+`evals/evals.json` : 8 cas au format du skill-creator d'Anthropic (prompt,
 sortie attendue, critères vérifiables). Ils s'appuient sur les fixtures de
 `tests/fixtures/` et ne s'exécutent pas seuls.
 
 ## Tests
-`tests/` contient 66 tests hors ligne. `test_glossary_logs.py` couvre
+`tests/` contient 91 tests hors ligne. `test_discovery.py` couvre
+`search_console.py` et `url_discovery.py` avec des transports simulés :
+catégories d'inspection, quotas, reprises sur 5xx, jeton absent des erreurs,
+URL encodées de `sitemaps.submit`, notification WebSub, URL en attente
+conservées sans `--submit`, clé IndexNow absente des sorties. `test_glossary_logs.py` couvre
 `glossary_check.py` et `crawler_logs.py` sur des fixtures (`tests/fixtures/glossary/`,
 `tests/fixtures/logs/`), sans réseau. `test_automation.py` sert
 `tests/fixtures/site/` sur 127.0.0.1 et lance `run_audit.main()` deux fois.

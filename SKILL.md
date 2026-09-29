@@ -6,7 +6,8 @@ description: >
   (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès réel des
   crawlers (robots.txt, blocage CDN), indexabilité, sitemap, canonical,
   hreflang, JSON-LD, maillage interne et cocon, glossaire, journaux serveur,
-  Core Web Vitals, Search Console, IndexNow. Audit complet en une commande,
+  Core Web Vitals, Search Console opérée par l'agent (sitemaps, inspection
+  d'URL), découverte des nouvelles URL (sitemap, WebSub, IndexNow). Audit complet en une commande,
   rapport daté, diff dans le temps, planifiable ; chaque recommandation porte
   une source datée et une étiquette ESTABLISHED, SUPPORTED ou CLAIMED. À
   utiliser pour « auditer le SEO/GEO », « pourquoi mon site n'est pas cité
@@ -17,13 +18,14 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.3.3"
+  version: "2.4.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.3.3 — connaissances revues le **2026-09-28** (historique :
+Version 2.4.0 — connaissances revues le **2026-09-28**, découverte des URL
+et Search Console le **2026-09-30** (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -57,6 +59,8 @@ restent humains.
 - choix des formats de contenu à publier (comparatif, guide d'achat, test,
   fiche technique, données originales, tutoriel…) ;
 - journaux serveur : quels crawlers viennent vraiment ;
+- nouvelles pages publiées à faire découvrir (Google, Bing et les moteurs
+  branchés sur IndexNow), pages non indexées ;
 - suivi planifié d'un site.
 
 Pas pour rédiger : la prose en français (articles, pages, fiches) relève
@@ -117,6 +121,35 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
    ([docs/USAGE.md](docs/USAGE.md#planifier-laudit)). La création de la
    tâche est une configuration persistante : **confirmation requise**.
 
+## Mode « découverte des URL » (après chaque publication, ou chaque jour)
+Faire découvrir les nouvelles pages sans navigateur, avec les accès du
+propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery.md).
+1. **Accès** : si Search Console n'est pas encore branchée, donner au
+   propriétaire le tutoriel numéroté de [gsc-access.md](references/gsc-access.md)
+   (compte de service ajouté comme Propriétaire, clé hors dépôt, jamais
+   affichée). Vérifier avec `python scripts/search_console.py sites`.
+2. **Lecture seule d'abord** :
+   `python scripts/url_discovery.py --site <url> --gsc-site <propriété> --inspect 50`.
+   Lire les étapes `skipped`/`error`, puis les constats : `Sitemap:` absent
+   de robots.txt, `lastmod` inexploitable, sitemap non soumis, flux sans hub
+   WebSub, nouvelles pages non liées depuis l'accueil. Les correctifs sur le
+   site suivent PLAN → FIX → VERIFY.
+3. **Annonce** (action externe, accord du propriétaire) : même commande avec
+   `--submit` : sitemap re-soumis par l'API s'il a changé, hub WebSub
+   notifié, IndexNow des URL changées. Jamais l'Indexing API de Google
+   (JobPosting et BroadcastEvent seulement), jamais le ping sitemap (404
+   depuis 2023).
+4. **Non indexées** : rapport par catégorie (`unknown_to_google`,
+   `discovered_not_crawled`, `crawled_not_indexed`, blocages du site). Une
+   page bloquée par le site se corrige, elle ne se soumet pas.
+5. **Bonus optionnel** : demande d'indexation manuelle de quelques URL
+   `to_request` (environ 10 par jour), dans le navigateur de l'utilisateur
+   via Claude in Chrome, avec la méthode de
+   [url-discovery.md](references/url-discovery.md#bonus--demande-dindexation-manuelle).
+   Jamais de saisie d'identifiant, jamais de CAPTCHA.
+6. **Planifier** (accord requis, `--submit` compris) :
+   [url-discovery.md](references/url-discovery.md#mode-planifiable-tâche-quotidienne).
+
 ## Les leviers (détail dans les références)
 
 | Levier | À retenir | Référence |
@@ -130,7 +163,7 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
 | Formats de contenu | Google ne favorise aucun format en soi : il récompense l'information originale, l'expérience de première main et les sources claires. Tests, comparatifs et classements relèvent du reviews system. FAQ : texte visible oui, rich result non. Les parts de citation par format viennent d'études de vendeurs (CLAIMED), varient selon l'intention et le moteur, et se contredisent. | [content-formats.md](references/content-formats.md) |
 | E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
 | Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, au p75 terrain (CrUX). | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
-| Indexation | Google : sitemap exact (lastmod vrai) et Search Console. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md) |
+| Indexation | Google : sitemap exact (lastmod vrai), déclaré dans robots.txt et soumis par l'API Search Console ; flux avec WebSub ; lien depuis l'accueil. Ping sitemap mort depuis 2023. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md), [url-discovery.md](references/url-discovery.md) |
 | Glossaire | Utile pour le SEO si chaque définition est originale et liée depuis les articles (ESTABLISHED, règles générales). Effet sur les citations IA : non démontré. `DefinedTerm` : aucun rich result. | [glossary.md](references/glossary.md) |
 | Automatisation | Mesurer, détecter, préparer : oui. Publier du contenu, des liens ou du balisage sans relecture : non (spam policies). Pas de suivi de citations par grounding Gemini ni par scraping de Google (conditions). | [automation.md](references/automation.md) |
 | Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
@@ -181,10 +214,18 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
 - Rien d'autre ne sort sans accès fourni par l'environnement :
   - `PAGESPEED_API_KEY` / `CRUX_API_KEY` : clé en paramètre d'URL vers les
     API Google ;
-  - `GSC_SERVICE_ACCOUNT_FILE` : jeton OAuth vers Search Console ;
+  - `GSC_SERVICE_ACCOUNT_FILE` (ou `GSC_ACCESS_TOKEN`) : jeton OAuth vers
+    Search Console. Portée lecture seule, sauf `submit-sitemap` et
+    `url_discovery.py --submit` (portée `webmasters`) ;
   - `--indexnow-submit` : URLs envoyées à api.indexnow.org et partagées
     avec tous les moteurs participants. C'est une **action externe :
-    confirmation requise**.
+    confirmation requise** ;
+  - `url_discovery.py --submit` : sitemap soumis à Google, notification
+    POST au hub WebSub déclaré par le flux, URLs à IndexNow. **Action
+    externe : confirmation requise**, y compris dans une tâche planifiée ;
+  - demande d'indexation manuelle (bonus) : clic dans le navigateur de
+    l'utilisateur, en son nom. **Accord requis** ; jamais d'identifiant
+    saisi, jamais de CAPTCHA résolu.
 - `crawler_logs.py` télécharge les listes d'IP publiques des fournisseurs
   (GET, rien n'est envoyé) ; `--no-verify` l'évite. Les IP du journal sont
   des données personnelles : jamais écrites, seulement comptées ou agrégées
@@ -192,8 +233,10 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
 - Les clés ne passent jamais en argument. Elles ne sont jamais affichées ni
   écrites : le rapport est masqué avant écriture, et un test le vérifie.
   Détail : [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md).
-- Ce skill ne modifie aucun compte (Search Console, CDN, GBP) : il liste
-  les réglages, et le propriétaire les change.
+- Ce skill ne modifie aucun réglage de compte (Search Console, CDN, GBP) :
+  il liste les réglages, et le propriétaire les change. Seules écritures
+  Search Console : la soumission de sitemap et, en bonus, la demande
+  d'indexation manuelle.
 
 ## Exemples d'invocation
 - « Audite le SEO/GEO de ce site et propose un plan » → procédure complète.
@@ -203,6 +246,13 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   « Cocon / silos » du rapport, puis
   [french-practitioners.md](references/french-practitioners.md).
 - « Lance cet audit chaque lundi » → étape 7, après confirmation.
+- « Je viens de publier 5 articles, fais-les découvrir » → mode découverte :
+  lecture seule, puis `--submit` après accord.
+- « Quelles pages ne sont pas indexées, et pourquoi ? » →
+  `search_console.py inspect` ; catégories et suites dans
+  [url-discovery.md](references/url-discovery.md#inspection--quelles-url-ne-sont-pas-indexées).
+- « Branche Search Console pour que tu t'en occupes » → tutoriel de
+  [gsc-access.md](references/gsc-access.md), puis `search_console.py sites`.
 - « Quels contenus publier pour être classé et cité ? » → carte de la
   demande, puis [content-formats.md](references/content-formats.md) ;
   plan soumis au propriétaire.
@@ -238,6 +288,18 @@ L'URL orpheline est `/lonely.html` : présente dans le sitemap, liée par
 aucune page. Les problèmes de ce site sont plantés volontairement pour les
 tests.
 
+Sortie réelle de `url_discovery.py` sur le même site (exécuté le
+2026-09-30, deuxième passage, `--urls` listant `/lonely.html` comme page
+publiée, sans aucun accès ; extrait) :
+```
+  changes: ran -- 1 nouvelle(s), 0 modifiee(s), 0 retiree(s) ; 1 en attente d'annonce
+  linking: ran -- 0/1 nouvelle(s) URL liee(s) depuis l'accueil
+  search_console: skipped -- propriete absente (--gsc-site ou GSC_SITE)
+  indexnow: skipped -- variable INDEXNOW_KEY absente
+  P1 Nouvelle(s) page(s) sans lien depuis l'accueil ni une page de rubrique fournie : ajouter un lien <a href> (bloc « derniers articles », rubrique) (1)
+  P2 5 URL(s) sans lastmod : la modification ne peut pas etre signalee
+```
+
 ## Livrables
 - Le rapport `audit_*.md` + `.json` de `run_audit.py`, et `diff_*.md` au
   passage suivant.
@@ -257,6 +319,8 @@ tests.
 | [pagespeed.py](scripts/pagespeed.py) | PageSpeed Insights : labo + terrain | `PAGESPEED_API_KEY` |
 | [crux_report.py](scripts/crux_report.py) | Core Web Vitals terrain | `CRUX_API_KEY` |
 | [gsc_report.py](scripts/gsc_report.py) | Search Console (web, discover, googleNews, news, image, video) | compte de service |
+| [search_console.py](scripts/search_console.py) | Search Console opérée par l'agent : `sites`, `sitemaps`, `submit-sitemap`, `inspect` (URL non indexées, quota 2 000/jour), `mark-requested`, `stats` | compte de service (`GSC_SERVICE_ACCOUNT_FILE`) ou `GSC_ACCESS_TOKEN` |
+| [url_discovery.py](scripts/url_discovery.py) | Découverte des nouvelles URL : robots.txt, lastmod, maillage depuis l'accueil, WebSub, sitemap re-soumis, IndexNow, inspection ; planifiable | optionnel (env) ; `--submit` = action externe |
 | [crawler_logs.py](scripts/crawler_logs.py) | Journaux serveur : crawlers réels, IP vérifiées contre les listes des fournisseurs, 5xx, 404, couverture du sitemap ; aucune IP écrite | aucun (lit les listes publiques) |
 | [glossary_check.py](scripts/glossary_check.py) | Glossaire : `build` (HTML + JSON-LD depuis un fichier de termes), `audit` (balisage visible, ancres, occasions de liens), `suggest` (termes candidats) | aucun |
 | [audit_site.sh](scripts/audit_site.sh), [check_backlinks.sh](scripts/check_backlinks.sh) | Passe curl rapide ; liens suivis/nofollow d'une page | aucun |
@@ -275,9 +339,10 @@ Tests hors ligne, dont un audit complet sur un site de test servi en
 127.0.0.1 : `python -m unittest discover -s tests`.
 
 ## Évaluations
-[evals/evals.json](evals/evals.json) : 6 cas (audit complet, site non cité
+[evals/evals.json](evals/evals.json) : 8 cas (audit complet, site non cité
 par les IA, journaux serveur, schema Product, planification et IndexNow,
-glossaire), au format du skill-creator d'Anthropic (`prompt`,
+glossaire, découverte de nouvelles pages, pages non indexées via Search
+Console), au format du skill-creator d'Anthropic (`prompt`,
 `expected_output`, `expectations`). Ce sont des critères à faire vérifier
 par un relecteur ou par le skill-creator ; ils ne s'exécutent pas seuls.
 
@@ -286,7 +351,7 @@ par un relecteur ou par le skill-creator ; ils ne s'exécutent pas seuls.
 - Par projet : `.claude/skills/seo-geo-optimizer/`.
 - Python 3.10+, bibliothèque standard uniquement.
   `pip install google-auth requests` n'est nécessaire que pour Search
-  Console.
+  Console avec un fichier de clé (`GSC_ACCESS_TOKEN` s'en passe).
 
 Voir [docs/INSTALLATION.md](docs/INSTALLATION.md).
 

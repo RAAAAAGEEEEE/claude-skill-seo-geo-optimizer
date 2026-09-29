@@ -147,6 +147,69 @@ donc que pour l'audit sans clé, ou avec des secrets configurés côté cloud.
 `--indexnow-submit` dans une tâche planifiée envoie des URLs à des tiers à
 chaque passage. Ne l'ajouter qu'après accord explicite du propriétaire.
 
+## Découverte des URL : `url_discovery.py`
+
+Méthode et sources : [url-discovery.md](../references/url-discovery.md).
+À lancer après chaque publication, ou une fois par jour.
+
+```bash
+# Lecture seule : rien n'est envoyé à un tiers
+python scripts/url_discovery.py --site https://example.com --gsc-site sc-domain:example.com --inspect 50
+
+# Annonce (action externe, accord du propriétaire) : sitemap re-soumis, WebSub, IndexNow
+python scripts/url_discovery.py --site https://example.com --gsc-site sc-domain:example.com --submit --inspect 200
+```
+La première forme a été exécutée le 2026-09-30 sur une propriété réelle
+(nom non publié) : 8 sitemaps lus, 228 URL, 2 flux sans hub WebSub signalés,
+2 URL inspectées. Elle a aussi été exécutée sur le site de test du dépôt
+(sortie dans [SKILL.md](../SKILL.md#exemple-de-sortie)). La forme avec
+`--submit` n'a **pas** été exécutée contre un vrai service : action
+externe, couverte par les tests hors ligne.
+
+Sorties dans `<out-dir>/<hôte>/` :
+
+| Fichier | Contenu |
+|---|---|
+| `discovery_<AAAAMMJJTHHMMSSZ>.md` / `.json` | Étapes (ran, skipped, error), constats P0/P1/P2, URL à annoncer, non indexées par catégorie, URL proposées à la demande manuelle |
+| `discovery_state.json` | URL et `lastmod` du passage précédent, URL en attente d'annonce, état d'inspection. Ne pas commiter |
+
+Codes de sortie : 0 OK ; 1 une action a échoué ou aucun sitemap lisible ;
+2 accueil injoignable.
+
+Premier passage : il enregistre l'état de référence et n'annonce rien. Pour
+annoncer tout de suite des pages précises : `--urls publiees.txt`.
+
+## Search Console opérée par l'agent : `search_console.py`
+
+Accès : [gsc-access.md](../references/gsc-access.md). Exécuté le
+2026-09-30 sur une propriété réelle, sauf `submit-sitemap` :
+```bash
+python scripts/search_console.py sites
+python scripts/search_console.py sitemaps --site sc-domain:example.com
+python scripts/search_console.py stats --site sc-domain:example.com --days 28 --dimension page
+python scripts/search_console.py inspect --site sc-domain:example.com --sitemap https://example.com/sitemap.xml --state ~/seo-reports/gsc_state.json --max-inspect 100 --out inspect.json
+python scripts/search_console.py mark-requested --state ~/seo-reports/gsc_state.json https://example.com/page
+python scripts/search_console.py submit-sitemap --site sc-domain:example.com --sitemap https://example.com/sitemap.xml --dry-run
+```
+Sortie réelle de `inspect` (2026-09-30, 3 URL, adresses masquées) :
+```
+{'candidates': 228, 'inspected': 3, 'indexed': 0, 'by_category': {'unknown_to_google': 3}, 'to_request': [3 URL], 'errors': [], 'quota_stopped': False}
+```
+`submit-sitemap` sans `--dry-run` soumet vraiment (action externe).
+Codes : 0 OK, 1 erreur d'API ou inspection partielle, 2 accès absent.
+
+### Planifier la découverte
+Même règle que pour l'audit : la tâche et `--submit` demandent l'accord du
+propriétaire. Commandes **non exécutées** ici (configuration persistante) :
+```cron
+0 7 * * * bash -c 'set -a; . ~/secrets/seo-discovery.env; set +a; python3 ~/.claude/skills/seo-geo-optimizer/scripts/url_discovery.py --site https://example.com --submit --inspect 200 --out-dir ~/seo-reports' >> ~/seo-reports/discovery.log 2>&1
+```
+```powershell
+schtasks /Create /SC DAILY /ST 07:00 /TN "url-discovery-example" /TR "python %USERPROFILE%\.claude\skills\seo-geo-optimizer\scripts\url_discovery.py --site https://example.com --submit --inspect 200 --out-dir %USERPROFILE%\seo-reports"
+```
+Tâche planifiée Claude Code, avec le bonus de demande manuelle : consigne
+type dans [url-discovery.md](../references/url-discovery.md#mode-planifiable-tâche-quotidienne).
+
 ## Journaux serveur : `crawler_logs.py`
 
 ```bash
@@ -238,5 +301,6 @@ par un script. Après publication, `run_audit.py` vérifie la partie technique
 | Valider du JSON-LD (fichier ou URL) | `python scripts/validate_schema.py tests/fixtures/schema_cases.html` |
 | PageSpeed d'une page | `python scripts/pagespeed.py https://example.com/` (avec `PAGESPEED_API_KEY`) |
 | CrUX d'une origine | `python scripts/crux_report.py --origin https://example.com` (avec `CRUX_API_KEY`) |
+| Propriétés Search Console accessibles | `python scripts/search_console.py sites` (avec `GSC_SERVICE_ACCOUNT_FILE`) |
 | Vérifier une clé IndexNow sans rien soumettre | `python scripts/indexnow_submit.py --host example.com --urls urls.txt --dry-run` (avec `INDEXNOW_KEY`) |
 | Générer sitemap et robots.txt | `python scripts/generate_sitemap.py pages.json --domain https://example.com --write-robots` |

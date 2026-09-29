@@ -1,6 +1,6 @@
 # SEO/GEO automatisable : ce qu'un script ou un agent planifié peut faire seul
 
-Revu le 2026-09-28. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-28 (ligne 2, 5 et 6 : 2026-09-30). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 « maj » = date « Last updated » de la page ; « consulté » = page sans date,
 lue le 2026-09-28. Les URLs de fichiers JSON ont été téléchargées ce jour-là
 (HTTP 200).
@@ -15,11 +15,11 @@ politiques anti-spam de Google (dernière section).
 | # | Technique | Ce que le skill fournit | Niveau |
 |---|---|---|---|
 | 1 | Audit technique complet planifié, diff avec le passage précédent | `run_audit.py` | ESTABLISHED (règles Google) |
-| 2 | IndexNow des seules URLs nouvelles ou modifiées, au déploiement | `run_audit.py --indexnow-submit`, `indexnow_submit.py` | ESTABLISHED |
-| 3 | Sitemap (et flux RSS/Atom) avec un `lastmod` exact | `generate_sitemap.py`, contrôle dans `run_audit.py` | ESTABLISHED |
+| 2 | Découverte des nouvelles URL à chaque publication : sitemap re-soumis par l'API, WebSub, IndexNow des seules URLs changées, contrôle du lien depuis l'accueil | **`url_discovery.py`** ([url-discovery.md](url-discovery.md)), `run_audit.py --indexnow-submit`, `indexnow_submit.py` | ESTABLISHED |
+| 3 | Sitemap (et flux RSS/Atom avec hub WebSub) avec un `lastmod` exact | `generate_sitemap.py`, contrôles dans `run_audit.py` et `url_discovery.py` | ESTABLISHED |
 | 4 | Analyse des journaux serveur : crawlers réels, statuts, usurpations, couverture du sitemap | **`crawler_logs.py`** (nouveau) | ESTABLISHED (méthode de vérification) |
-| 5 | Search Console : performances quotidiennes, données horaires, alertes d'écart | `gsc_report.py`, module de `run_audit.py` | ESTABLISHED |
-| 6 | URL Inspection API sur les pages clés (canonical retenu, couverture, dernier crawl) | non fourni ; quota 2 000/jour/site | ESTABLISHED |
+| 5 | Search Console : performances quotidiennes, données horaires, alertes d'écart | `gsc_report.py`, `search_console.py stats`, module de `run_audit.py` | ESTABLISHED |
+| 6 | URL Inspection API : URL non indexées et leur cause (couverture, canonical retenu, dernier crawl) | **`search_console.py inspect`** ; quota 2 000/jour/site | ESTABLISHED |
 | 7 | JSON-LD généré côté serveur depuis la base, avec contrôle « balisé = visible » | `validate_schema.py`, `glossary_check.py build` | ESTABLISHED |
 | 8 | Orphelines et occasions de liens internes, **validées par un humain** | `linkgraph.py`, **`glossary_check.py audit --site`** | ESTABLISHED (principes) |
 | 9 | Bing Webmaster API : requêtes, pages, crawl | non fourni | ESTABLISHED |

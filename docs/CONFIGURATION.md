@@ -19,8 +19,9 @@ acceptées pour compatibilité, mais elles sont dépréciées.
 |---|---|---|---|
 | `PAGESPEED_API_KEY` | `run_audit.py`, `pagespeed.py` | Clé API Google Cloud avec « PageSpeed Insights API » activée | URL auditée + clé → googleapis.com |
 | `CRUX_API_KEY` | `run_audit.py`, `crux_report.py`, `generate_report.py` | Clé avec « Chrome UX Report API » activée. Si vide, `run_audit.py` réutilise `PAGESPEED_API_KEY` | Origine + clé → chromeuxreport.googleapis.com |
-| `GSC_SERVICE_ACCOUNT_FILE` | `run_audit.py` | **Chemin** du fichier JSON d'un compte de service en lecture seule ([gsc-access.md](../references/gsc-access.md)) | Jeton OAuth → googleapis.com |
-| `GSC_SITE` | `run_audit.py` | Propriété Search Console, ex. `sc-domain:example.com` (équivaut à `--gsc-site`) | — |
+| `GSC_SERVICE_ACCOUNT_FILE` | `run_audit.py`, `search_console.py`, `url_discovery.py` | **Chemin** du fichier JSON de la clé du compte de service ajouté à la propriété ([gsc-access.md](../references/gsc-access.md)) | Jeton OAuth → googleapis.com ; lectures, et soumission de sitemap avec `--submit` / `submit-sitemap` |
+| `GSC_ACCESS_TOKEN` | `search_console.py`, `url_discovery.py` | Jeton OAuth déjà obtenu (valable une heure), à la place du fichier de clé. Prioritaire s'il est défini | Idem |
+| `GSC_SITE` | `run_audit.py`, `url_discovery.py` | Propriété Search Console, ex. `sc-domain:example.com` ou `https://example.com/` (équivaut à `--gsc-site`) | — |
 | `INDEXNOW_KEY` | `run_audit.py`, `indexnow_submit.py` | Clé IndexNow du site. Le fichier `/<clé>.txt` doit être publié à la racine | Vérification : GET du fichier de clé sur le site. Soumission (option explicite) : URLs → api.indexnow.org |
 
 Plusieurs sites, plusieurs clés IndexNow : une variable par site, par exemple
@@ -43,9 +44,10 @@ dépôt**, lui donner les droits 600, puis le charger avec
   [CrUX API](https://developer.chrome.com/docs/crux/api). Sans clé, le quota
   partagé de PageSpeed est souvent épuisé : c'était le cas le 2026-09-27 et
   le 2026-09-28.
-- **Search Console** : compte de service en lecture seule, ajouté comme
-  utilisateur de la propriété. Pas à pas : [gsc-access.md](../references/gsc-access.md).
-  Nécessite `pip install google-auth requests`.
+- **Search Console** : compte de service ajouté à la propriété
+  (Propriétaire pour que l'agent soumette les sitemaps et inspecte les URL).
+  Tutoriel numéroté, liens vérifiés : [gsc-access.md](../references/gsc-access.md).
+  Nécessite `pip install google-auth requests` avec un fichier de clé.
 - **IndexNow** : générer une clé
   (`python -c "import uuid; print(uuid.uuid4().hex)"`), puis la publier à la
   racine du site. Voir [indexing-rules.md](../references/indexing-rules.md).
@@ -69,3 +71,24 @@ dépôt**, lui donner les droits 600, puis le charger avec
 | `--indexnow-key-env` | `INDEXNOW_KEY` | Nom de la variable qui contient la clé de ce site |
 | `--indexnow-submit` | non | Soumet les URLs nouvelles ou modifiées. **Action externe** |
 | `--no-ai-access` / `--no-diff` | non | Désactive le test des crawlers IA / la comparaison |
+
+## Paramètres de `url_discovery.py` (pas de secret)
+
+| Option | Défaut | Rôle |
+|---|---|---|
+| `--site` | requis | URL de l'accueil |
+| `--gsc-site` | `GSC_SITE` | Propriété Search Console |
+| `--feed` | détection dans l'accueil | Flux Atom/RSS à contrôler et notifier (répétable) |
+| `--hub-page` | — | Page de rubrique qui doit lier les nouveautés (répétable) |
+| `--urls` | — | Fichier des URL publiées : remplace la détection par le sitemap |
+| `--priority` | — | URL à inspecter en premier (répétable) |
+| `--submit` | non | Sitemap par l'API, WebSub, IndexNow. **Action externe** |
+| `--inspect` | 0 | Inspections au plus (plafond 2 000 par jour et par propriété) |
+| `--max-request` | 10 | URL proposées à la demande manuelle |
+| `--indexnow-key-env` | `INDEXNOW_KEY` | Variable qui contient la clé IndexNow de ce site |
+| `--out-dir` | `seo-reports` | Rapports et état, un sous-dossier par hôte |
+
+Options de `search_console.py inspect` : `--sitemap` ou `--urls`,
+`--state` (fichier d'état, hors dépôt), `--max-inspect` (100),
+`--max-request` (10), `--recheck-days` (7), `--pace` (0,2 s, minimum 0,1),
+`--priority`, `--out`.

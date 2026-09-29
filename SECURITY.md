@@ -27,5 +27,8 @@ Exemples de sujets à signaler :
 ## Bonnes pratiques d'utilisation
 - Clés dans l'environnement ou dans un fichier hors du dépôt (droits 600),
   jamais en argument.
-- Compte de service Search Console en lecture seule.
-- Ne pas planifier `--indexnow-submit` sans accord du propriétaire du site.
+- Compte de service Search Console : niveau choisi en connaissance de
+  cause ([gsc-access.md](references/gsc-access.md#propriétaire-ou-accès-complet-)),
+  clé révoquée dès qu'elle a pu fuiter.
+- Ne pas planifier `--indexnow-submit` ni `url_discovery.py --submit` sans
+  accord du propriétaire du site.

@@ -12,6 +12,11 @@ Retour : [README](../README.md) · Voir aussi : [SECURITY.md](../SECURITY.md),
 | `CRUX_API_KEY` ou `PAGESPEED_API_KEY` présente | chromeuxreport.googleapis.com | Origine du site + clé |
 | `GSC_SERVICE_ACCOUNT_FILE` + propriété | oauth2.googleapis.com, googleapis.com | Assertion signée du compte de service, puis requête Search Analytics en lecture seule |
 | `INDEXNOW_KEY` présente | Le site audité | GET de `/<clé>.txt` : vérification seulement |
+| `search_console.py` (`sites`, `sitemaps`, `inspect`, `stats`) ou `url_discovery.py` avec propriété | oauth2.googleapis.com, googleapis.com, searchconsole.googleapis.com | Assertion signée du compte de service (ou jeton fourni), puis lectures : liste des propriétés et sitemaps, URL à inspecter, requêtes Search Analytics. Portée `webmasters.readonly` |
+| `search_console.py submit-sitemap` ou `url_discovery.py --submit` | googleapis.com (Search Console) | URL du sitemap soumis. Portée `webmasters`. **Action externe, à approuver.** |
+| `url_discovery.py --submit` avec un flux qui déclare un hub | Le hub déclaré (par exemple pubsubhubbub.appspot.com, service de Google) | POST `hub.mode=publish` et l'URL du flux. **Action externe, à approuver.** |
+| `url_discovery.py --submit` avec `INDEXNOW_KEY` | api.indexnow.org | Hôte, clé, URL nouvelles, modifiées ou retirées. **Action externe, à approuver.** |
+| Bonus : demande d'indexation manuelle | Search Console, dans le navigateur de l'utilisateur (session déjà ouverte) | Clic « Demander une indexation » pour quelques URL. **Accord requis** ; aucun identifiant saisi, aucun CAPTCHA résolu |
 | `crawler_logs.py` sans `--no-verify` | Serveurs des fournisseurs (Google, Bing, OpenAI, Perplexity, Anthropic, Apple, DuckDuckGo, Common Crawl, Mistral) | GET des listes d'IP publiques. Rien du journal n'est envoyé. |
 | `glossary_check.py audit --site` ou `suggest` | Le site indiqué | GET publics : robots.txt, sitemaps, pages (au plus `--max-pages`, pause `--delay`, robots.txt respecté) |
 | `--indexnow-submit` **et** clé vérifiée **et** rapport précédent | api.indexnow.org | Hôte, clé, URLs nouvelles ou modifiées. Elles sont partagées avec tous les moteurs participants. **Action externe, à approuver.** |
@@ -36,8 +41,14 @@ Rien d'autre. Pas de télémétrie, pas d'appel à une API payante. L'API X
 
   Vérifié aussi en réel le 2026-09-28, avec une fausse clé PageSpeed et une
   fausse clé IndexNow contre un site réel : aucune trace dans les sorties.
-- Fichier de compte de service : hors du dépôt, avec les droits 600. Rôle
-  Search Console « Restreint » ou « Complet », jamais « Propriétaire ».
+- Fichier de compte de service : hors du dépôt, avec les droits 600, jamais
+  ouvert dans une conversation. Niveau dans Search Console : **Propriétaire**
+  pour que l'agent fasse tout (sitemaps, inspection), **Accès complet** pour
+  le moindre privilège, **Restreint** pour les seules statistiques. Un
+  propriétaire peut gérer les utilisateurs : une clé qui fuit se révoque
+  aussitôt ([gsc-access.md](../references/gsc-access.md#propriétaire-ou-accès-complet-)).
+- Le jeton OAuth est masqué dans les erreurs de `search_console.py` (test
+  `test_error_message_never_contains_the_token`).
 
 ## Données dans les rapports
 Les rapports ne contiennent que des données publiques du site audité :
