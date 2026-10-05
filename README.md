@@ -16,6 +16,22 @@ comportement du skill lui-même est décrit par 8 cas d'évaluation
 ([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
 skill-creator d'Anthropic : il n'existe pas de exécution automatique.
 
+## Comment ça marche
+
+Pour un débutant, trois gestes, et aucun copier-coller du dépôt dans la conversation :
+
+1. **Installer le skill une fois** : `git clone https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer ~/.claude/skills/seo-geo-optimizer`
+   (disponible dans tous vos projets), ou le même clone dans `.claude/skills/seo-geo-optimizer` à la racine d'un
+   projet (disponible dans ce projet seulement). Sous Windows PowerShell, remplacez `~` par
+   `$env:USERPROFILE`. Détail : [docs/INSTALLATION.md](docs/INSTALLATION.md).
+2. **Le demander** : depuis le dépôt de votre site, écrivez simplement « audite le SEO/GEO de ce site », ou tapez `/seo-geo-optimizer`.
+3. **Se laisser guider** : Claude charge le skill d'après sa description, lance l'audit, produit un rapport daté et propose les corrections dans le code, chaque recommandation avec sa source.
+
+C'est le fonctionnement de tous les skills Claude Code : un dossier avec un `SKILL.md` placé dans
+`~/.claude/skills/<nom>/` (personnel) ou `.claude/skills/<nom>/` (projet) ; Claude le charge
+automatiquement quand votre demande correspond à sa `description`, et `/<nom>` le lance à la main.
+[officiel : [skills](https://code.claude.com/docs/en/skills#where-skills-live), page consultée le 2026-10-05]
+
 ## Le problème
 Un site peut être invisible pour les moteurs de réponse IA sans que personne
 le voie. Quelques cas réels :
