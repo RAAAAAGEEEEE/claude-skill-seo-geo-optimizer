@@ -8,7 +8,7 @@ Les versions 1.x sont reconstituées depuis l'historique git.
 Mise à jour des connaissances d'après une veille du 2026-10-29 (sources
 datées et étiquettes ESTABLISHED / SUPPORTED / CLAIMED) : section Vercel,
 agents, robots IA, fonctions IA de Google, signaux d'usage, gabarits de
-portfolio. Une correction de comportement (ci-dessous). 92 tests (1 nouveau).
+portfolio. Une correction de comportement (ci-dessous). 94 tests (3 nouveaux).
 
 ### Corrigé
 - `generate_sitemap.py --ai-policy search-only` et l'exemple de
@@ -19,6 +19,11 @@ portfolio. Une correction de comportement (ci-dessous). 92 tests (1 nouveau).
   autorisé (le test correspondant est mis à jour et un test est ajouté).
   Changement visible : un robots.txt régénéré ne contient plus
   `Google-Extended` dans le groupe `Disallow`.
+- `linkgraph.py` : la page mère d'un cocon est l'URL sans paramètre de requête
+  (jamais une variante filtrée, ex. `/robots?sort=x`), et une variante filtrée
+  dont la page de liste n'a pas été récupérée (exploration partielle) n'est
+  plus signalée orpheline à tort. Correctif repris d'une copie installée du
+  skill (commit local du 2026-10-05, jamais publié), avec ses deux tests.
 - Dates aipref de `licensing-signals.md` corrigées d'un jour
   (`attach-05` : 2026-08-18, `vocab-08` : 2026-09-13, datatracker).
 

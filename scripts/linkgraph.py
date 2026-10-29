@@ -144,7 +144,15 @@ def analyze(pages: dict[str, dict], resolve: dict[str, str], home: str, host: st
 
     non_crawlable = {u: n for u, p in pages.items() if (n := sum(1 for a in p.get("anchors", []) if _not_crawlable(a)))}
 
-    orphans = sorted(u for u in sitemap_final if u != home_n and not inbound.get(u))
+    def _base(u: str) -> str:
+        p = urllib.parse.urlsplit(u)
+        return urllib.parse.urlunsplit((p.scheme, p.netloc, p.path or "/", "", ""))
+
+    # A filtered variant (/robots?x=1) is normally linked from its own listing
+    # (/robots). When that listing was not fetched (sampled crawl), the link is
+    # invisible: no verdict rather than a false orphan.
+    orphans = sorted(u for u in sitemap_final if u != home_n and not inbound.get(u)
+                     and not (not complete and urllib.parse.urlsplit(u).query and _base(u) not in pages))
     unreachable = sorted(u for u in fetched_ok if u not in depth)
     deep = sorted((u, depth[u]) for u in fetched_ok if depth.get(u, 0) > max_depth)
 
@@ -161,19 +169,30 @@ def analyze(pages: dict[str, dict], resolve: dict[str, str], home: str, host: st
 
     # Cocoon / silo view by directory.
     clusters: dict[str, dict] = {}
-    for u in fetched_ok:
+    for u in sorted(fetched_ok):  # sorted: deterministic mother when only filtered variants exist
         c = cluster_of(u)
         if not c:
             continue
         key, mother_path = c
         info = clusters.setdefault(key, {"mother": None, "children": []})
-        if urllib.parse.urlsplit(u).path.rstrip("/") == mother_path:
-            info["mother"] = u
+        parts = urllib.parse.urlsplit(u)
+        if parts.path.rstrip("/") == mother_path:
+            # Several URLs can share the mother path (filtered listings,
+            # /robots?x=1): the canonical mother is the one without a query
+            # string, never an arbitrary filtered variant.
+            if info["mother"] is None or (not parts.query and urllib.parse.urlsplit(info["mother"]).query):
+                info["mother"] = u
         else:
             info["children"].append(u)
     cluster_rows, no_uplink = [], []
+    edge_targets = {e["target"] for e in edges}
     for key, info in sorted(clusters.items()):
         mother, children = info["mother"], sorted(info["children"])
+        if mother and urllib.parse.urlsplit(mother).query:
+            # Only filtered variants of the mother were fetched: the real mother
+            # is the query-less URL, known only through the links that point to it.
+            plain = _base(mother)
+            mother = plain if plain in edge_targets else None
         if not children:
             continue  # a lone page is not a silo
         ctx_out = [e for e in edges if e["zone"] == "main" and e["source"] in set(children) | {mother}]

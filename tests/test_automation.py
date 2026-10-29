@@ -161,6 +161,33 @@ class LinkGraph(unittest.TestCase):
         g = linkgraph.analyze(pages, {}, "https://e.com/p0", "e.com", [], complete=True)
         self.assertEqual(g["repeated_anchors"][0]["anchor"], "robot humanoïde")
 
+    def test_mother_ignores_filtered_variant(self):
+        # /fr/robots?sort=x shares the mother path: the mother must be the URL without a query.
+        m, f, c = "https://e.com/fr/robots", "https://e.com/fr/robots?sort=x", "https://e.com/fr/robots/g1"
+        pages = {"https://e.com/": {"status": 200, "anchors": [_a(m)]},
+                 m: {"status": 200, "anchors": [_a(c)]},
+                 f: {"status": 200, "anchors": [_a(c)]},
+                 c: {"status": 200, "anchors": [_a(m)]}}
+        for _ in range(3):
+            g = linkgraph.analyze(dict(pages), {}, "https://e.com/", "e.com", [], complete=True)
+            cl = {x["cluster"]: x for x in g["clusters"]}["/fr/robots"]
+            self.assertEqual(cl["mother"], m)
+            self.assertEqual(cl["children_linking_mother"], 1)
+            self.assertEqual(g["cocoon_no_uplink"], [])
+
+    def test_mother_unfetched_only_filtered_variant_fetched(self):
+        # Sampled crawl: only /fr/robots?sort=x was fetched, children link to the plain /fr/robots.
+        m, f, c = "https://e.com/fr/robots", "https://e.com/fr/robots?sort=x", "https://e.com/fr/robots/g1"
+        pages = {"https://e.com/": {"status": 200, "anchors": [_a(c)]},
+                 f: {"status": 200, "anchors": []},
+                 c: {"status": 200, "anchors": [_a(m)]}}
+        g = linkgraph.analyze(pages, {}, "https://e.com/", "e.com", [f], complete=False)
+        cl = {x["cluster"]: x for x in g["clusters"]}["/fr/robots"]
+        self.assertEqual(cl["mother"], m)
+        self.assertEqual(cl["children_linking_mother"], 1)
+        self.assertEqual(g["cocoon_no_uplink"], [])
+        self.assertEqual(g["orphans"], [])  # listing not fetched: no verdict on its filtered variant
+
     def test_cluster_skips_locale_segment(self):
         self.assertEqual(linkgraph.cluster_of("https://e.com/fr/robots/g1"), ("/fr/robots", "/fr/robots"))
         self.assertIsNone(linkgraph.cluster_of("https://e.com/fr"))

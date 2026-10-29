@@ -11,7 +11,7 @@ nouvelles pages sans navigateur.
 **Statut : bêta.** Version 2.5.0, connaissances revues le 2026-10-29,
 découverte des URL et Search Console le 2026-09-30
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (92 tests hors ligne). Le
+sur quelques sites. Ses scripts sont testés (94 tests hors ligne). Le
 comportement du skill lui-même est décrit par 8 cas d'évaluation
 ([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
 skill-creator d'Anthropic : il n'existe pas de exécution automatique.

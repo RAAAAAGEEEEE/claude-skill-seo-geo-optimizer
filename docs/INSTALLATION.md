@@ -25,7 +25,7 @@ Depuis le dossier du skill :
 ```bash
 python -m unittest discover -s tests
 ```
-Résultat attendu : `Ran 92 tests` puis `OK`. Aucune requête ne sort de la
+Résultat attendu : `Ran 94 tests` puis `OK`. Aucune requête ne sort de la
 machine : le test de bout en bout sert un site de test sur 127.0.0.1.
 
 Vérification faite le 2026-09-30 (version 2.4.0, 91 tests) dans un environnement propre :
