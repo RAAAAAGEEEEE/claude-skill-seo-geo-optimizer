@@ -4,7 +4,7 @@ description: >
   Audite puis corrige, dans le code d'un site, sa visibilité dans Google
   (AI Overviews, AI Mode, Discover) et dans les moteurs de réponse IA
   (ChatGPT, Claude, Perplexity, Gemini, Copilot, Mistral) : accès réel des
-  crawlers (robots.txt, blocage CDN), indexabilité, sitemap, canonical,
+  crawlers (robots.txt, blocage CDN ou pare-feu, Cloudflare ou Vercel), indexabilité, sitemap, canonical,
   hreflang, JSON-LD, maillage interne et cocon, glossaire, journaux serveur,
   Core Web Vitals, Search Console opérée par l'agent (sitemaps, inspection
   d'URL), découverte des nouvelles URL (sitemap, WebSub, IndexNow). Audit complet en une commande,
@@ -18,14 +18,15 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.4.0"
+  version: "2.5.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.4.0 — connaissances revues le **2026-09-28**, découverte des URL
-et Search Console le **2026-09-30** (historique :
+Version 2.5.0 — connaissances revues le **2026-10-29** (Vercel, agents, Google,
+signaux d'usage), découverte des URL et Search Console le **2026-09-30**
+(historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
 
@@ -154,11 +155,12 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 
 | Levier | À retenir | Référence |
 |---|---|---|
-| Accès crawlers | Rôles : engine, search, user, training, token. `Google-Extended` et `Applebot-Extended` ne sont que des jetons. Plusieurs fetchers « utilisateur » ignorent robots.txt. Depuis le 2026-09-15, Cloudflare bloque par défaut Training et Agent sur les pages avec publicité. | [ai-crawlers.md](references/ai-crawlers.md), [cloudflare-ai-access.md](references/cloudflare-ai-access.md) |
-| Google IA | AI Overviews et AI Mode sont en France depuis le 2026-07-22. Conditions : page indexée, extrait autorisé, réglage Search Console « Search generative AI » sur Inclure. Les rapports IA donnent les impressions seulement. | [google-ai-features.md](references/google-ai-features.md) |
+| Accès crawlers | Rôles : engine, search, user, training, token. `Google-Extended` et `Applebot-Extended` ne sont que des jetons ; `Google-Extended` couvre aussi le grounding de l'app Gemini, donc le refuser retire le site de ses réponses (2026-10-15). Plusieurs fetchers « utilisateur » ignorent robots.txt. Depuis le 2026-09-15, Cloudflare bloque par défaut Training et Agent sur les pages avec publicité. | [ai-crawlers.md](references/ai-crawlers.md), [cloudflare-ai-access.md](references/cloudflare-ai-access.md) |
+| Hébergeurs statiques (Vercel) | Pare-feu Vercel : règles « AI Bots » et « Bot Protection » inactives par défaut, tous plans ; « AI Bots » sur Deny bloque les robots de citation même si robots.txt les autorise (mode Log pour observer) ; moins fiable derrière un proxy inverse. Observabilité : CLAIMED, à reconfirmer. | [cloudflare-ai-access.md](references/cloudflare-ai-access.md#vercel-ajouté-le-2026-10-29) |
+| Google IA | AI Overviews et AI Mode sont en France depuis le 2026-07-22. Conditions : page indexée, extrait autorisé, réglage Search Console « Search generative AI » sur Inclure. Les rapports IA donnent les impressions seulement. Contenu assisté par IA : vérifier titres, méta, schéma et alt, indiquer la méthode (2026-10-01). | [google-ai-features.md](references/google-ai-features.md) |
 | Technique / on-page | Une URL inconnue répond 404, jamais 5xx. Un déplacement définitif passe par 301/308. Pas de doublon de langue. Un canonical sur chaque page. Le contenu est dans le HTML initial. | [audit-framework.md](references/audit-framework.md) |
 | Maillage / cocon | Google : `<a href>`, au moins un lien vers chaque page importante, ancres descriptives, aucun nombre idéal de liens. Cocon, liens contextuels et profondeur ≤ 3 : méthodes de praticiens, CLAIMED. | [french-practitioners.md](references/french-practitioners.md) |
-| Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». | [schema-templates.md](references/schema-templates.md) |
+| Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». Gabarits Person + WebSite + Service / SoftwareApplication pour un portfolio. | [schema-templates.md](references/schema-templates.md) |
 | Contenu citable | Preuves vérifiables (chiffres, sources, dates), fraîcheur réelle, structure lisible, pas de découpage artificiel. | [evidence.md](references/evidence.md) |
 | Formats de contenu | Google ne favorise aucun format en soi : il récompense l'information originale, l'expérience de première main et les sources claires. Tests, comparatifs et classements relèvent du reviews system. FAQ : texte visible oui, rich result non. Les parts de citation par format viennent d'études de vendeurs (CLAIMED), varient selon l'intention et le moteur, et se contredisent. | [content-formats.md](references/content-formats.md) |
 | E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
@@ -167,7 +169,7 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Glossaire | Utile pour le SEO si chaque définition est originale et liée depuis les articles (ESTABLISHED, règles générales). Effet sur les citations IA : non démontré. `DefinedTerm` : aucun rich result. | [glossary.md](references/glossary.md) |
 | Automatisation | Mesurer, détecter, préparer : oui. Publier du contenu, des liens ou du balisage sans relecture : non (spam policies). Pas de suivi de citations par grounding Gemini ni par scraping de Google (conditions). | [automation.md](references/automation.md) |
 | Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
-| Agents | MCP, API catalog, WebMCP : impact marginal au 2026-09-27. | [agent-discovery.md](references/agent-discovery.md) |
+| Agents | MCP, API catalog, WebMCP (brouillon du 2026-10-27, `document.modelContext`), A2A 1.0.0 : impact marginal au 2026-10-29. Accessibilité des pages = interface des agents (effet réel CLAIMED). Atlas : arrêt annoncé, CLAIMED, à reconfirmer. | [agent-discovery.md](references/agent-discovery.md) |
 | Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
 | Local | API GBP : fiche validée depuis 60 jours ou plus, approbation manuelle. | [google-business-profile.md](references/google-business-profile.md) |
 

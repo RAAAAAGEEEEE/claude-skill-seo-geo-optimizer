@@ -1,6 +1,6 @@
 # SEO/GEO automatisable : ce qu'un script ou un agent planifié peut faire seul
 
-Revu le 2026-09-28 (ligne 2, 5 et 6 : 2026-09-30). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-28 (ligne 2, 5 et 6 : 2026-09-30 ; section 5 et fin de page : 2026-10-29). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 « maj » = date « Last updated » de la page ; « consulté » = page sans date,
 lue le 2026-09-28. Les URLs de fichiers JSON ont été téléchargées ce jour-là
 (HTTP 200).
@@ -35,7 +35,7 @@ politiques anti-spam de Google (dernière section).
 | URL Inspection API : version indexée seulement (pas de test en direct) ; renvoie couverture, état robots.txt, dernier crawl, canonical Google et canonical déclaré, sitemaps, rich results | ESTABLISHED | [inspect](https://developers.google.com/webmaster-tools/v1/urlInspection.index/inspect) (maj 2024-07-23) |
 | Pas d'API pour Crawl Stats ni pour le rapport « Generative AI performance » (impressions seules, export manuel) | ESTABLISHED (absence) | [référence API](https://developers.google.com/webmaster-tools/v1/api_reference_index) ; [Google](https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports) (2026-06-03) |
 | Bing Webmaster API : GetQueryStats, GetPageStats, GetCrawlStats, GetCrawlIssues, GetUrlInfo, SubmitUrlBatch, GetUrlSubmissionQuota… ; **aucune méthode « AI Performance »** | ESTABLISHED | [Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi?view=bing-webmaster-dotnet) (consulté) |
-| Bing AI Performance : citations Copilot, grounding queries, Citation Share ; interface seulement | ESTABLISHED | [Bing](https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview) (2026-02-10) ; [Bing](https://blogs.bing.com/search/2026/6/New-AI-Visibility-Insights-in-Bing-Webmaster-Tools-Intents-Topics-Citation-Share-Compare/) (2026-06-16) |
+| Bing AI Performance : citations Copilot, grounding queries, Citation Share, puis Topics Portfolio (bêta, 2026-10-13) ; interface seulement | ESTABLISHED | [Bing](https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview) (2026-02-10) ; [Bing](https://blogs.bing.com/search/2026/6/New-AI-Visibility-Insights-in-Bing-Webmaster-Tools-Intents-Topics-Citation-Share-Compare/) (2026-06-16) ; [Topics Portfolio](https://blogs.bing.com/webmaster/October-2026/Introducing-Topics-Portfolio-Beta-in-AI-Performance) (2026-10-13) |
 | IndexNow : 10 000 URLs par POST ; soumettre les URLs nouvelles, modifiées ou supprimées ; Google ne participe pas | ESTABLISHED | [documentation](https://www.indexnow.org/documentation), [searchengines.json](https://www.indexnow.org/searchengines.json) (consultés) |
 | Indexing API : JobPosting et BroadcastEvent seulement ; abus = perte d'accès | ESTABLISHED | [quickstart](https://developers.google.com/search/apis/indexing-api/v3/quickstart) (maj 2026-07-16) |
 
@@ -102,9 +102,10 @@ Glossaire généré depuis les données du site : voir [glossary.md](glossary.md
 | Source | Ce qu'elle donne | Automatisable ? | Niveau |
 |---|---|---|---|
 | Search Console « Generative AI performance » | Impressions AI Overviews, AI Mode, Discover ; pas de clics | Non : interface et export manuel | ESTABLISHED |
-| Bing « AI Performance » | Citations Copilot et résumés Bing, grounding queries, Citation Share | Non : interface | ESTABLISHED |
+| Bing « AI Performance » | Citations Copilot et résumés Bing, grounding queries, Citation Share, Intents, Topics ; **Topics Portfolio** (bêta, 2026-10-13) : thèmes et requêtes d'opportunité (« Top Opportunity Queries »), thèmes masqués si peu de données | Non : interface | ESTABLISHED ([Bing, 2026-10-13](https://blogs.bing.com/webmaster/October-2026/Introducing-Topics-Portfolio-Beta-in-AI-Performance)) |
 | Journaux serveur | Hits des fetchers « utilisateur » (ChatGPT-User, Perplexity-User…) | **Oui** (`crawler_logs.py`) | mesuré |
-| Analytics (référents) | Visites venant de chatgpt.com, perplexity.ai… | Oui | mesuré ; `utm_source=chatgpt.com` **non vérifié** à la source |
+| Analytics (référents) | Visites venant de chatgpt.com, perplexity.ai… | Oui | mesuré ; `utm_source=chatgpt.com` **non vérifié** à la source : constat de praticiens d'une perte du paramètre et du référent (visites classées « Direct ») vers 2026-10-09 à 2026-10-15, retour signalé le 2026-10-15 et probablement un bug, **sans déclaration d'OpenAI** ([SERoundtable](https://www.seroundtable.com/utm-parameters-missing-chatgpt-42299.html), 2026-10-14, maj 2026-10-15) — **CLAIMED**, une seule source, à reconfirmer |
+| Observabilité Vercel (tableau de bord du projet) | Ventilation des requêtes par robot (moteurs, robots IA) ; remplace un journal de requêtes sur un plan sans log drain | Non : interface | **CLAIMED, à reconfirmer** (extrait du changelog Vercel, page non relue ; voir [cloudflare-ai-access.md](cloudflare-ai-access.md#vercel-ajouté-le-2026-10-29)) |
 | API OpenAI `web_search` | Annotations `url_citation` (URL, titre, position) et liste des sources ; citations « clearly visible and clickable » à l'affichage | Oui, payant | ESTABLISHED ([doc](https://developers.openai.com/api/docs/guides/tools-web-search), consulté) |
 | API Perplexity Sonar | `citations[]` et `search_results[]` (url, date, snippet) | Oui, payant | ESTABLISHED ([doc](https://docs.perplexity.ai/api-reference/chat-completions-post), consulté) |
 | API Anthropic `web_search` | Citations avec url, titre, extrait cité ; filtres de domaines | Oui, payant | ESTABLISHED ([doc](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool), consulté) |
@@ -163,7 +164,17 @@ Source : [spam policies](https://developers.google.com/search/docs/essentials/sp
 - Données structurées trompeuses ou invisibles ([policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies), maj 2026-07-10).
 - Dates fausses ou futures ([publication dates](https://developers.google.com/search/docs/appearance/publication-dates), maj 2025-12-10).
 
-## Non vérifié (2026-09-28)
+## Non vérifié (2026-10-29)
+
+- Observabilité Vercel (filtre par catégorie IA, plans concernés, absence de
+  log drain sur le plan gratuit) : extrait de recherche et sources de tiers,
+  à relire sur la page de la doc.
+- Retour des paramètres UTM de ChatGPT le 2026-10-15 : une seule source
+  (mise à jour d'un billet), pas de déclaration d'OpenAI.
+- Les domaines de référents des autres assistants (hors `chatgpt.com`) n'ont
+  pas été revérifiés le 2026-10-29.
+
+Non vérifié le 2026-09-28 :
 
 - Quota réel de l'API de soumission d'URL Bing (aide rendue en JavaScript).
 - Ajout de `utm_source=chatgpt.com` par ChatGPT (aide OpenAI en 403).

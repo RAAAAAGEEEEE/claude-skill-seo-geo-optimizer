@@ -104,7 +104,7 @@ sortie attendue, critères vérifiables). Ils s'appuient sur les fixtures de
 `tests/fixtures/` et ne s'exécutent pas seuls.
 
 ## Tests
-`tests/` contient 91 tests hors ligne. `test_discovery.py` couvre
+`tests/` contient 92 tests hors ligne. `test_discovery.py` couvre
 `search_console.py` et `url_discovery.py` avec des transports simulés :
 catégories d'inspection, quotas, reprises sur 5xx, jeton absent des erreurs,
 URL encodées de `sitemaps.submit`, notification WebSub, URL en attente

@@ -106,10 +106,19 @@ class SitemapAndRobots(unittest.TestCase):
 
     def test_search_only_blocks_training_and_tokens_but_not_citation(self):
         robots = robotstxt.parse(generate_sitemap.build_robots("https://e.com", "search-only"))
-        for token in ("GPTBot", "ClaudeBot", "Google-Extended", "CCBot"):
+        for token in ("GPTBot", "ClaudeBot", "Applebot-Extended", "CCBot"):
             self.assertFalse(robotstxt.is_allowed(robots, token, "/"), token)
         for token in ("OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "Googlebot", "bingbot"):
             self.assertTrue(robotstxt.is_allowed(robots, token, "/"), token)
+
+    def test_search_only_keeps_google_extended_open_for_gemini_grounding(self):
+        # Google-Extended couvre aussi le grounding de l'app Gemini (Google, 2026-10-15) :
+        # l'exemple 'search-only' ne doit pas le bloquer (correction 2.5.0).
+        robots = robotstxt.parse(generate_sitemap.build_robots("https://e.com", "search-only"))
+        self.assertTrue(robotstxt.is_allowed(robots, "Google-Extended", "/"))
+        disallowed = generate_sitemap.build_robots("https://e.com", "search-only").split("Disallow: /")[0]
+        self.assertNotIn("User-agent: Google-Extended", disallowed)
+        self.assertIn("User-agent: Applebot-Extended", disallowed)
 
 
 class CrawlerCatalog(unittest.TestCase):

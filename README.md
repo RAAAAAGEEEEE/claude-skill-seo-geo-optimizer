@@ -8,10 +8,10 @@ chaque rapport au précédent. Le skill opère aussi Search Console avec les
 accès du propriétaire (sitemaps, inspection des URL) et fait découvrir les
 nouvelles pages sans navigateur.
 
-**Statut : bêta.** Version 2.4.0, connaissances revues le 2026-09-28,
+**Statut : bêta.** Version 2.5.0, connaissances revues le 2026-10-29,
 découverte des URL et Search Console le 2026-09-30
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (91 tests hors ligne). Le
+sur quelques sites. Ses scripts sont testés (92 tests hors ligne). Le
 comportement du skill lui-même est décrit par 8 cas d'évaluation
 ([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
 skill-creator d'Anthropic : il n'existe pas de exécution automatique.
@@ -51,10 +51,10 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
 ## Ce que le skill apporte
 - **Une commande, un rapport daté** : `run_audit.py` écrit un rapport
   Markdown et JSON avec un plan P0/P1/P2. Il couvre :
-  - l'accès réel des crawlers ;
+  - l'accès réel des crawlers (règles CDN Cloudflare, pare-feu Vercel) ;
   - les sitemaps ;
   - la cohérence canonical, hreflang et noindex ;
-  - le JSON-LD ;
+  - le JSON-LD (gabarits Organization, Person, WebSite, Service, SoftwareApplication, Article…) ;
   - les 404 ;
   - le maillage interne et le cocon ;
   - en option : PageSpeed, CrUX, Search Console et IndexNow.

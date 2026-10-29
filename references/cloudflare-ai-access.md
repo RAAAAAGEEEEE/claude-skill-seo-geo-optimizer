@@ -1,6 +1,6 @@
-# Blocage CDN des crawlers IA (Cloudflare et autres)
+# Blocage CDN et pare-feu des crawlers IA (Cloudflare, Vercel et autres)
 
-Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-27 ; section Vercel et ligne du 2026-09-30 ajoutées le 2026-10-29. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 `robots.txt` déclare une intention ; le CDN décide de la réalité. Un site peut
 autoriser tous les crawlers IA dans son `robots.txt` et leur renvoyer `403`
@@ -34,6 +34,7 @@ n'avait vue. (Constat de terrain du skill, mesuré ; pas une source publique.)
 | 2026-07-01 | Trafic IA classé en **Search / Agent / Training**, contrôlable par catégorie, y compris en Free ; « Pay Per Crawl évolue vers Pay Per Use » (la doc parle toujours de Pay per crawl, bêta fermée) ; les agents signés (Web Bot Auth) deviennent des bots vérifiés | [blog](https://blog.cloudflare.com/content-independence-day-ai-options/), [communiqué](https://www.cloudflare.com/press/press-releases/2026/cloudflare-allows-the-agentic-internet-to-flourish-with-a-simple-philosophy-your-content-your-rules/) |
 | **2026-09-15** | Sur les **pages avec publicité** : Search autorisé, Training et Agent **bloqués par défaut** — nouveaux clients, nouveaux sites, et clients Free existants qui n'ont pas modifié leurs réglages. Les crawlers « mixtes » qui ne séparent pas recherche et entraînement sont bloqués sur ces pages pour qui bloque Training | mêmes sources (annonce du 2026-07-01) |
 | 2026-08-21 | Bot Preference Sync : les réglages IA sont réécrits dans robots.txt, actif par défaut pour les nouveaux clients | [blog](https://blog.cloudflare.com/bot-preference-sync/) |
+| 2026-09-30 | « The Internet has a second audience » : Search / Agent / Training sur tous les plans ; Monetization Gateway (HTTP 402 + x402, bêta) ; Web Bot Auth | [blog](https://blog.cloudflare.com/agentic-web) |
 | 2026-09-15 | Statut « Accountable » pour les crawlers mixtes ; engagements attribués à Google, Apple, Microsoft (**CLAIMED** : rapportés par Cloudflare, pas par ces fournisseurs) | [blog](https://blog.cloudflare.com/accountable-mixed-use-ai-crawlers/) |
 
 Non vérifié au 2026-09-27 : un changelog Cloudflare confirmant le
@@ -90,6 +91,41 @@ Cloudflare) ou les journaux d'origine.
   cohérente (le contenu reste citable sans nourrir les modèles).
 - **Pay per crawl / Pay Per Use** : pertinent pour un éditeur qui veut
   monétiser, hors sujet pour un site qui cherche la visibilité.
+
+## Vercel (ajouté le 2026-10-29)
+
+Un site hébergé sur Vercel n'a pas de couche Cloudflare : le blocage éventuel
+vient du pare-feu de Vercel. Faits ESTABLISHED, d'après la documentation
+Vercel ([managed rulesets](https://vercel.com/docs/vercel-firewall/vercel-waf/managed-rulesets),
+[bot management](https://vercel.com/docs/bot-management), maj 2026-09-10) :
+
+- Les règles gérées **« AI Bots »** et **« Bot Protection »** sont
+  **inactives par défaut** et ouvertes à tous les plans. Un site neuf n'est
+  donc pas bloqué sans action du propriétaire.
+- Régler « AI Bots » sur **Deny** bloque les robots IA **même si robots.txt
+  les autorise** : cela coupe aussi `OAI-SearchBot` et `Claude-SearchBot`, les
+  robots de citation. Pour observer sans bloquer, utiliser le mode **Log**.
+- Les **bots vérifiés** (Googlebot…) sont exclus de « Bot Protection ».
+- Ces règles sont **moins fiables derrière un proxy inverse** : ne pas mettre
+  un autre CDN devant Vercel pour un site de ce type, la détection perd en
+  précision. La doc mentionne aussi la vérification Web Bot Auth des bots.
+- `check_ai_access.py` s'applique tel quel : un `403` pour un user-agent de
+  robot de citation alors que robots.txt l'autorise désigne une règle du
+  pare-feu, à confirmer dans le tableau de bord du projet. Même limite que
+  pour Cloudflare : requête simulée depuis votre machine.
+
+Observabilité (**CLAIMED, à reconfirmer sur la page de la doc avant d'agir** :
+changelog Vercel vu en extrait de recherche et intégrations de tiers,
+page non relue) : le tableau « Observability » ventilerait les requêtes
+« Edge Requests » par robot (moteurs, robots IA) sur tous les plans, avec un
+filtre par catégorie IA réservé à « Observability Plus » ; les journaux
+(log drains) seraient réservés aux offres payantes, donc absents du plan
+gratuit. Source : [changelog Vercel](https://vercel.com/changelog/bot-activity-and-crawler-insights-now-in-observability).
+
+Non vérifié : HSTS par défaut sur Vercel, effet exact de `trailingSlash` sur
+des canoniques existants — **CLAIMED, à reconfirmer** : tester sur un
+déploiement de prévisualisation avant de modifier `vercel.json` (sauvegarde
+horodatée du fichier d'abord).
 
 Autres CDN : Fastly et Akamai proposent des contrôles par crawler et des
 partenariats de monétisation (TollBit, 2025) ; aucun blocage par défaut

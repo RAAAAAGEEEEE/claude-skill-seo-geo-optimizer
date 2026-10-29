@@ -1,6 +1,6 @@
 # Fichiers et signaux « pour l'IA » : llms.txt, RSL, aipref, Content Signals
 
-Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-27 ; aipref et Content Signals revus le 2026-10-29. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 Point commun : **aucun grand fournisseur d'IA ne s'engage publiquement à lire
 ou respecter ces signaux** au 2026-09-27 (vérifié sur les pages crawlers
@@ -52,21 +52,29 @@ SaaS ou commerce : P2 au mieux, jamais présenté comme levier de citation, et
 
 ## IETF aipref (préférences d'usage IA)
 
-- `draft-ietf-aipref-vocab-08` (2026-09-14) : catégories `train-ai`,
+- `draft-ietf-aipref-vocab-08` (2026-09-13) : catégories `train-ai`,
   `ai-use`, `search` ; le brouillon précise qu'il ne reflète pas un
-  consensus. `draft-ietf-aipref-attach-05` (2026-08-19) : règle
+  consensus. `draft-ietf-aipref-attach-05` (2026-08-18) : règle
   `Content-Usage` dans robots.txt et en-tête HTTP `Content-Usage`.
-  ESTABLISHED ([datatracker](https://datatracker.ietf.org/wg/aipref/documents/)).
+  Statut visé : Proposed Standard ; ni dernier appel ni RFC au 2026-10-29.
+  ESTABLISHED ([datatracker](https://datatracker.ietf.org/wg/aipref/documents/),
+  consulté 2026-10-29 ; ces dates corrigent de un jour celles de la
+  version précédente du skill).
 - Jalon IESG du 2026-08-31 manqué. Aucun crawler ne documente le support.
   À surveiller, pas à déployer comme levier.
 
 ## Content Signals (Cloudflare)
 
 - `Content-Signal: search=yes, ai-input=yes, ai-train=no` dans robots.txt
-  (2025-09-24) ; champ `use=immediate|reference|full` ajouté le 2026-07-01.
+  (2025-09-24, blog modifié 2026-07-15).
 - Cloudflare dit lui-même que ce sont des préférences, pas une protection
-  technique ; aucun engagement d'une entreprise d'IA annoncé. ESTABLISHED
-  ([blog](https://blog.cloudflare.com/content-signals-policy/)).
+  technique (« préférences, pas contre-mesures techniques ») ; aucune
+  entreprise d'IA nommée ni engagement annoncé. ESTABLISHED
+  ([blog](https://blog.cloudflare.com/content-signals-policy/), relu le 2026-10-29).
+- Champ `use=immediate|reference|full`, annoncé comme ajouté le 2026-07-01 par
+  une version précédente de ce skill : **absent de la page relue le
+  2026-10-29** — **CLAIMED, à reconfirmer** ; ne pas l'écrire dans un
+  robots.txt avant de l'avoir revu à la source.
 - Adoption : 4 % des 200 000 domaines les plus visités (scan Cloudflare,
   2026-04-17 — CLAIMED, méthode publiée, vendeur de la fonction).
 

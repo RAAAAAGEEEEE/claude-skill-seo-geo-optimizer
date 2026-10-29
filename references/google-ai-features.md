@@ -1,6 +1,6 @@
 # Google : AI Overviews, AI Mode, Discover, Actualités, Search Console
 
-Revu le 2026-09-27. Tout est **ESTABLISHED** (documentation ou blog Google)
+Revu le 2026-09-27 ; section « Octobre 2026 » ajoutée le 2026-10-29. Tout est **ESTABLISHED** (documentation ou blog Google)
 sauf mention. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 ## AI Overviews et AI Mode
@@ -15,6 +15,20 @@ sauf mention. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-pre
 | `Google-Extended` ne retire **pas** un site des AI Overviews / AI Mode | [common crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers) (maj 2026-07-14) |
 | **Réglage « Search generative AI »** dans Search Console (Paramètres) : Inclure (défaut) / Exclure / Hériter. Mondial depuis le **2026-08-31**. Exclure = plus de liens ni d'usage comme entrée dans AI Overviews, AI Mode et AI Overviews de Discover, sans effet sur le classement ailleurs ni sur l'entraînement ; effet en 1-2 jours | [aide Search Console](https://support.google.com/webmasters/answer/16908024), [blog Google](https://blog.google/products-and-platforms/products/search/new-controls-website-owners/) (2026-06-03, maj 2026-08-31) |
 | Être « inclus » dans ce réglage est désormais une condition d'éligibilité | guide d'optimisation (2026-07-10) |
+
+## Octobre 2026 (ajouté le 2026-10-29)
+
+| Fait | Étiquette | Source (date) |
+|---|---|---|
+| Mise à jour d'AI Mode et d'AI Overviews : plus de liens en ligne, section « sites officiels » (en test), profils de créateurs, carrousels d'actualités | ESTABLISHED (annonce Google) | [blog Google](https://blog.google/products-and-platforms/products/search/updates-ai-mode-overviews-explore-web/) (2026-10-15) |
+| Page « control what you share » mise à jour : relire la page avant toute décision de blocage | ESTABLISHED (la mise à jour ; le détail de ses changements n'a pas été relu) | [Google](https://developers.google.com/search/docs/crawling-indexing/control-what-you-share) (maj 2026-10-21) |
+| Contenu assisté par IA : permis s'il respecte les règles anti-spam ; **vérifier les faits, y compris titres, méta-descriptions, données structurées et textes alternatifs** ; indiquer aux lecteurs comment le contenu a été créé est recommandé ; renvoi aux consignes des évaluateurs (sections 4.6.5 et 4.6.6) | ESTABLISHED | [using gen AI content](https://developers.google.com/search/docs/fundamentals/using-gen-ai-content) (maj 2026-10-01) |
+| Mots d'URL : tirets plutôt que soulignés | ESTABLISHED | [journal des mises à jour](https://developers.google.com/search/updates) (2026-10-23) |
+
+Conséquences pratiques : une phrase factuelle de méthode éditoriale sur les
+contenus assistés par IA (qui a écrit, avec quels outils, qui a relu) ; ne
+pas renommer des URL existantes pour des tirets, mais les adopter pour les
+nouvelles ; tout retrait ou changement d'URL passe par une redirection 301.
 
 Règle d'audit : sur un site qui ne se voit pas dans les réponses IA de
 Google, vérifier **dans cet ordre** : indexation, `nosnippet`/`max-snippet`,

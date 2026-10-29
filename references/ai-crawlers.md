@@ -1,6 +1,6 @@
 # Crawlers de recherche et d'IA : rôles, robots.txt, vérification
 
-Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-27 ; Google, OpenAI (AdsBot), Meta (ads), Apple, Comet et Atlas revus le 2026-10-29. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 Version machine de ce tableau : [`../scripts/ai_bots.py`](../scripts/ai_bots.py)
 — mettre à jour les deux ensemble.
 
@@ -18,14 +18,14 @@ Version machine de ce tableau : [`../scripts/ai_bots.py`](../scripts/ai_bots.py)
 
 | Fournisseur | engine / search | user | training / token | Source (date) |
 |---|---|---|---|---|
-| Google | `Googlebot` (Search, AI Overviews, AI Mode, Discover) | `Google-Agent` (agents hébergés par Google, ignore généralement robots.txt), `Google-GeminiNotebook` | `Google-Extended` (jeton : entraînement Gemini + grounding Gemini Apps/Vertex AI) | [common crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers) (2026-07-14), [user-triggered](https://developers.google.com/crawling/docs/crawlers-fetchers/google-user-triggered-fetchers) (2026-08-19) |
+| Google | `Googlebot` (Search, AI Overviews, AI Mode, Discover) | `Google-Agent` (agents hébergés par Google, ignore généralement robots.txt ; identité Web Bot Auth `agent.bot.goog` en expérimentation), `Google-GeminiNotebook` | `Google-Extended` (jeton : entraînement Gemini + grounding Gemini Apps/Vertex AI) | [common crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers) (maj 2026-10-15), [user-triggered](https://developers.google.com/crawling/docs/crawlers-fetchers/google-user-triggered-fetchers) (2026-08-19) |
 | Microsoft | `bingbot` (Bing et grounding de Copilot) | — | pas de jeton : `NOCACHE` / `NOARCHIVE` en meta | [Bing, 2023-09-22](https://blogs.bing.com/webmaster/september-2023/Announcing-new-options-for-webmasters-to-control-usage-of-their-content-in-Bing-Chat), [Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-365/copilot/manage-public-web-access) (2026-08-18) |
-| OpenAI | `OAI-SearchBot` | `ChatGPT-User` (robots.txt non garanti) | `GPTBot` | [OpenAI bots](https://developers.openai.com/api/docs/bots) (consulté 2026-09-27) |
+| OpenAI | `OAI-SearchBot` (effet d'un changement ~24 h) | `ChatGPT-User` (robots.txt non garanti) ; `OAI-AdsBot` (valide les pages de publicité soumises) | `GPTBot` | [OpenAI bots](https://developers.openai.com/api/docs/bots) (sans date, consulté 2026-10-29) |
 | Anthropic | `Claude-SearchBot` | `Claude-User` (respecte robots.txt) | `ClaudeBot` | [Anthropic](https://support.claude.com/en/articles/8896518) (2026-04-07) |
 | Perplexity | `PerplexityBot` | `Perplexity-User` (ignore généralement robots.txt) | — | [Perplexity](https://docs.perplexity.ai/guides/bots) (consulté 2026-09-27) |
 | Mistral (Le Chat, renommé Vibe le 2026-08-12) | `MistralAI-Index` | `MistralAI-User` | `MistralAI-Training` | [Mistral](https://docs.mistral.ai/robots) (consulté 2026-09-27) |
-| Apple | `Applebot` (Siri, Spotlight, Safari ; suit les règles Googlebot s'il n'est pas nommé) | — | `Applebot-Extended` (jeton, ne crawle pas) | [Apple](https://support.apple.com/en-us/119829) (2026-09-04) |
-| Meta | `meta-webindexer` (recherche Meta AI) | `meta-externalfetcher` (peut ignorer robots.txt) | `meta-externalagent` (entraînement et indexation) | [Meta](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/) (consulté 2026-09-27) |
+| Apple | `Applebot` (Siri, Spotlight, Safari ; suit les règles Googlebot s'il n'est pas nommé) | — | `Applebot-Extended` (jeton, entraînement seulement, ne crawle pas) | [Apple](https://support.apple.com/en-us/119829) (2026-09-04) |
+| Meta | `meta-webindexer` (recherche Meta AI) | `meta-externalfetcher` (peut ignorer robots.txt) | `meta-externalagent` (entraînement et indexation) ; `meta-externalads` (publicité) | [Meta](https://developers.facebook.com/docs/sharing/webmasters/web-crawlers/) (consulté 2026-09-27) |
 | Amazon | `Amzn-SearchBot` | `Amzn-User` | `Amazonbot` (ignore `Crawl-delay`) | [Amazon](https://developer.amazon.com/amazonbot) (consulté 2026-09-27) |
 | DuckDuckGo | `DuckAssistBot` (réponses IA, pas d'entraînement ; effet sous 72 h) | — | — | [DuckDuckGo](https://duckduckgo.com/duckduckgo-help-pages/results/duckassistbot) |
 | Common Crawl | — | — | `CCBot` (corpus ouvert) | [Common Crawl](https://commoncrawl.org/ccbot) |
@@ -34,6 +34,28 @@ Version machine de ce tableau : [`../scripts/ai_bots.py`](../scripts/ai_bots.py)
 Tout ce tableau est **ESTABLISHED** (documentation de chaque fournisseur sur
 son propre crawler). Pas de crawler documenté trouvé pour xAI (Grok),
 DeepSeek, ByteDance, You.com, Cohere au 2026-09-27.
+
+Mises à jour du 2026-10-29 (ESTABLISHED sauf mention) :
+- **OAI-AdsBot** (OpenAI) et **meta-externalads** (Meta) concernent les
+  pages de publicité, pas la citation : ils ne figurent pas dans le catalogue
+  machine `ai_bots.py`, qui ne couvre que la recherche, la lecture à la
+  demande et l'entraînement. Les bloquer n'affecte pas la citation.
+- **Apple** : la directive `nosnippet` exclut la page des réponses IA d'Apple,
+  et `isAccessibleForFree: false` en JSON-LD l'exclut du contexte IA
+  ([Apple](https://support.apple.com/en-us/119829), 2026-09-04).
+  `Applebot-Extended` ne couvre que l'entraînement.
+- **Google-Agent** : identité Web Bot Auth `agent.bot.goog` en
+  expérimentation ; seule une partie des requêtes est signée, garder la
+  vérification par IP en repli (voir [automation.md](automation.md)).
+- **Comet** (navigateur à agent de Perplexity) : aucun user-agent documenté,
+  il apparaît comme Chrome. SUPPORTED ([MIT AI Agent Index](https://aiagentindex.mit.edu/2025/comet),
+  [HUMAN Security](https://humansecurity.com/ai-agent/perplexity-comet/)).
+  Conséquence : le user-agent est un signal faible pour ces agents ;
+  l'accessibilité de la page et le comportement comptent davantage.
+- **ChatGPT Atlas** : arrêt annoncé le 2026-07-09 par la presse (visé
+  2026-08-09) — CLAIMED, à reconfirmer ; voir
+  [agent-discovery.md](agent-discovery.md#chatgpt-atlas--arrêt-annoncé). Ne
+  plus compter sur lui comme canal.
 
 Les Google IP ranges ont changé d'adresse : `/static/crawling/ipranges/*.json`
 ([Google, 2026-03-31](https://developers.google.com/search/blog/2026/03/crawler-ip-ranges)).
@@ -50,6 +72,10 @@ Anthropic publie les siens depuis août 2026 : `https://claude.com/crawling/bots
   seul `OAI-SearchBot` le fait (un site exclu peut encore apparaître comme
   lien de navigation). Si les deux sont autorisés, OpenAI peut réutiliser un
   même crawl pour les deux usages. ESTABLISHED.
+- **`Google-Extended`** : jeton d'entraînement de Gemini **et** de grounding
+  dans l'app Gemini et Vertex AI ; sans effet sur Search ni sur les AI
+  Overviews. Le refuser retire donc le site des réponses de l'app Gemini
+  (ESTABLISHED, [common crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers), maj 2026-10-15).
 - **Fetchers « user »** : ChatGPT-User, Perplexity-User, Google-Agent,
   meta-externalfetcher et Amzn-User ont des exceptions documentées à
   robots.txt. robots.txt n'est pas un contrôle d'accès ; seul le serveur ou le
@@ -69,7 +95,7 @@ lancer [`../scripts/check_ai_access.py`](../scripts/check_ai_access.py)
 avant de conclure. Limite : le test part de votre machine avec un user-agent
 simulé ; un CDN qui vérifie les IP peut traiter le vrai bot autrement.
 
-## Exemple de robots.txt « citation autorisée, entraînement refusé »
+## Exemple de robots.txt « citation autorisée, entraînement refusé » (corrigé le 2026-10-29)
 
 Décision produit, à présenter et non à trancher. Généré par
 `python scripts/generate_sitemap.py pages.json --domain https://exemple.fr --write-robots --ai-policy search-only`.
@@ -81,7 +107,6 @@ Allow: /
 # Politique 'search-only' : pas d'entrainement, citation autorisee.
 User-agent: GPTBot
 User-agent: ClaudeBot
-User-agent: Google-Extended
 User-agent: Applebot-Extended
 User-agent: MistralAI-Training
 User-agent: meta-externalagent
@@ -96,6 +121,7 @@ User-agent: Claude-User
 User-agent: PerplexityBot
 User-agent: Perplexity-User
 User-agent: Google-Agent
+User-agent: Google-Extended
 User-agent: Applebot
 User-agent: MistralAI-Index
 User-agent: MistralAI-User
@@ -109,10 +135,17 @@ Allow: /
 Sitemap: https://exemple.fr/sitemap.xml
 ```
 
-Sortie réelle du script (exécuté le 2026-09-27). `Googlebot` et `bingbot`
-restent couverts par le groupe `*`. Rappel : `Google-Extended: Disallow`
-n'enlève pas le site des AI Overviews ; seul le réglage Search Console ou
-`nosnippet` le fait.
+Sortie réelle du script (exécuté le 2026-10-29). `Googlebot` et `bingbot`
+restent couverts par le groupe `*`.
+
+**Correction (2.5.0).** Les versions précédentes de cet exemple et du script
+bloquaient aussi `Google-Extended`. Ce jeton couvre l'entraînement **et** le
+grounding de l'app Gemini et de Vertex AI : le bloquer retire le site des
+réponses de Gemini, ce qui contredit « citation autorisée ». Il est donc
+maintenant autorisé. Pour le refuser quand même (choix du propriétaire, à
+présenter avec cette conséquence), le déplacer dans le groupe `Disallow: /`.
+Rappel : `Google-Extended: Disallow` n'enlève pas le site des AI Overviews ;
+seul le réglage Search Console ou `nosnippet` le fait.
 
 ## Soumission Brave Search (visibilité Claude)
 

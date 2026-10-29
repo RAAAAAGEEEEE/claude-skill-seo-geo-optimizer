@@ -3,6 +3,57 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.5.0] — 2026-10-29
+
+Mise à jour des connaissances d'après une veille du 2026-10-29 (sources
+datées et étiquettes ESTABLISHED / SUPPORTED / CLAIMED) : section Vercel,
+agents, robots IA, fonctions IA de Google, signaux d'usage, gabarits de
+portfolio. Une correction de comportement (ci-dessous). 92 tests (1 nouveau).
+
+### Corrigé
+- `generate_sitemap.py --ai-policy search-only` et l'exemple de
+  `references/ai-crawlers.md` bloquaient `Google-Extended`. Ce jeton couvre
+  aussi le grounding de l'app Gemini et de Vertex AI (Google, common
+  crawlers, maj 2026-10-15) : le bloquer retire le site des réponses de
+  Gemini, ce qui contredit « citation autorisée ». Il reste maintenant
+  autorisé (le test correspondant est mis à jour et un test est ajouté).
+  Changement visible : un robots.txt régénéré ne contient plus
+  `Google-Extended` dans le groupe `Disallow`.
+- Dates aipref de `licensing-signals.md` corrigées d'un jour
+  (`attach-05` : 2026-08-18, `vocab-08` : 2026-09-13, datatracker).
+
+### Ajouté
+- `references/cloudflare-ai-access.md`, retitré « Blocage CDN et pare-feu » :
+  section **Vercel** (règles « AI Bots » et « Bot Protection » inactives par
+  défaut sur tous les plans, « Deny » prime sur robots.txt, bots vérifiés
+  exclus, moins fiable derrière un proxy inverse ; ESTABLISHED, docs Vercel
+  maj 2026-09-10) et observabilité Vercel (CLAIMED, à reconfirmer). Ligne
+  Cloudflare du 2026-09-30 (Search / Agent / Training, Monetization Gateway).
+- `references/schema-templates.md` : gabarits **Person + WebSite** (graphe
+  d'accueil), **Service** et **SoftwareApplication / WebApplication** pour un
+  portfolio d'indépendant, avec règles (pas d'avis ni de prix inventés).
+- `references/agent-discovery.md` : WebMCP (brouillon du 2026-10-27, surface
+  `document.modelContext`, essai d'origine Chrome 149, API déclarative),
+  A2A 1.0.0, contrôles et chemins de l'Agent Readiness de Cloudflare,
+  Lighthouse « Agentic Browsing », accessibilité comme interface des agents,
+  arrêt annoncé d'Atlas (CLAIMED, à reconfirmer).
+- `references/ai-crawlers.md` : `OAI-AdsBot`, `meta-externalads`, identité
+  Web Bot Auth de `Google-Agent`, Comet sans user-agent propre (SUPPORTED),
+  consignes Applebot (`nosnippet`, `isAccessibleForFree`), date de la page
+  Google des robots communs (2026-10-15).
+- `references/google-ai-features.md` : annonce AI Mode / AI Overviews du
+  2026-10-15, page « control what you share » (2026-10-21), guide du contenu
+  IA (2026-10-01), tirets dans les URL (2026-10-23).
+- `references/automation.md` : Topics Portfolio de Bing (2026-10-13),
+  épisode UTM de ChatGPT du 2026-10-09 au 2026-10-15 (CLAIMED), observabilité
+  Vercel (CLAIMED).
+
+### Modifié
+- `references/licensing-signals.md` : le champ `use` de Content Signals est
+  passé en CLAIMED, à reconfirmer (absent de la page relue le 2026-10-29).
+- `SKILL.md` : version 2.5.0, date de revue 2026-10-29, ligne « Hébergeurs
+  statiques (Vercel) » dans le tableau des leviers.
+
 ## [2.4.0] — 2026-09-30
 
 Search Console opérée par l'agent et découverte automatique des nouvelles

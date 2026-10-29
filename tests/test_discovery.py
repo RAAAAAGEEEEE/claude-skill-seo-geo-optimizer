@@ -1,4 +1,4 @@
-"""Offline tests for search_console.py and url_discovery.py (2.4.0).
+"""Offline tests for search_console.py and url_discovery.py (added in 2.4.0).
 
 Every HTTP call goes through an injected fake: no request leaves the machine,
 no Google library is needed.

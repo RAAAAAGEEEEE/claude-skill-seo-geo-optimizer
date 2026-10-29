@@ -33,6 +33,9 @@ n'importe quelle source externe (export d'une DB, liste de sous-domaines...)
 - search-only : crawlers d'entrainement interdits, crawlers de recherche et
                 fetchers declenches par l'utilisateur autorises. Liste et roles :
                 scripts/ai_bots.py, references/ai-crawlers.md.
+                `Google-Extended` reste AUTORISE : ce jeton couvre aussi le
+                grounding de l'app Gemini et de Vertex AI (Google, 2026-10-15) ;
+                le refuser retire le site des reponses de Gemini.
 C'est une decision produit : ne pas la trancher a la place du proprietaire.
 """
 
@@ -90,13 +93,21 @@ def build_sitemap(pages: list[dict], domain: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+# Jetons gardes ouverts meme en 'search-only' : Google-Extended couvre l'entrainement
+# de Gemini ET le grounding de l'app Gemini / Vertex AI (Google, common crawlers, 2026-10-15).
+SEARCH_ONLY_KEEP_OPEN = ("google-extended",)
+
+
 def build_robots(domain: str, ai_policy: str = "open") -> str:
     lines = ["User-agent: *", "Allow: /", ""]
     crawlers = [b for b in AI_BOTS if b.robots_token and b.robots_token.lower() not in ("googlebot", "bingbot")]
     if ai_policy == "search-only":
         lines.append("# Politique 'search-only' : pas d'entrainement, citation autorisee.")
-        blocked = [b for b in crawlers if b.role in ("training", "token")]
-        allowed = [b for b in crawlers if b.role not in ("training", "token")]
+        def _is_blocked(b):
+            return b.role in ("training", "token") and b.robots_token.lower() not in SEARCH_ONLY_KEEP_OPEN
+
+        blocked = [b for b in crawlers if _is_blocked(b)]
+        allowed = [b for b in crawlers if not _is_blocked(b)]
     else:
         lines.append("# Politique 'open' : crawlers IA autorises explicitement.")
         blocked, allowed = [], crawlers

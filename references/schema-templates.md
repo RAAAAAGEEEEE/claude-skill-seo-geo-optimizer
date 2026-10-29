@@ -1,6 +1,6 @@
 # Données structurées : statut Google et gabarits JSON-LD
 
-Revu le 2026-09-28. Statuts **ESTABLISHED** d'après la
+Revu le 2026-09-28 ; gabarits Person, WebSite, Service et SoftwareApplication pour un portfolio ajoutés le 2026-10-29. Statuts **ESTABLISHED** d'après la
 [galerie Google](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)
 (maj 2026-06-15) et le [journal des mises à jour](https://developers.google.com/search/updates).
 
@@ -22,6 +22,10 @@ Règles :
 | Type | Rich result Google au 2026-09-27 | Verdict |
 |---|---|---|
 | `Organization` (+ `logo`, `sameAs`) | Logo, panneau d'entité ; aucune propriété requise | Page d'accueil, toujours |
+| `Person` (+ `jobTitle`, `sameAs`, `knowsAbout`) | Pas de rich result dédié à relever dans la galerie ; sert la désambiguïsation d'entité et d'`author` / `publisher` | Portfolio ou site d'indépendant sans société à nommer : accueil, à la place d'`Organization` |
+| `Service` / `ProfessionalService` | Aucun rich result attendu : balisage d'entité (veille du 2026-10-29) | Page « Travailler avec moi » d'un indépendant ; jamais de prix ni d'avis inventés |
+| `SoftwareApplication` / `WebApplication` | Rich result seulement avec `offers` ou `aggregateRating` réels et visibles ; sinon balisage d'entité | Page d'un produit ou d'une étude de cas d'un portfolio |
+| `ProfilePage` (`mainEntity` → `Person`) | Rich result conçu pour les profils de créateurs | Seulement si la page est réellement un profil |
 | `WebSite` (`name`, `alternateName`) | **Nom du site** dans les résultats (la sitelinks search box a disparu le 2024-11-21) | Page d'accueil, toujours |
 | `Article` / `NewsArticle` / `BlogPosting` | Oui ; aucune propriété requise ; `author.url` ou `sameAs` recommandés | Tout contenu éditorial |
 | `BreadcrumbList` | Oui, **desktop seulement** depuis le 2025-01-23 | Pages internes |
@@ -67,6 +71,93 @@ Supprimer un balisage retiré n'est pas nécessaire (Google, 2023-08-08).
 }
 </script>
 ```
+
+## Portfolio d'indépendant : Person + WebSite + Service / SoftwareApplication
+Ajouté le 2026-10-29. Ces gabarits sont des modèles du skill, pas des
+sources : ils structurent des données que le propriétaire fournit. Règles
+Google qui s'y appliquent (ESTABLISHED, [galerie](https://developers.google.com/search/docs/appearance/structured-data/search-gallery),
+maj 2026-06-15) : le balisage décrit ce qui est visible ; aucun avis ni note
+auto-attribués sur sa propre activité ; aucune propriété n'est requise pour
+`Person`, `Service` ou `SoftwareApplication`. Chaque `@id` est stable (même
+valeur sur toutes les pages) pour relier les entités. **N'ajouter
+`Organization` que s'il existe une société à nommer.** Un `Person` sans
+profil réel dans `sameAs` vaut mieux qu'un `sameAs` rempli de profils
+inventés : omettre la propriété.
+
+### Accueil : Person + WebSite dans un seul graphe
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "{{url_racine}}/#person",
+      "name": "{{nom_complet}}",
+      "url": "{{url_racine}}/",
+      "image": "{{url_photo_ou_portrait}}",
+      "jobTitle": "{{intitule_reel}}",
+      "description": "{{deux_phrases_factuelles_visibles_sur_la_page}}",
+      "sameAs": ["{{profil_reel_1}}", "{{profil_reel_2}}"],
+      "knowsAbout": ["{{domaine_1}}", "{{domaine_2}}"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{url_racine}}/#website",
+      "name": "{{nom_du_site}}",
+      "url": "{{url_racine}}/",
+      "inLanguage": "{{fr|en}}",
+      "publisher": { "@id": "{{url_racine}}/#person" }
+    }
+  ]
+}
+</script>
+```
+
+### Page « Travailler avec moi » : Service
+Pas d'`offers`, de `aggregateRating` ni de `review` tant que le prix, la
+note et l'avis ne sont pas réels et visibles sur la page.
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": "{{url_page}}#service",
+  "name": "{{nom_du_service}}",
+  "serviceType": "{{type_de_service}}",
+  "description": "{{description_identique_au_texte_visible}}",
+  "url": "{{url_page}}",
+  "provider": { "@id": "{{url_racine}}/#person" },
+  "areaServed": "{{pays_ou_zone_reelle}}"
+}
+</script>
+```
+`ProfessionalService` (sous-type de `LocalBusiness`) n'est à choisir que si
+l'activité a une adresse ou une zone d'intervention réelle à afficher.
+
+### Page produit ou étude de cas : SoftwareApplication (ou WebApplication)
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "{{SoftwareApplication|WebApplication}}",
+  "@id": "{{url_page}}#app",
+  "name": "{{nom_du_produit}}",
+  "url": "{{url_page}}",
+  "description": "{{description_identique_au_texte_visible}}",
+  "applicationCategory": "{{categorie_reelle}}",
+  "creator": { "@id": "{{url_racine}}/#person" }
+}
+</script>
+```
+Ajouter `offers` (prix réel, devise, visible sur la page) seulement si la
+page vend le produit ; ajouter `aggregateRating` seulement avec de vrais
+avis visibles et non sollicités par l'auteur sur sa propre activité. Sinon
+omettre : aucun rich result n'est attendu et le balisage sert l'entité.
+
+Valider chaque bloc : `python scripts/validate_schema.py <fichier|URL>`, puis
+le Rich Results Test. Un `@id` référencé (`#person`) doit être défini sur la
+même page ou sur une page que l'on balise de façon identique ailleurs.
 
 ## LocalBusiness (choisir le sous-type : Restaurant, Bakery, HairSalon...)
 Pas d'`aggregateRating` ici : des notes que l'entreprise s'attribue ne
