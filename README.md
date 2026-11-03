@@ -8,7 +8,7 @@ chaque rapport au précédent. Le skill opère aussi Search Console avec les
 accès du propriétaire (sitemaps, inspection des URL) et fait découvrir les
 nouvelles pages sans navigateur.
 
-**Statut : bêta.** Version 2.5.0, connaissances revues le 2026-10-29,
+**Statut : bêta.** Version 2.6.0, connaissances revues le 2026-11-03,
 découverte des URL et Search Console le 2026-09-30
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
 sur quelques sites. Ses scripts sont testés (94 tests hors ligne). Le

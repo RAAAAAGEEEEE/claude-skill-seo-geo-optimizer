@@ -18,13 +18,13 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.5.0"
+  version: "2.6.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.5.0 — connaissances revues le **2026-10-29** (Vercel, agents, Google,
+Version 2.6.0 — connaissances revues le **2026-11-03** (Vercel, agents, Google,
 signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
@@ -104,6 +104,9 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
      ([content-formats.md](references/content-formats.md)). Un format ne
      se publie que si le site détient la preuve qu'il exige (test réel,
      donnée propre, source datée). Jamais une page par variante de requête.
+   - **Mots-clés sous-exploités d'une niche** :
+     [keyword-research.md](references/keyword-research.md) ; la matrice de
+     suggestions et la lecture de SERP précèdent le choix des formats.
 4. **PLAN** : reprendre le plan P0/P1/P2 du rapport. Un constat CLAIMED
    (maillage de praticien, seuils) reste P2. **Attendre le GO** avant de
    coder.
@@ -163,6 +166,7 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». Gabarits Person + WebSite + Service / SoftwareApplication pour un portfolio. | [schema-templates.md](references/schema-templates.md) |
 | Contenu citable | Preuves vérifiables (chiffres, sources, dates), fraîcheur réelle, structure lisible, pas de découpage artificiel. | [evidence.md](references/evidence.md) |
 | Formats de contenu | Google ne favorise aucun format en soi : il récompense l'information originale, l'expérience de première main et les sources claires. Tests, comparatifs et classements relèvent du reviews system. FAQ : texte visible oui, rich result non. Les parts de citation par format viennent d'études de vendeurs (CLAIMED), varient selon l'intention et le moteur, et se contredisent. | [content-formats.md](references/content-formats.md) |
+| Recherche de mots-clés sans outil payant | Suggestions en matrice, lecture de SERP, Trends, Search Console. Aucun volume fiable et gratuit : signaux relatifs croisés. Une page par intention, preuve propre exigée, publication par lots. Scaled content abuse et doorway abuse : ESTABLISHED (Google, 2024-03-05). | [keyword-research.md](references/keyword-research.md) |
 | E-E-A-T / éditeur | Pas un facteur de classement en soi. Auteur désambiguïsé (`author.url`), politiques éditoriales exactes. | [eeat-news.md](references/eeat-news.md) |
 | Performance | LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1, au p75 terrain (CrUX). | [audit-framework.md](references/audit-framework.md#vitesse--core-web-vitals) |
 | Indexation | Google : sitemap exact (lastmod vrai), déclaré dans robots.txt et soumis par l'API Search Console ; flux avec WebSub ; lien depuis l'accueil. Ping sitemap mort depuis 2023. Indexing API interdite hors JobPosting/BroadcastEvent. IndexNow pour Bing et les autres, **clé à la racine**. | [indexing-rules.md](references/indexing-rules.md), [url-discovery.md](references/url-discovery.md) |

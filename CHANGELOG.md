@@ -3,6 +3,17 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.6.0] — 2026-11-03
+
+### Ajouté
+- `references/keyword-research.md` : méthode pour repérer les mots-clés
+  sous-exploités d'une niche et s'y positionner sans outil payant
+  (suggestions en matrice, lecture de SERP, Trends, Search Console,
+  notation, publication par lots), avec limites, sources datées et
+  étiquettes ESTABLISHED / SUPPORTED / CLAIMED.
+- `SKILL.md` : puce à l'étape 3, ligne au tableau « Les leviers », version
+  2.6.0 ; renvoi dans `references/checklist.md`.
+
 ## [2.5.0] — 2026-10-29
 
 Mise à jour des connaissances d'après une veille du 2026-10-29 (sources

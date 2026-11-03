@@ -56,6 +56,9 @@ que `run_audit.py` contrôle :
       (`glossary_check.py audit --site`). SEO : ESTABLISHED (règles
       générales) ; citations IA : non démontré. Voir
       [glossary.md](glossary.md).
+- [ ] Mots-clés sous-exploités (avant de choisir les requêtes), voir
+      [keyword-research.md](keyword-research.md) : matrice de suggestions,
+      SERP lues, notation, preuve propre exigée par page.
 - [ ] Formats de contenu (avant d'en planifier), voir
       [content-formats.md](content-formats.md) :
   - chaque format prévu répond à une intention de la carte de la demande,
