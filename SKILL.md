@@ -21,13 +21,13 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.7.0"
+  version: "2.8.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.7.0, connaissances revues le **2026-11-04** (robots malveillants et faux
+Version 2.8.0, connaissances revues le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
 trafic, contenu utile de Google mis à jour le 2026-10-05), puis le **2026-10-29**
 (Vercel, agents, Google, signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
@@ -83,7 +83,7 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
 
 ## Procédure (PLAN → FIX → VERIFY)
 
-1. **Audit automatique** — `python scripts/run_audit.py --site <url> --out-dir <dossier>`.
+1. **Audit automatique**, `python scripts/run_audit.py --site <url> --out-dir <dossier>`.
    - Code de sortie : 0 = aucun P0, 1 = au moins un P0, 2 = accueil
      injoignable (ne rien conclure).
    - Lire en premier les modules `skipped` et `error` : un module absent
@@ -194,6 +194,7 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
 | Robots malveillants, faux trafic | Chemins de scanners coupés en 444 sans toucher aux bons robots ni aux aperçus de lien (WhatsApp, `facebookexternalhit`) ; `real_ip` derrière Cloudflare ; statistiques sans trafic interne ni robots ; pièges : Bot Fight Mode challenge les appels d'API et ne se contourne pas par règle WAF, « Block AI bots » coupe les moteurs IA voulus. `hygiene_check.py probes` et `logs`. | [bot-traffic-hygiene.md](references/bot-traffic-hygiene.md) |
 | Contenu utile (petit site) | Page « creating helpful content » mise à jour le 2026-10-05 (section « Main content » : effort, originalité, talent, exactitude). Pages pour des acheteurs précis, jamais de masse, auteur et expérience visibles, pages ville et métier jamais en doublon, rythme que la relecture suit. `hygiene_check.py content`. | [helpful-content-small-site.md](references/helpful-content-small-site.md) |
+| Confiance et hygiène | HTTPS, HSTS, nosniff, Referrer-Policy, security.txt, `sameAs` et contact de l'Organization : P2, **aucun effet de classement démontré** (Google : seuls les Core Web Vitals comptent dans « page experience »). Le contrôle qui compte : `lastmod` du sitemap égal au vrai changement de la page (Google, 2023-06-26). Écartés : ai.txt, preload, SRI, CAA, DNSSEC, SPF/DMARC. `trust_check.py`. | [trust-hygiene.md](references/trust-hygiene.md) |
 | Local | API GBP : fiche validée depuis 60 jours ou plus, approbation manuelle. | [google-business-profile.md](references/google-business-profile.md) |
 
 ## Niveaux de preuve

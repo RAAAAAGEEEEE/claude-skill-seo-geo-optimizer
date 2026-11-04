@@ -66,6 +66,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import check_ai_access  # noqa: E402
 import envkeys  # noqa: E402
 import linkgraph  # noqa: E402
+import trust_check  # noqa: E402
 import robotstxt  # noqa: E402
 import sitemaps as sitemaps_mod  # noqa: E402
 from audit_rules import RULES, finding_id, hreflang_checks, page_checks  # noqa: E402
@@ -233,6 +234,10 @@ class Audit:
         else:
             for m in ("crawl", "probes_404", "coherence", "link_graph"):
                 self.module(m, "skipped", "accueil hors 200")
+        if home_ok:
+            self.step_trust()
+        else:
+            self.module("trust", "skipped", "accueil hors 200")
         self.step_pagespeed(home_ok)
         self.step_crux()
         self.step_gsc()
@@ -342,6 +347,24 @@ class Audit:
         self.module("crawl", "ran", f"{len(self.pages)} page(s) récupérée(s), {fetched_sitemap}/{len(sitemap_urls)} "
                     f"URL(s) du sitemap, {len(frontier)} lien(s) découvert(s) non visité(s)",
                     complete=self.crawl_complete)
+
+    def step_trust(self) -> None:
+        self.log("[trust] HTTPS, en-tetes, security.txt, identite, lastmod")
+        res = trust_check.check_headers(self.origin) + trust_check.check_security_txt(self.origin)
+        res += trust_check.check_identity(self.pages[self.home].jsonld_blocks)
+        pairs = []
+        for u in self.sitemaps.urls:
+            key = self.resolve.get(linkgraph.normalize(u), linkgraph.normalize(u))
+            s = self.pages.get(key)
+            lm = self.sitemaps.lastmod_of(u)
+            if s and lm:
+                pairs.append((key, lm, trust_check.page_modified_date(s.jsonld_blocks, [])))
+        for url, detail in trust_check.check_lastmod_vs_page(pairs):
+            res.append(("sitemap-lastmod-mismatch", url, detail))
+        for code, url, detail in res:
+            self.findings.add(code, url, detail, "mesuré")
+        measurable = sum(1 for p in pairs if p[2])
+        self.module("trust", "ran", f"{len(res)} constat(s) ; lastmod comparable sur {measurable}/{len(pairs)} page(s)")
 
     def step_probes(self) -> None:
         self.log("[6/9] URLs inexistantes (404 attendu)")

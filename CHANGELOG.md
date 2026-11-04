@@ -3,6 +3,21 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.8.0] - 2026-11-05
+
+Contrôles de confiance et d'hygiène tirés de deux rapports RoastMyUrl (vuntum.com id 13426, siteservi.com
+id 13469, 2026-11-04). Tri fait : ce qui n'a aucun lien démontré avec le classement ou la citation IA est écarté
+et documenté. 111 tests (7 nouveaux).
+
+### Ajouté
+- `scripts/trust_check.py` et étape `trust` de `run_audit.py` : redirection http vers https, HSTS, nosniff et
+  Referrer-Policy, security.txt (RFC 9116, Expires), `sameAs` et contact de l'Organization, `lastmod` du sitemap
+  comparé au `dateModified` des pages. Huit règles P2 dans `audit_rules.py`, catégorie `confiance`.
+- `references/trust-hygiene.md` : tableau de sources datées (web.dev Enable HTTPS, Google page experience, schéma
+  Organization, Google sitemaps lastmod 2023-06-26, RFC 9116), liste des contrôles écartés, méthode de correction
+  (snippet nginx, Cloudflare, lastmod = dernier commit).
+- `tests/test_trust.py`.
+
 ## [2.7.0] - 2026-11-04
 
 Deux ajouts d'audit, avec sources datées et étiquettes ESTABLISHED / SUPPORTED / CLAIMED. 104 tests
