@@ -127,6 +127,37 @@
         "Il ne modifie aucun réglage de la propriété (utilisateurs, paramètres, suppressions)",
         "La demande manuelle, si proposée, reste limitée aux URL to_request et suivie de mark-requested"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "Les statistiques de mon site sont pleines de faux visiteurs et mon journal est rempli de requêtes vers .env et wp-login. Le site est derrière Cloudflare. Audite et dis-moi quoi corriger sans bloquer WhatsApp ni les moteurs IA.",
+      "expected_output": "Sondes hygiene_check.py probes, mesure du journal fourni avec hygiene_check.py logs (comptes seulement), contrôles B1 à B14 de bot-traffic-hygiene.md avec étiquettes et sources datées, sans rien modifier sur le serveur ni dans Cloudflare.",
+      "files": [],
+      "expectations": [
+        "Le skill lance hygiene_check.py probes et lit le verdict closed (444), ok ou challenge de chaque robot d'aperçu et de recherche",
+        "Il lance hygiene_check.py logs avec les adresses internes fournies, ou écrit 'non mesuré' quand elles manquent",
+        "Il signale real_ip absent si des adresses Cloudflare apparaissent comme client, avec set_real_ip_from et real_ip_header CF-Connecting-IP, source Cloudflare datée",
+        "Il dit que Bot Fight Mode peut challenger les appels d'API, que Skip/Bypass/Allow n'ont aucun effet sur lui, et qu'il ne faut pas l'activer sans inventaire des appels automatiques",
+        "Il vérifie que 'Block AI bots' ou la politique des robots IA ne coupe pas les moteurs IA voulus (check_ai_access.py puis tableau de bord)",
+        "Il propose d'exclure le trafic interne et les robots des statistiques plutôt que de seulement bloquer",
+        "Il n'écrit aucune adresse IP du journal et ne modifie ni nginx, ni fail2ban, ni Cloudflare",
+        "Chaque recommandation porte une source datée et une étiquette ESTABLISHED, SUPPORTED ou CLAIMED"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Mon petit site n'a ni clients ni trafic. Je veux publier des pages par ville et par métier. Comment éviter une pénalité de Google ?",
+      "expected_output": "Contrôles H1 à H11 de helpful-content-small-site.md, hygiene_check.py content, date de mise à jour 2026-10-05 de la page Google vérifiée, pages ville uniquement avec contenu propre.",
+      "files": [],
+      "expectations": [
+        "Le skill vérifie la date de la page Google 'creating helpful content' (2026-10-05) sur la source officielle et signale ce qui ne correspond pas",
+        "Il cite doorway abuse et scaled content abuse (spam policies, maj 2026-08-28) pour les pages ville et métier",
+        "Il déconseille une page par ville sans contenu propre et propose une page zones, une fusion ou noindex, sans trancher à la place du propriétaire",
+        "Il demande un auteur réel visible et interdit les avis, cas clients et profils inventés",
+        "Il dit que Google ne donne ni nombre de mots ni fréquence de publication, et étiquette tout rythme proposé CLAIMED",
+        "Il lance hygiene_check.py content et traite ses constats comme des indices à relire, pas comme un verdict",
+        "Il ne produit pas de pages en masse"
+      ]
     }
   ]
 }

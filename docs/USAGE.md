@@ -235,6 +235,26 @@ Options :
 Codes de sortie : 0 analysé, 1 constat bloquant (5xx/429 servi à Googlebot
 ou bingbot, robots.txt en 5xx), 2 aucune ligne reconnue.
 
+## Hygiène : `hygiene_check.py`
+
+Trois sous-commandes, aucune clé requise (détail : [../references/bot-traffic-hygiene.md](../references/bot-traffic-hygiene.md),
+[../references/helpful-content-small-site.md](../references/helpful-content-small-site.md)).
+
+```bash
+python scripts/hygiene_check.py probes --site https://example.com
+python scripts/hygiene_check.py logs /var/log/nginx/access.log --internal-ip 203.0.113.9 [--cf-ranges ips.txt | --no-fetch]
+python scripts/hygiene_check.py content --site https://example.com --max-pages 40 --group-min 5
+```
+
+- `probes` : GET publics vers le site audité (chemins de scanners, puis l'accueil avec les agents de
+  WhatsApp, facebookexternalhit, Googlebot, bingbot, OAI-SearchBot, ClaudeBot, PerplexityBot). Agent
+  simulé depuis votre machine : un `ok` ne prouve pas que le vrai robot passe.
+- `logs` : comptes seulement, aucune adresse écrite. Les plages Cloudflare sont téléchargées
+  (`--no-fetch` pour s'en passer ; le contrôle `real_ip` est alors non fait).
+- `content` : lit le sitemap, échantillonne les pages, signale doublons de pages sœurs, auteur absent,
+  pages minces, rafales de dates. Les seuils sont ceux du skill.
+- Code de sortie : 0 aucun P1, 1 au moins un P1, 2 rien mesuré.
+
 ## Glossaire : `glossary_check.py`
 
 Termes candidats relevés sur un petit site de démonstration servi en local

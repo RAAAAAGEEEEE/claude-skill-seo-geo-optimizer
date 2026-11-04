@@ -32,5 +32,9 @@ Les plus pertinentes pour un audit SEO/GEO :
 - **Thin affiliation**, **cloaking**, **sneaky redirects**, **hidden
   text**, **keyword stuffing**, **doorway abuse** : bases classiques.
 
+Application à un petit site (contrôles H1 à H11, doorways et pages ville) :
+[helpful-content-small-site.md](helpful-content-small-site.md). Définition citée de *doorway abuse* :
+« multiple domain names or pages targeted at specific regions or cities that funnel users to one page ».
+
 Liste complète et définitions exactes : la source primaire ci-dessus, pas
 un résumé de blog.

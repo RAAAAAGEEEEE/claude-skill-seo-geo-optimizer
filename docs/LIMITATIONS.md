@@ -106,7 +106,7 @@ Retour : [README](../README.md) · Voir aussi : [ARCHITECTURE](ARCHITECTURE.md).
   dans Search Console : soumission de sitemap (`--submit`,
   `submit-sitemap`) et, en bonus, demande d'indexation manuelle. Les
   corrections de code passent par la procédure avec GO.
-- Les 8 cas de [evals/evals.json](../evals/evals.json) décrivent le
+- Les 10 cas de [evals/evals.json](../evals/evals.json) décrivent le
   comportement attendu de Claude avec ce skill, mais ne s'exécutent pas
   automatiquement : seuls les scripts sont testés par `unittest`.
 - Connaissances datées : au-delà de 3 mois, revérifier les références.

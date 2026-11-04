@@ -8,11 +8,11 @@ chaque rapport au précédent. Le skill opère aussi Search Console avec les
 accès du propriétaire (sitemaps, inspection des URL) et fait découvrir les
 nouvelles pages sans navigateur.
 
-**Statut : bêta.** Version 2.6.0, connaissances revues le 2026-11-03,
+**Statut : bêta.** Version 2.7.0, connaissances revues le 2026-11-04,
 découverte des URL et Search Console le 2026-09-30
 ([CHANGELOG.md](CHANGELOG.md)). Le skill est utilisé en conditions réelles
-sur quelques sites. Ses scripts sont testés (94 tests hors ligne). Le
-comportement du skill lui-même est décrit par 8 cas d'évaluation
+sur quelques sites. Ses scripts sont testés (104 tests hors ligne). Le
+comportement du skill lui-même est décrit par 10 cas d'évaluation
 ([evals/evals.json](evals/evals.json)), à faire relire ou passer par le
 skill-creator d'Anthropic : il n'existe pas de exécution automatique.
 
@@ -81,6 +81,11 @@ re-exécutable et planifiable plutôt qu'une liste de bonnes pratiques.
   Bourrelly (cocon sémantique) et de Stéphane Delgado (GEO, maillage) sont
   intégrées comme CLAIMED, confrontées à la documentation de Google
   ([references/french-practitioners.md](references/french-practitioners.md)).
+- **Robots malveillants, faux trafic, contenu utile** : sondes et mesures de journal
+  sans écrire d'adresse (`hygiene_check.py`), pièges Cloudflare (Bot Fight Mode, « Block AI
+  bots »), et les contrôles de la page Google sur le contenu utile du 2026-10-05 pour un petit
+  site ([references/bot-traffic-hygiene.md](references/bot-traffic-hygiene.md),
+  [references/helpful-content-small-site.md](references/helpful-content-small-site.md)).
 - **Ce qui s'automatise, et ce qui est interdit** : analyse des journaux
   serveur avec vérification des IP des crawlers (`crawler_logs.py`),
   glossaire construit et audité depuis les données du site

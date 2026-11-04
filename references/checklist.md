@@ -31,6 +31,21 @@ que `run_audit.py` contrôle :
       règles WAF) : cohérent avec la décision d'ouverture aux crawlers ;
       bascule du 2026-09-15 sur les pages avec publicité.
 
+## Robots malveillants et faux trafic (voir [bot-traffic-hygiene.md](bot-traffic-hygiene.md))
+- [ ] `hygiene_check.py probes` : scanners en `closed`, robots d'aperçu et de recherche en `ok`.
+- [ ] Derrière Cloudflare : `real_ip` en place (`hygiene_check.py logs`, `real-ip-missing` absent).
+- [ ] Statistiques : trafic interne et robots exclus ; une adresse interne non fournie = non mesuré.
+- [ ] Tableau de bord Cloudflare : Bot Fight Mode inactif ou appels automatiques (paiement, API)
+      inventoriés ; « Block AI bots » et politique des robots IA cohérents avec l'ouverture voulue.
+- [ ] Origine joignable directement : décision du propriétaire.
+
+## Contenu utile, petit site (voir [helpful-content-small-site.md](helpful-content-small-site.md))
+- [ ] Chaque page répond à un acheteur précis ; le site a un but principal (H1).
+- [ ] Aucun lot de pages de masse ; `hygiene_check.py content` sans `near-duplicate-pages` (H2, H7).
+- [ ] Preuve de première main sur chaque page de fond, sans avis ni cas client inventés (H3).
+- [ ] Auteur réel visible, page auteur et À-propos réelles (H4, H5).
+- [ ] Rythme de publication que la relecture suit ; dates modifiées seulement après un vrai changement (H6).
+
 ## Jugement éditorial
 - [ ] Le title donne-t-il envie de cliquer, pas seulement « présent » ?
 - [ ] La meta description donne-t-elle une raison de cliquer ?

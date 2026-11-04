@@ -3,6 +3,27 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.7.0] - 2026-11-04
+
+Deux ajouts d'audit, avec sources datées et étiquettes ESTABLISHED / SUPPORTED / CLAIMED. 104 tests
+(10 nouveaux), 10 cas d'évaluation (2 nouveaux).
+
+### Ajouté
+- `references/bot-traffic-hygiene.md` : robots malveillants et faux trafic, contrôles B1 à B14 (chemins de
+  scanners en 444 sans bloquer les bons robots ni les aperçus de lien, `real_ip` derrière Cloudflare,
+  statistiques sans trafic interne ni robots, pièges Bot Fight Mode et « Block AI bots »). Base : rapport de
+  recherche du 2026-11-04 (mesures sur 639 572 lignes de journal) ; pages Cloudflare relues le 2026-11-04
+  (Bot Fight Mode maj 2026-08-03, politiques robots IA maj 2026-11-02, restauration des adresses maj 2026-04-23).
+- `references/helpful-content-small-site.md` : contrôles H1 à H11 pour un petit site sans clients ni trafic.
+  Date vérifiée : la page Google « creating helpful content » porte « Last updated 2026-10-05 UTC » (version
+  précédente : 2025-12-10, instantané Internet Archive du 2026-09-21). Cette mise à jour n'est pas annoncée
+  dans le journal des mises à jour de Search Central. Nouveauté : section « Main content » (effort,
+  originalité, talent, exactitude).
+- `scripts/hygiene_check.py` (`probes`, `logs`, `content`) et `tests/test_hygiene.py`. Les journaux ne sortent
+  que sous forme de comptes.
+- Mode « hygiène » dans `SKILL.md`, deux lignes du tableau des leviers, sections de `checklist.md`,
+  renvoi dans `spam-policies.md`, section de `docs/USAGE.md`.
+
 ## [2.6.0] — 2026-11-03
 
 ### Ajouté

@@ -7,7 +7,10 @@ description: >
   crawlers (robots.txt, blocage CDN ou pare-feu, Cloudflare ou Vercel), indexabilité, sitemap, canonical,
   hreflang, JSON-LD, maillage interne et cocon, glossaire, journaux serveur,
   Core Web Vitals, Search Console opérée par l'agent (sitemaps, inspection
-  d'URL), découverte des nouvelles URL (sitemap, WebSub, IndexNow). Audit complet en une commande,
+  d'URL), découverte des nouvelles URL (sitemap, WebSub, IndexNow), robots
+  malveillants et faux trafic (scanners en 444, real_ip derrière Cloudflare,
+  statistiques sans trafic interne ni robots), contenu utile de Google pour un
+  petit site (pages ville et métier, auteur visible, contenu de masse). Audit complet en une commande,
   rapport daté, diff dans le temps, planifiable ; chaque recommandation porte
   une source datée et une étiquette ESTABLISHED, SUPPORTED ou CLAIMED. À
   utiliser pour « auditer le SEO/GEO », « pourquoi mon site n'est pas cité
@@ -18,14 +21,15 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.6.0"
+  version: "2.7.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.6.0 — connaissances revues le **2026-11-03** (Vercel, agents, Google,
-signaux d'usage), découverte des URL et Search Console le **2026-09-30**
+Version 2.7.0, connaissances revues le **2026-11-04** (robots malveillants et faux
+trafic, contenu utile de Google mis à jour le 2026-10-05), puis le **2026-10-29**
+(Vercel, agents, Google, signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
 [CHANGELOG.md](CHANGELOG.md)). Au-delà de 3 mois, revérifier toute
 affirmation datée avant de la ressortir.
@@ -125,6 +129,19 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
    ([docs/USAGE.md](docs/USAGE.md#planifier-laudit)). La création de la
    tâche est une configuration persistante : **confirmation requise**.
 
+## Mode « hygiène » (robots malveillants, faux trafic, contenu utile)
+À lancer en plus de l'audit pour tout site en production, surtout derrière Cloudflare ou avec des
+pages ville et métier. Méthode : [bot-traffic-hygiene.md](references/bot-traffic-hygiene.md) (B1 à B14)
+et [helpful-content-small-site.md](references/helpful-content-small-site.md) (H1 à H11).
+1. `python scripts/hygiene_check.py probes --site <url>` : un `closed` est le bon verdict pour un
+   chemin de scanner ; un robot d'aperçu ou de recherche qui n'est pas `ok` est un P1.
+2. Si le propriétaire fournit un journal : `hygiene_check.py logs <journal> --internal-ip <ip>`,
+   puis `crawler_logs.py` pour les faux robots. Sans journal ni adresse interne : « non mesuré ».
+3. `python scripts/hygiene_check.py content --site <url>` : doublons de pages ville, auteur, rafales.
+4. Réglages que seul le tableau de bord montre (Bot Fight Mode, « Block AI bots », politique des robots
+   IA) : les lister au propriétaire, ne rien activer. Pare-feu d'origine, nginx, fail2ban : décision et
+   application du propriétaire.
+
 ## Mode « découverte des URL » (après chaque publication, ou chaque jour)
 Faire découvrir les nouvelles pages sans navigateur, avec les accès du
 propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery.md).
@@ -175,6 +192,8 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
 | Agents | MCP, API catalog, WebMCP (brouillon du 2026-10-27, `document.modelContext`), A2A 1.0.0 : impact marginal au 2026-10-29. Accessibilité des pages = interface des agents (effet réel CLAIMED). Atlas : arrêt annoncé, CLAIMED, à reconfirmer. | [agent-discovery.md](references/agent-discovery.md) |
 | Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
+| Robots malveillants, faux trafic | Chemins de scanners coupés en 444 sans toucher aux bons robots ni aux aperçus de lien (WhatsApp, `facebookexternalhit`) ; `real_ip` derrière Cloudflare ; statistiques sans trafic interne ni robots ; pièges : Bot Fight Mode challenge les appels d'API et ne se contourne pas par règle WAF, « Block AI bots » coupe les moteurs IA voulus. `hygiene_check.py probes` et `logs`. | [bot-traffic-hygiene.md](references/bot-traffic-hygiene.md) |
+| Contenu utile (petit site) | Page « creating helpful content » mise à jour le 2026-10-05 (section « Main content » : effort, originalité, talent, exactitude). Pages pour des acheteurs précis, jamais de masse, auteur et expérience visibles, pages ville et métier jamais en doublon, rythme que la relecture suit. `hygiene_check.py content`. | [helpful-content-small-site.md](references/helpful-content-small-site.md) |
 | Local | API GBP : fiche validée depuis 60 jours ou plus, approbation manuelle. | [google-business-profile.md](references/google-business-profile.md) |
 
 ## Niveaux de preuve
@@ -327,6 +346,7 @@ publiée, sans aucun accès ; extrait) :
 | [gsc_report.py](scripts/gsc_report.py) | Search Console (web, discover, googleNews, news, image, video) | compte de service |
 | [search_console.py](scripts/search_console.py) | Search Console opérée par l'agent : `sites`, `sitemaps`, `submit-sitemap`, `inspect` (URL non indexées, quota 2 000/jour), `mark-requested`, `stats` | compte de service (`GSC_SERVICE_ACCOUNT_FILE`) ou `GSC_ACCESS_TOKEN` |
 | [url_discovery.py](scripts/url_discovery.py) | Découverte des nouvelles URL : robots.txt, lastmod, maillage depuis l'accueil, WebSub, sitemap re-soumis, IndexNow, inspection ; planifiable | optionnel (env) ; `--submit` = action externe |
+| [hygiene_check.py](scripts/hygiene_check.py) | `probes` (chemins de scanners, robots d'aperçu et de recherche refusés ou défiés), `logs` (scanners, trafic interne, Cloudflare pris pour client, navigateurs sans tête ; comptes seulement), `content` (pages ville en doublon, auteur absent, rafale de dates) | aucun (GET publics du site audité ; journal fourni) |
 | [crawler_logs.py](scripts/crawler_logs.py) | Journaux serveur : crawlers réels, IP vérifiées contre les listes des fournisseurs, 5xx, 404, couverture du sitemap ; aucune IP écrite | aucun (lit les listes publiques) |
 | [glossary_check.py](scripts/glossary_check.py) | Glossaire : `build` (HTML + JSON-LD depuis un fichier de termes), `audit` (balisage visible, ancres, occasions de liens), `suggest` (termes candidats) | aucun |
 | [audit_site.sh](scripts/audit_site.sh), [check_backlinks.sh](scripts/check_backlinks.sh) | Passe curl rapide ; liens suivis/nofollow d'une page | aucun |
@@ -345,7 +365,7 @@ Tests hors ligne, dont un audit complet sur un site de test servi en
 127.0.0.1 : `python -m unittest discover -s tests`.
 
 ## Évaluations
-[evals/evals.json](evals/evals.json) : 8 cas (audit complet, site non cité
+[evals/evals.json](evals/evals.json) : 10 cas (audit complet, site non cité
 par les IA, journaux serveur, schema Product, planification et IndexNow,
 glossaire, découverte de nouvelles pages, pages non indexées via Search
 Console), au format du skill-creator d'Anthropic (`prompt`,
