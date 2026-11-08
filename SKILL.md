@@ -21,13 +21,13 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.8.0"
+  version: "2.9.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.8.0, connaissances revues le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
+Version 2.9.0, connaissances revues le **2026-11-08** (praticiens Paul Vengeons et Laurent Bourrelly, domaines à mot-clé exact et réseaux de sites, délais cités par Google), puis le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
 trafic, contenu utile de Google mis à jour le 2026-10-05), puis le **2026-10-29**
 (Vercel, agents, Google, signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
@@ -111,6 +111,13 @@ du skill `redaction`, la structure d'une page de vente de `copywriting`.
    - **Mots-clés sous-exploités d'une niche** :
      [keyword-research.md](references/keyword-research.md) ; la matrice de
      suggestions et la lecture de SERP précèdent le choix des formats.
+     Tests manuels de praticiens (test d'ouverture, quick wins, faisabilité
+     de la SERP, registre des modifications) : même fichier, section
+     « Compléments de praticiens », tous CLAIMED.
+   - **Proposition d'acheter des domaines à mot-clé exact, de multiplier
+     les sites par requête ou promesse de classement en quelques jours** :
+     [exact-match-domains.md](references/exact-match-domains.md). Ne jamais
+     le recommander ; la décision d'achat revient au propriétaire.
 4. **PLAN** : reprendre le plan P0/P1/P2 du rapport. Un constat CLAIMED
    (maillage de praticien, seuils) reste P2. **Attendre le GO** avant de
    coder.
@@ -179,7 +186,7 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Hébergeurs statiques (Vercel) | Pare-feu Vercel : règles « AI Bots » et « Bot Protection » inactives par défaut, tous plans ; « AI Bots » sur Deny bloque les robots de citation même si robots.txt les autorise (mode Log pour observer) ; moins fiable derrière un proxy inverse. Observabilité : CLAIMED, à reconfirmer. | [cloudflare-ai-access.md](references/cloudflare-ai-access.md#vercel-ajouté-le-2026-10-29) |
 | Google IA | AI Overviews et AI Mode sont en France depuis le 2026-07-22. Conditions : page indexée, extrait autorisé, réglage Search Console « Search generative AI » sur Inclure. Les rapports IA donnent les impressions seulement. Contenu assisté par IA : vérifier titres, méta, schéma et alt, indiquer la méthode (2026-10-01). | [google-ai-features.md](references/google-ai-features.md) |
 | Technique / on-page | Une URL inconnue répond 404, jamais 5xx. Un déplacement définitif passe par 301/308. Pas de doublon de langue. Un canonical sur chaque page. Le contenu est dans le HTML initial. | [audit-framework.md](references/audit-framework.md) |
-| Maillage / cocon | Google : `<a href>`, au moins un lien vers chaque page importante, ancres descriptives, aucun nombre idéal de liens. Cocon, liens contextuels et profondeur ≤ 3 : méthodes de praticiens, CLAIMED. | [french-practitioners.md](references/french-practitioners.md) |
+| Maillage / cocon | Google : `<a href>`, au moins un lien vers chaque page importante, ancres descriptives, aucun nombre idéal de liens. Cocon, liens contextuels et profondeur ≤ 3 : méthodes de praticiens, CLAIMED ; Vengeons et Bourrelly (lectures du 2026-11-08) : même fichier, section dédiée, avec leurs divergences et ce qui n'entre pas. | [french-practitioners.md](references/french-practitioners.md) |
 | Schema | Rich results FAQ supprimés le 2026-05-07. Dataset ne sert qu'à Dataset Search. `WebSite` porte le nom du site. Pas d'étoiles auto-attribuées, aucun schema « spécial IA ». Gabarits Person + WebSite + Service / SoftwareApplication pour un portfolio. | [schema-templates.md](references/schema-templates.md) |
 | Contenu citable | Preuves vérifiables (chiffres, sources, dates), fraîcheur réelle, structure lisible, pas de découpage artificiel. | [evidence.md](references/evidence.md) |
 | Formats de contenu | Google ne favorise aucun format en soi : il récompense l'information originale, l'expérience de première main et les sources claires. Tests, comparatifs et classements relèvent du reviews system. FAQ : texte visible oui, rich result non. Les parts de citation par format viennent d'études de vendeurs (CLAIMED), varient selon l'intention et le moteur, et se contredisent. | [content-formats.md](references/content-formats.md) |
@@ -191,7 +198,8 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Automatisation | Mesurer, détecter, préparer : oui. Publier du contenu, des liens ou du balisage sans relecture : non (spam policies). Pas de suivi de citations par grounding Gemini ni par scraping de Google (conditions). | [automation.md](references/automation.md) |
 | Signaux « pour l'IA » | llms.txt, RSL, aipref, Content Signals : aucun fournisseur ne s'engage à les lire. P2 au mieux. | [licensing-signals.md](references/licensing-signals.md) |
 | Agents | MCP, API catalog, WebMCP (brouillon du 2026-10-27, `document.modelContext`), A2A 1.0.0 : impact marginal au 2026-10-29. Accessibilité des pages = interface des agents (effet réel CLAIMED). Atlas : arrêt annoncé, CLAIMED, à reconfirmer. | [agent-discovery.md](references/agent-discovery.md) |
-| Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
+| Domaines et réseaux de sites | Google (Starter Guide, maj 2025-12-10) : les mots-clés du nom de domaine ont « hardly any effect ». Plusieurs sites en variantes légères = *doorway abuse* ; sites multipliés pour cacher l'échelle = *scaled content abuse* ; domaines expirés réutilisés = *expired domain abuse* (ESTABLISHED, spam policies maj 2026-08-28). Promesses « n°1 en 10 jours » : CLAIMED. | [exact-match-domains.md](references/exact-match-domains.md) |
+| Liens externes | Évaluer, pas acquérir. `sponsored`, `ugc`, `nofollow` sont des indications. Échange de liens ou de classements, même triangulaire : *link spam*. Désaveu : outil avancé, rarement utile. | [backlinks.md](references/backlinks.md), [spam-policies.md](references/spam-policies.md) |
 | Robots malveillants, faux trafic | Chemins de scanners coupés en 444 sans toucher aux bons robots ni aux aperçus de lien (WhatsApp, `facebookexternalhit`) ; `real_ip` derrière Cloudflare ; statistiques sans trafic interne ni robots ; pièges : Bot Fight Mode challenge les appels d'API et ne se contourne pas par règle WAF, « Block AI bots » coupe les moteurs IA voulus. `hygiene_check.py probes` et `logs`. | [bot-traffic-hygiene.md](references/bot-traffic-hygiene.md) |
 | Contenu utile (petit site) | Page « creating helpful content » mise à jour le 2026-10-05 (section « Main content » : effort, originalité, talent, exactitude). Pages pour des acheteurs précis, jamais de masse, auteur et expérience visibles, pages ville et métier jamais en doublon, rythme que la relecture suit. `hygiene_check.py content`. | [helpful-content-small-site.md](references/helpful-content-small-site.md) |
 | Confiance et hygiène | HTTPS, HSTS, nosniff, Referrer-Policy, security.txt, `sameAs` et contact de l'Organization : P2, **aucun effet de classement démontré** (Google : seuls les Core Web Vitals comptent dans « page experience »). Le contrôle qui compte : `lastmod` du sitemap égal au vrai changement de la page (Google, 2023-06-26). Écartés : ai.txt, preload, SRI, CAA, DNSSEC, SPF/DMARC. `trust_check.py`. | [trust-hygiene.md](references/trust-hygiene.md) |

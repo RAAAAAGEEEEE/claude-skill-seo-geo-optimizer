@@ -3,6 +3,29 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.9.0] - 2026-11-08
+
+Lecture de deux publications X du 2026-11-07 (@alg0_slayer, @VengeonsP), du travail public de Paul Vengeons
+(article X du 2026-10-21, Substack, 2026) et de Laurent Bourrelly (blog), puis tri : ce qui est solide entre avec
+sa source et son étiquette, ce qui contredit les politiques anti-spam de Google est écrit comme risque. Aucun
+script, aucune règle d'audit et aucun test modifiés (111 tests).
+
+### Ajouté
+- `references/exact-match-domains.md` : domaines à correspondance exacte, réseaux de sites, stratégies « achat de
+  domaines puis attente » ; état de Google lu le 2026-11-08 (SEO Starter Guide 2025-12-10, spam policies
+  2026-08-28), délais cités par Gary Illyes (CLAIMED), contrôles.
+- `references/french-practitioners.md` : section « Paul Vengeons et Laurent Bourrelly » (V1 à V19, B-N1 à B-N7),
+  avec leurs contradictions (auto-classement, cadence) et la liste de ce qui n'entre pas.
+- `references/keyword-research.md` : « Compléments de praticiens » (test d'ouverture, quick wins, faisabilité de
+  la SERP, bandes d'autorité, anatomie du title, registre des modifications, cadence).
+- `references/evidence.md` : délais d'Illyes, conflit « ChatGPT cite ce qui ranke », Business Hub (non annoncé),
+  OAI-SearchBot, croyances non démontrées (13 mois de rebonds, signaux Chrome).
+- `references/content-formats.md` : conflits 5 et 6 (auto-classement et classements payants).
+- `references/backlinks.md` : désaveu, échanges de classements, placement payant.
+- `references/spam-policies.md` : état des mises à jour au 2026-11-08.
+- `references/checklist.md` et `references/helpful-content-small-site.md` : tests manuels de praticiens, repères
+  de cadence (CLAIMED).
+
 ## [2.8.0] - 2026-11-05
 
 Contrôles de confiance et d'hygiène tirés de deux rapports RoastMyUrl (vuntum.com id 13426, siteservi.com

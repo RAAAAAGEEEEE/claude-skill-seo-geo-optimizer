@@ -1,6 +1,6 @@
 # Praticiens SEO français : Laurent Bourrelly et Stéphane Delgado
 
-Revu le 2026-09-28 (posts X lus le 2026-09-28). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-11-08 (posts X lus le 2026-09-28 ; Paul Vengeons et compléments Bourrelly lus le 2026-11-08, voir la section dédiée). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 
 Ce fichier reprend les méthodes publiques de deux praticiens suivis par le
 propriétaire du skill. Il dit ce qui est vérifiable et ce qui ne l'est pas, et
@@ -150,6 +150,9 @@ verdict.
 - Les seuils présentés comme des règles : 150 mots (D6), nombre de liens par
   page (D9). Ils restent des paramètres, jamais des exigences.
 - Les statistiques sans source (D8).
+- L'échange de liens ou de classements, même « sur trois sites » (V10), l'achat de liens présenté comme toléré,
+  l'auto-classement premier non fondé (V16), les signaux Chrome (V18) et l'avatar IA ou le faux profil d'auteur
+  (B-N6) : *link spam*, tromperie ou affirmation non démontrée.
 
 ## Posts X : lecture du 2026-09-28
 
@@ -218,6 +221,50 @@ repris, plus l'article du blog vers lequel pointe un post (BX3).
   réseau de liens privé. Le skill suit Google et écarte BX6.
 - Aucun nouveau contrôle automatique : BX1 et BX3 reprennent B1, B2, B5 et
   B6 ; aucun seuil ni aucune donnée n'est publié.
+
+## Paul Vengeons (`@VengeonsP`) et Laurent Bourrelly : lecture du 2026-11-08
+
+Sources lues le 2026-11-08 : note X du 2026-11-07 ([status/2119013491864727763](https://x.com/vengeonsp/status/2119013491864727763), « 97 % du SEO en 30 min », 20 conseils) ; article X du 2026-10-21 « How to Become an SEO Chad with AI (Full Course) » ([status/2112804448648982655](https://x.com/vengeonsp/status/2112804448648982655), texte complet par fxtwitter) ; post X du 2026-05-11 ; billets Substack des 2026-01-27, 2026-02-17 et 2026-04-22 ; page paulvengeons.fr/geo (maj 2026-10-06). Vengeons (11 357 abonnés, cofondateur de ChatSEO, qui vend un outil et des audits) se déclare premier sur « meilleur consultant SEO » et à environ 50 000 € de chiffre d'affaires mensuel (la note du 2026-10-21 dit « 30K MRR » : écart non expliqué). **Aucun de ces chiffres n'est vérifié ici.** Tout ce qui suit est **CLAIMED** (praticien, sans donnée publiée) sauf mention contraire. Le texte de Bourrelly vient de son blog (billets non datés sur la page) et de son compte `@aibloodmoon`.
+
+| N° | Méthode (source, date) | Étiquette | Rapport à Google et usage dans le skill |
+|---|---|---|---|
+| V1 | **Ordre des leviers** (article 2026-10-21) : 1 intention, 2 mot-clé dans le title, 3 liens internes, 4 autorité du site, 5 backlinks vers la page ; le reste est du « polish ». Technique vérifiée une fois (PageSpeed sur une page par type, un crawl), pas en boucle | CLAIMED | Compatible : le title et les liens internes sont des pratiques documentées par Google ([SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide), maj 2025-12-10). L'ordre lui-même n'est pas démontré. Sert d'ordre de lecture, jamais de priorité P0/P1 |
+| V2 | **Bandes d'autorité** (2026-10-21) : DR < 20 = longue traîne ; 20 à 40 = moyenne traîne ; > 40 = têtes de requêtes ; moins de 50 domaines référents = presque rien de compétitif | CLAIMED | Le DR est une métrique d'Ahrefs, pas un signal Google. Repère de choix de cible, voir [keyword-research.md](keyword-research.md) |
+| V3 | **Motifs de pages** : « X vs Y », « alternative », « service + ville » ; une intention, un type de page, plusieurs variantes seulement si chaque page a un contenu propre. Cas cité : chatseo.app de 0 à environ 150 clics hors marque par mois en 3 mois avec des pages « X vs Y » (chiffre déclaré, non vérifié) | CLAIMED | Les pages « service + ville » sont exposées à *doorway abuse* si elles ne diffèrent que par le nom de la ville ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies), maj 2026-08-28). Lui-même avoue que ses pages « consultant + ville » ont tenu 3 à 4 ans puis perdu des impressions en 2026 (date « fin mars 2026 » non vérifiée, absente des références du skill) |
+| V4 | **Test d'ouverture** : chercher la requête, regarder si un concurrent a le mot-clé exact dans son title ; s'il n'y en a pas, la porte est ouverte | CLAIMED | Test manuel utile, ajouté à [keyword-research.md](keyword-research.md). Ne prouve pas que Google privilégie un title |
+| V5 | **Quick wins** : pages en positions 5 à 20 ; dans Search Console, filtrer sur la page ET la requête avant de lire la position moyenne (la moyenne d'un site mélange les requêtes) | CLAIMED pour la plage ; le filtre page ET requête est un usage standard du rapport Performances de Search Console (non rouvert à la source le 2026-11-08) | Compatible. Ajouté à [keyword-research.md](keyword-research.md) |
+| V6 | **Lecture de la SERP** : lire les trois premiers résultats pour l'intention, ne regarder les concurrents qu'ensuite, chercher « ce que les trois premiers n'ont pas » ; page « comme celle de Google en mieux » | CLAIMED | Rejoint BX2 (lire la page de résultats) |
+| V7 | **Anatomie du title** : mot-clé exact, deux-points, une promesse, l'année, « best », environ 600 px ; la meta description sert à donner une raison de cliquer (simulateur de pixels) | CLAIMED | Google réécrit titles et descriptions quand il juge mieux ([titles](https://developers.google.com/search/docs/appearance/title-link)). Ne pas mettre une année fausse ou un « best » non fondé |
+| V8 | **Liens internes** : au moins 3 à 5 liens contextuels vers une page cible, ancre exacte, jamais la même ancre pour deux pages différentes | CLAIMED pour les nombres | Compatible avec les conseils Google sur les ancres descriptives ; un nombre fixe est un paramètre, pas une exigence |
+| V9 | **Backlinks** : aligner le nombre de domaines référents et le mélange d'ancres sur les trois premiers résultats ; ignorer les liens toxiques, ne pas désavouer | Le « ne pas désavouer » est ESTABLISHED ([Disavow](https://support.google.com/webmasters/answer/2648487) : outil avancé, la plupart des sites n'en ont pas besoin) ; le reste CLAIMED | Compatible |
+| V10 | **Échange de liens ou de classements** : « un échange se fait sur trois sites, jamais en direct » ; « je te mets 2e, tu me mets 1er » (Substack 2026-04-22) ; achat de backlinks « interdit par Google mais pas par la loi » | CLAIMED | **Conflit** : *link spam* (« excessive link exchanges », achat de liens). Un échange triangulaire reste un échange. **Ne jamais recommander** (comme BX5 et BX6) |
+| V11 | **Cadence de publication** : première page à la main, puis duplication par une IA avec un brief distinct par variante ; plafond d'une page par jour (environ 2 par semaine, 1 par semaine sur site neuf) ; « programmatic SEO réservé aux sites déjà autoritaires » | CLAIMED | Prudence cohérente avec *scaled content abuse*. À mettre en face du contrôle `publication-burst`. **Contredit** son billet du 2026-04-22 (« 1 page par jour en pilote automatique ») |
+| V12 | **Registre des modifications** (« ledger ») et fichier de contexte `SITE.md` ; règle des 90 jours (ne pas rejuger une page modifiée avant 90 jours) | CLAIMED (la règle des 90 jours est son « Transition Rank », non documentée par Google) | Le registre est une bonne pratique de preuve, ajouté à [keyword-research.md](keyword-research.md). Les délais Google réels : voir [exact-match-domains.md](exact-match-domains.md) |
+| V13 | **Pages zombies** : pages sans impression sur 16 mois, jamais avant 2 à 6 mois d'âge ; la cannibalisation serait « surtout un mythe » | CLAIMED | Prudent. À ne pas traduire en suppression automatique |
+| V14 | **Langues** : ne pas traduire les mots-clés marché par marché, un `.com` avec un répertoire par langue | CLAIMED | Compatible avec la documentation hreflang du skill |
+| V15 | **Règles pour une IA qui touche un site** : chaque nombre lu par un outil le jour même ; relire le diff (une IA a retiré en silence des tableaux de classement) ; contrôler le site réel | CLAIMED (retour d'expérience) | Utile et sans risque, ajouté à [checklist.md](checklist.md) |
+| V16 | **Auto-classement** : « être premier de sa propre liste ne marche plus » (2026-11-07), il a enseigné la méthode jusqu'en juin 2026, puis retrait par Claude et échange de classement avec une agence. Billet du 2026-04-22 : l'inverse (« Mettez-VOUS n°1 ») | CLAIMED, auto-contredit | Rejoint les mesures de Lily Ray (voir [content-formats.md](content-formats.md)). Ne pas se placer premier d'un classement non fondé |
+| V17 | **GEO** : « il faut d'abord avoir un bon SEO » ; suivi manuel de 3 à 5 requêtes par semaine en session privée ; `llms.txt` inutile ; Bing AI Performance « le seul outil de suivi GEO digne de ce nom » (Substack 2026-02-17) | CLAIMED ; l'outil Bing est ESTABLISHED comme fonctionnalité ([Bing, 2026-02-10](https://blogs.bing.com/webmaster/February-2026/Introducing-AI-Performance-in-Bing-Webmaster-Tools-Public-Preview)) | Le lien SEO puis GEO s'oppose à Ahrefs (2025-09-03 : environ 10 % de recoupement entre ChatGPT et le top 10 Google), voir [evidence.md](evidence.md). Le reste est déjà dans le skill |
+| V18 | **« Google voit ces signaux, notamment avec Chrome »** (rebond, défilement) et « Google conserve environ 13 mois de mémoire des rebonds » (2026-10-21) | CLAIMED, non démontré | aucune page Google lue le 2026-11-08 ne le confirme ; **ne pas reprendre** comme fait |
+| V19 | **Couche humaine** : auteur nommé, captures d'écran, verdict à la première personne | CLAIMED | Compatible avec les questions de qualité de Google ([contenu utile](https://developers.google.com/search/docs/fundamentals/creating-helpful-content)) |
+
+**Laurent Bourrelly : compléments (blog, billets non datés lus le 2026-11-08).**
+
+| N° | Méthode | Étiquette | Rapport à Google et usage |
+|---|---|---|---|
+| B-N1 | **« Mot mystère »** : retirer le mot-clé exact d'un passage, un lecteur compétent doit deviner le sujet ; soigner les 200 à 300 premiers mots (billet 59274) | CLAIMED | Compatible (écrire pour le lecteur, pas de bourrage). Test manuel ajouté à la checklist |
+| B-N2 | **« Odeur de la SERP » et faisabilité** : certaines pages de résultats sont occupées par des entités traitées comme « la réponse » (marques, encyclopédies), ce qui rend la place inatteignable pour une page ordinaire ; lire onglets, types d'URL et présence d'un AI Overview avant de produire | CLAIMED | Renforce la lecture de SERP (V6, BX2). Ajouté à [keyword-research.md](keyword-research.md) |
+| B-N3 | **Le test « mon texte sur une autre page »** : si je colle mon texte sur le site d'un autre, quelqu'un s'en aperçoit-il ? Sinon, il n'apporte rien de propre | CLAIMED | Bon contrôle manuel pour *scaled content abuse*. Ajouté à la checklist |
+| B-N4 | **Le lien est une affirmation** : légitime seulement si la page suivante est le prochain indice du sujet | CLAIMED | Rejoint BX3 et D9 |
+| B-N5 | **Silo contre cluster** ; GEO = « rebranding » du SEO ; « les experts GEO sont du scam » (`llms.txt`, découpage en morceaux) | CLAIMED | Divergence avec Vengeons sur la longue traîne (Bourrelly : « stratégie du loser ») : l'arbitrage dépend de l'autorité du site, voir V2 |
+| B-N6 | **« 6 points d'entrée par jour minimum »**, avatar IA (billet 59134), page auto-promotionnelle « meilleur SEO de France » (billet 59094) | CLAIMED | **Risque** : contenu de masse (*scaled content abuse*) et faux profil d'auteur (E-E-A-T : un auteur fictif trompe le lecteur). **Ne pas reprendre** |
+| B-N7 | **Stratégie française dominante = « du Google Text et des backlinks achetés »** (billet 59274) | CLAIMED | Description d'un marché, pas une méthode. Achat de liens : voir BX5 |
+
+**Ce que ces lectures ajoutent au skill.** Étapes manuelles (V4, V5, V6, V15, B-N1, B-N2, B-N3), un
+registre des modifications (V12), des repères de cadence en CLAIMED (V11) et un renvoi vers
+[exact-match-domains.md](exact-match-domains.md). **Conflits à dire au propriétaire** : V16 contredit
+Vengeons lui-même (2026-04-22 contre 2026-11-07) ; V10 et la tolérance à l'achat de liens contredisent Google ;
+V18 n'est pas démontré.
 
 ## Sources non lues
 

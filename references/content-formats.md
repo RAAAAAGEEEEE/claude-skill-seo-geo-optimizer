@@ -1,6 +1,6 @@
 # Formats de contenu : ce que Google classe et ce que les moteurs IA citent
 
-Revu le 2026-09-28. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-28, conflit 5 ajouté le 2026-11-08. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 « maj » = date « Last updated » de la page ; « consulté » = page sans date,
 lue le 2026-09-28.
 
@@ -135,6 +135,16 @@ Recoupement des citations avec le top 10 de Google : voir
 4. **Reddit, Wikipedia** : parts très variables selon la période, l'outil et
    le moteur. Ce sont des sources tierces : y être présent relève des
    mentions (skill `seo`), pas de ce skill.
+
+5. **Se placer premier de sa propre liste « best »** : Paul Vengeons l'a enseigné jusqu'en juin 2026
+   (Substack du 2026-04-22 : « Mettez-VOUS n°1 »), puis dit que cela « ne marche plus » et qu'une IA l'a
+   retiré en silence de ses pages (note X du 2026-11-07, article X du 2026-10-21). Même constat chez Lily Ray
+   (2026-02-03 et 2026-06-17, voir plus haut). Un classement n'est publié que s'il est fondé sur des critères
+   écrits, des données propres et une preuve par entrée ; l'échange de places entre sites (« je te mets 2e, tu me
+   mets 1er ») relève du *link spam* ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies),
+   maj 2026-08-28). CLAIMED pour les témoignages, ESTABLISHED pour la politique de Google.
+6. **Un classement d'ordre intéressé dans les listes tierces** (payer ou échanger sa place chez d'autres) : même
+   risque, et un lien payant doit porter `rel="sponsored"` ([backlinks.md](backlinks.md)).
 
 ### Formats sans aucune donnée publiée (au 2026-09-28)
 

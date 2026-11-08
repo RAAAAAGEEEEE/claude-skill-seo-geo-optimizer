@@ -46,6 +46,19 @@ que `run_audit.py` contrôle :
 - [ ] Auteur réel visible, page auteur et À-propos réelles (H4, H5).
 - [ ] Rythme de publication que la relecture suit ; dates modifiées seulement après un vrai changement (H6).
 
+## Tests manuels de praticiens (ajout du 2026-11-08, CLAIMED, voir [french-practitioners.md](french-practitioners.md))
+- [ ] Test « mon texte sur une autre page » (B-N3) : si le texte était collé sur le site d'un autre, quelqu'un
+      s'en apercevrait-il ? Sinon, la page n'apporte rien de propre.
+- [ ] « Mot mystère » (B-N1) : retirer le mot-clé exact des 200 à 300 premiers mots ; un lecteur compétent
+      devine-t-il encore le sujet ?
+- [ ] Prix, plans et faits critiques lisibles dans le HTML brut (`curl`), pas seulement après JavaScript.
+- [ ] Collision de noms : la marque a-t-elle un homonyme (autre domaine, autre extension) que les moteurs
+      confondent ? Le vérifier par une recherche de la marque seule.
+- [ ] Suivi GEO manuel : 3 à 5 requêtes fixes, relevées chaque semaine en session privée déconnectée (un compte
+      connecté flatte les résultats), dans un journal daté.
+- [ ] Après toute modification faite par une IA : relire le diff (retraits silencieux de tableaux ou de
+      sections) et contrôler le site réel (V15).
+
 ## Jugement éditorial
 - [ ] Le title donne-t-il envie de cliquer, pas seulement « présent » ?
 - [ ] La meta description donne-t-elle une raison de cliquer ?

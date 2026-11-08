@@ -1,6 +1,6 @@
 # Politiques anti-spam Google — ce qu'il ne faut jamais recommander
 
-Revu le 2026-09-27. Source primaire :
+Revu le 2026-09-27, état des mises à jour complété le 2026-11-08. Source primaire :
 [Google Search Central, spam policies](https://developers.google.com/search/docs/essentials/spam-policies)
 (maj 2026-08-28). **ESTABLISHED.**
 
@@ -10,6 +10,12 @@ règles, arnaques). Aucune nouvelle catégorie en 2026 ; deux renommées
 (« Malicious practices », « Site reputation policy »). Mises à jour de
 détection récentes : spam updates de juin (24-26), août (18-21) et
 septembre 2026 (démarrée le 24, en cours au 2026-09-27).
+
+**État au 2026-11-08** : page des spam policies toujours « Last updated 2026-08-28 UTC » ; journal des mises à
+jour de Google : dernière entrée le 2026-10-26, sans rapport avec ces politiques. Selon des relevés tiers (tableau
+de bord Google non relu), la spam update de septembre a couru du 2026-09-24 au 2026-10-08 et aucune mise à jour
+n'était confirmée en octobre ni début novembre (au 2026-11-06). Cas des domaines à mot-clé exact, des réseaux de
+sites et des stratégies « achat de domaines puis attente » : [exact-match-domains.md](exact-match-domains.md).
 
 Les plus pertinentes pour un audit SEO/GEO :
 

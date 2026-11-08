@@ -59,6 +59,21 @@ Utiles pour l'autorité de domaine, pas seulement pour le trafic direct :
 - **Ne jamais automatiser la soumission** (formulaires + CAPTCHA fragiles,
   risque de ban IP/compte sur l'annuaire). Saisie manuelle uniquement.
 
+## Désaveu, échanges et classements payants (ajout du 2026-11-08)
+- **Désaveu** : outil « advanced » de Google ; « most sites will not need to use this tool »
+  ([aide Search Console](https://support.google.com/webmasters/answer/2648487), page sans date affichée, lue le
+  2026-11-08). Ne pas désavouer par principe les liens « toxiques » signalés par un outil tiers (ESTABLISHED
+  pour la position de Google ; Paul Vengeons dit la même chose, CLAIMED).
+- **Échange de liens ou de classements** (« je te mets 2e, tu me mets 1er », échange « sur trois sites »,
+  recommandé par Vengeons, Substack 2026-04-22 et article X 2026-10-21) : relève de *link spam* ("excessive link
+  exchanges", pages de partenaires "exclusively for the sake of cross-linking", [spam policies](https://developers.google.com/search/docs/essentials/spam-policies),
+  maj 2026-08-28). Un échange triangulaire reste un échange. **Ne jamais recommander.**
+- **Placement payant dans un classement tiers** : un lien payé pour le classement est du *link spam* ; si la
+  mention est commerciale, l'étiqueter (`rel="sponsored"`) et la déclarer comme telle.
+- **Achat de backlinks présenté comme toléré** (« interdit par Google mais pas par la loi », Vengeons) : vrai que
+  la loi ne l'interdit pas, sans effet sur la politique de Google. **Ne jamais recommander** (voir BX5 dans
+  [french-practitioners.md](french-practitioners.md)).
+
 ## À bannir sans exception
 - Achat de backlinks, fermes de liens, réseaux d'échange massif —
   politique « Link spam » de Google. Politiques anti-spam actuelles :

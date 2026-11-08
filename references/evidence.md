@@ -1,6 +1,6 @@
 # Registre des preuves GEO : études, déclarations, croyances démenties
 
-Revu le 2026-09-27. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-09-27, complété le 2026-11-08 (section « Ajouts du 2026-11-08 »). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 À consulter avant d'écrire une recommandation « de contenu pour l'IA » dans un
 audit : si l'affirmation n'est pas ici ou dans une autre référence datée, elle
 est à sourcer ou à retirer.
@@ -73,3 +73,18 @@ Traduction opérationnelle, sans surinterpréter :
 Chiffres de « gain de citation par type de schema » repris par les blogs SEO :
 aucun ne repose sur des données primaires publiées (vérifié le 2026-09-27).
 Ne pas les réintroduire.
+
+## Ajouts du 2026-11-08 (CLAIMED sauf mention)
+
+| Constat | Étiquette | Source (date) |
+|---|---|---|
+| Délais indicatifs donnés par Gary Illyes (Google) à Search Central Live Barcelone le 2026-10-02 : nouvelle URL découverte en ~20 h (plus lent : semaines, voire jamais) ; recrawl d'une URL connue ~30 jours ; changement de title 1 à 2 jours ; canonical 1 à 3 semaines ; déménagement de site 1 à 3 mois ; récupération après une mise à jour du cœur 3 à 6 mois (parfois 6 mois à 1 an). « Typique » n'est pas défini, diapositives non publiées | CLAIMED (recap d'un tiers, John Campbell, relayé par SEJ ; source primaire non relue) | [SEJ](https://www.searchenginejournal.com/google-crawling-indexing-recovery-timing-ranges/591829/) (2026-10-04) |
+| Conflit : « ChatGPT cite ce qui ranke sur Google » (Paul Vengeons, note du 2026-11-07, « d'abord un bon SEO ») contre un recoupement de ~10 % entre les pages citées par ChatGPT et le top 10 de Google (Ahrefs, 2025-09-03, déjà ci-dessus) | CLAIMED des deux côtés ; la note de Vengeons ne cite aucune étude | [note X](https://x.com/vengeonsp/status/2119013491864727763) (2026-11-07) ; Ahrefs (2025-09-03) |
+| OpenAI testerait un « Business Hub / Claim your business » avec courbes de mentions et de clics : **non annoncé**, un seul observateur (Juozas Kaziukėnas, LinkedIn), relayé par SERoundtable et PPC Land le 2026-11-06. L'article de @alg0_slayer (2026-11-07, 118 946 vues, auteur lié à l'outil ChatSEO) le décrit sans donnée de prompts ni benchmark. À surveiller, rien à mettre en place | CLAIMED (un seul observateur) | SERoundtable (2026-11-06) ; [article X](https://x.com/alg0_slayer/status/2119006202323439621) (2026-11-07) |
+| Chiffres de l'article @alg0_slayer : sa propre marque citée 2 fois sur 7 questions, seulement quand son nom figure dans la question, et 0 fois sur 12 dans deux réponses sans nom de marque ; un site à 34 471 impressions en 28 jours sur « ubersuggest alternatives » en position moyenne 3,5 avec 0 clic. Échantillon minuscule, mesure par un modèle via API (non équivalente à ChatGPT en production) | CLAIMED, échantillon trop petit pour conclure | article X (2026-11-07) |
+| `OAI-SearchBot` : en cas de blocage, le site « will not be shown in ChatGPT search answers, though can still appear as navigational links » ; environ 24 h pour une prise en compte ; plages d'IP publiées ([searchbot.json](https://openai.com/searchbot.json), HTTP 200 le 2026-11-08) | ESTABLISHED (documentation OpenAI) | doc OpenAI des robots (lue le 2026-11-08) |
+| Bing Webmaster Tools, AI Performance (requêtes de « grounding » et pages citées) : preview publique du 2026-02-10, correspondance requêtes et pages en mars 2026, Topics Portfolio en bêta en octobre 2026. Interface seulement, pas d'API de lecture connue : voir [automation.md](automation.md) | ESTABLISHED (annonce Microsoft), état de l'API non revérifié | Bing (2026-02-10) |
+
+Croyances à ne pas reprendre : « Google garde environ 13 mois de mémoire des rebonds » et « Google voit ces
+signaux avec Chrome » (article et note de Vengeons, 2026-10-21 et 2026-11-07) : aucune page Google lue ne les
+confirme.

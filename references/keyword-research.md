@@ -1,6 +1,6 @@
 # Mots-clés sous-exploités d'une niche : repérer et se positionner sans outil payant
 
-Revu le 2026-11-03. Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
+Revu le 2026-11-03, complété le 2026-11-08 (section « Compléments de praticiens »). Étiquettes : [data-hygiene.md](data-hygiene.md#étiquettes-de-preuve).
 « consultée » = page sans date affichée, lue le 2026-11-03.
 
 À utiliser quand on **choisit** les requêtes à viser avant de planifier des pages. Ce fichier
@@ -119,6 +119,37 @@ concurrence observée (+ moteur utilisé), page existante ou à créer, priorit�
    restaurant) ; `LocalBusiness` seulement sur la page de l'entité qu'elle décrit.
 7. **Suivre** : relever à date fixe les mêmes requêtes (SERP et Search Console) et consigner
    dans un journal ; une page sans impression après 8 semaines est réécrite ou retirée.
+
+## Compléments de praticiens (2026-11-08, tous CLAIMED)
+Source : Paul Vengeons (article X du 2026-10-21, note X du 2026-11-07) et Laurent Bourrelly (blog), lus le
+2026-11-08, détail et numéros V/B-N dans [french-practitioners.md](french-practitioners.md). Aucune donnée
+publiée : ce sont des **tests manuels et des repères**, jamais des P0 ou P1.
+1. **Un motif = une intention, un type de page** (V3) : « X vs Y », « alternative à X », « service + ville ».
+   Plusieurs variantes seulement si chaque page apporte une donnée propre (règle 2 ci-dessus). Les pages
+   « service + ville » qui ne diffèrent que par la ville sont des *doorways* (spam policies, maj 2026-08-28).
+2. **Test d'ouverture** (V4) : pour chaque requête retenue, noter si au moins un des trois premiers résultats a
+   le mot-clé exact dans son title. Aucun : porte ouverte. Ne prouve pas que Google préfère un title ; c'est
+   un indice de faible optimisation.
+3. **Odeur de la SERP et faisabilité** (B-N2) : avant de produire, noter les types d'URL en tête (marques,
+   encyclopédie, forums, vidéos), la présence d'un AI Overview, et si une entité occupe la place de « la
+   réponse ». Si oui, la requête est probablement inatteignable pour une page ordinaire : la retirer ou la
+   reformuler.
+4. **Quick wins** (V5) : pages en positions 5 à 20 dans Search Console. Filtrer sur la page ET la requête
+   avant de lire la position moyenne (la moyenne d'un site mélange des requêtes sans rapport).
+5. **Bandes d'autorité** (V2, CLAIMED) : site à moins de 20 de DR (Ahrefs) = longue traîne ; 20 à 40 = moyenne
+   traîne ; plus de 40 = têtes de requêtes ; moins de 50 domaines référents = peu de requêtes compétitives
+   accessibles. Le DR n'est pas un signal Google : ne s'en servir que pour choisir des cibles. **Divergence** :
+   Bourrelly juge la longue traîne perdante ; l'arbitrage dépend de l'autorité réelle du site.
+6. **Anatomie du title** (V7) : mot-clé exact au début, une promesse vérifiable, l'année seulement si le
+   contenu est à jour, « best » seulement si un classement fondé suit, environ 600 px. Google réécrit les
+   titres qu'il juge trompeurs ([title links](https://developers.google.com/search/docs/appearance/title-link)).
+7. **Registre des modifications** (V12) : consigner pour chaque page la date, la modification et la mesure de
+   départ ; ne pas rejuger avant la fin des délais (repères Google : [exact-match-domains.md](exact-match-domains.md)).
+   La « règle des 90 jours » de Vengeons est une pratique, non un délai Google.
+8. **Cadence** (V11) : site neuf, environ 1 page par semaine ; site établi, jusqu'à 2 par semaine ; jamais plus
+   d'une page par jour. Repère de prudence face au *scaled content abuse*, pas un plafond Google ; le contrôle
+   `publication-burst` de l'audit reste la mesure.
+9. **Ne pas traduire les mots-clés marché par marché** (V14) : un seul domaine, un répertoire par langue.
 
 ## Ce qu'il faut éviter (consignes Google)
 | Règle | Niveau | Source (date) |

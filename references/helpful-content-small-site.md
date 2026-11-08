@@ -57,6 +57,13 @@ pages, liste ; le propriétaire décide). Les seuils du script sont ceux du skil
    clients peut produire seul.
 3. H6, H1, H8, H9, puis H10 et H11.
 
+## Repères de cadence (ajout du 2026-11-08, CLAIMED)
+Paul Vengeons (article X du 2026-10-21) recommande, pour un site neuf, environ 1 page par semaine (jusqu'à 2 par
+semaine sur un site établi), jamais plus d'une par jour, chaque page avec un brief distinct, et réserve le
+programmatic SEO aux sites déjà autoritaires. Aucune donnée publiée, et son billet du 2026-04-22 conseillait
+une page par jour : à utiliser comme prudence en face de H6 et du contrôle `publication-burst`, pas comme seuil.
+Il dit lui-même que ses pages « service + ville » ont perdu des impressions après 3 à 4 ans (voir H2 et H7).
+
 ## Limites
 - Le script ne juge pas la qualité : il mesure des indices (recoupement de texte, présence d'une
   signature, dates). Un faux positif est possible (pages courtes légitimes, fiches techniques
