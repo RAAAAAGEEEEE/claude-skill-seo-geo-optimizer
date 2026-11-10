@@ -3,6 +3,11 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.10.0] - 2026-11-10
+
+### Ajouté
+- `references/retours-terrain-2026-11.md` : leçons de sites réels (noindex et sitemap, catégories, domaines secondaires, titres, images, local), datées et sourcées. Aucun script modifié.
+
 ## [2.9.0] - 2026-11-08
 
 Lecture de deux publications X du 2026-11-07 (@alg0_slayer, @VengeonsP), du travail public de Paul Vengeons

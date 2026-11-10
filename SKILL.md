@@ -21,13 +21,13 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.9.0"
+  version: "2.10.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.9.0, connaissances revues le **2026-11-08** (praticiens Paul Vengeons et Laurent Bourrelly, domaines à mot-clé exact et réseaux de sites, délais cités par Google), puis le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
+Version 2.10.0 (retours de terrain du 2026-11-10 : `references/retours-terrain-2026-11.md`), connaissances revues le **2026-11-08** (praticiens Paul Vengeons et Laurent Bourrelly, domaines à mot-clé exact et réseaux de sites, délais cités par Google), puis le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
 trafic, contenu utile de Google mis à jour le 2026-10-05), puis le **2026-10-29**
 (Vercel, agents, Google, signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
@@ -204,6 +204,7 @@ propriétaire. Méthode et sources : [url-discovery.md](references/url-discovery
 | Contenu utile (petit site) | Page « creating helpful content » mise à jour le 2026-10-05 (section « Main content » : effort, originalité, talent, exactitude). Pages pour des acheteurs précis, jamais de masse, auteur et expérience visibles, pages ville et métier jamais en doublon, rythme que la relecture suit. `hygiene_check.py content`. | [helpful-content-small-site.md](references/helpful-content-small-site.md) |
 | Confiance et hygiène | HTTPS, HSTS, nosniff, Referrer-Policy, security.txt, `sameAs` et contact de l'Organization : P2, **aucun effet de classement démontré** (Google : seuls les Core Web Vitals comptent dans « page experience »). Le contrôle qui compte : `lastmod` du sitemap égal au vrai changement de la page (Google, 2023-06-26). Écartés : ai.txt, preload, SRI, CAA, DNSSEC, SPF/DMARC. `trust_check.py`. | [trust-hygiene.md](references/trust-hygiene.md) |
 | Local | API GBP : fiche validée depuis 60 jours ou plus, approbation manuelle. | [google-business-profile.md](references/google-business-profile.md) |
+| Retours de terrain | Leçons datées de sites réels (noindex, domaines secondaires, images, local). | [retours-terrain-2026-11.md](references/retours-terrain-2026-11.md) |
 
 ## Niveaux de preuve
 - **ESTABLISHED** : documentation officielle, ou déclaration du fournisseur
