@@ -28,6 +28,11 @@ Merci de votre intérêt. Issues et pull requests sont bienvenues.
 7. Aucun secret, aucune donnée personnelle, aucun rapport d'audit réel dans
    le dépôt. `seo-reports/` et `*.env` sont ignorés par git.
 
+## Règle de maintenance
+Chaque nouvelle trouvaille SEO/GEO (article, test, incident) met à jour le skill dans la même journée, avec sa
+source datée et une ligne dans `CHANGELOG.md`. Comparer d'abord à l'existant : on n'ajoute que ce qui est
+réellement nouveau, au bon fichier de `references/`, avec l'étiquette ESTABLISHED, SUPPORTED ou CLAIMED.
+
 ## Style
 - Python 3.10+, bibliothèque standard autant que possible. Toute dépendance
   tierce est optionnelle et chargée à la demande (voir Search Console).

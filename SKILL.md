@@ -21,13 +21,13 @@ license: MIT
 compatibility: Python 3.10+ (bibliothèque standard). bash et curl pour deux scripts. Accès réseau sortant vers le site audité. Conçu pour Claude Code ; les scripts s'exécutent aussi seuls.
 metadata:
   author: Anto1nx
-  version: "2.10.0"
+  version: "2.11.0"
   repository: https://github.com/RAAAAAGEEEEE/claude-skill-seo-geo-optimizer
 ---
 
 # SEO / GEO Optimizer
 
-Version 2.10.0 (retours de terrain du 2026-11-10 : `references/retours-terrain-2026-11.md`), connaissances revues le **2026-11-08** (praticiens Paul Vengeons et Laurent Bourrelly, domaines à mot-clé exact et réseaux de sites, délais cités par Google), puis le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
+Version 2.11.0 (guide des liens internes Semrush du 2026-09-10, lu le 2026-11-11 : navigation visible sans JavaScript), 2.10.0 (retours de terrain du 2026-11-10 : `references/retours-terrain-2026-11.md`), connaissances revues le **2026-11-08** (praticiens Paul Vengeons et Laurent Bourrelly, domaines à mot-clé exact et réseaux de sites, délais cités par Google), puis le **2026-11-05** (confiance et hygiène : HTTPS, en-têtes, security.txt, sameAs, lastmod qui suit le vrai changement, d'après deux rapports RoastMyUrl), puis le **2026-11-04** (robots malveillants et faux
 trafic, contenu utile de Google mis à jour le 2026-10-05), puis le **2026-10-29**
 (Vercel, agents, Google, signaux d'usage), découverte des URL et Search Console le **2026-09-30**
 (historique :
@@ -242,6 +242,11 @@ Console), **inféré** (HTML, code) ou **hypothèse**. Détail :
   « non vérifiable », jamais « vérifié ». Format non reconnu : code 2.
 - Glossaire : `glossary_check.py` n'insère aucun lien et n'écrit aucune
   définition ; il liste, le propriétaire décide.
+
+## Maintenance du skill
+Chaque nouvelle trouvaille SEO/GEO (article, test, incident) met à jour le skill dans la même journée, avec sa
+source datée et son étiquette ESTABLISHED, SUPPORTED ou CLAIMED, et une ligne dans `CHANGELOG.md`. Ne
+s'ajoute que ce qui est réellement nouveau : comparer d'abord à `references/`. Détail : `CONTRIBUTING.md`.
 
 ## Sécurité et confidentialité
 - Par défaut, uniquement des **GET publics** vers le site audité. Le crawl

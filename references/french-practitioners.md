@@ -266,6 +266,20 @@ registre des modifications (V12), des repères de cadence en CLAIMED (V11) et un
 Vengeons lui-même (2026-04-22 contre 2026-11-07) ; V10 et la tolérance à l'achat de liens contredisent Google ;
 V18 n'est pas démontré.
 
+## Semrush : guide des liens internes (lu le 2026-11-11)
+
+Source : [semrush.com/blog/internal-links](https://www.semrush.com/blog/internal-links/), publié le 2026-09-10
+(Alex Lindley), sans date de mise à jour. Éditeur d'outils : ses seuils sont ceux de son audit, pas des règles de
+Google. Déjà couvert par le skill et non repris : orphelines, profondeur > 3, liens cassés, liens vers des
+redirections et chaînes, ancres génériques, pas d'idéal de nombre de liens, nofollow inutile en interne.
+
+| # | Point nouveau | Étiquette | Traitement |
+|---|---|---|---|
+| S1 | Vérifier que le menu et les liens de navigation sont dans le HTML source (`view-source`, `curl`) : les robots IA n'exécutent pas le JavaScript comme Google. Un menu ou des liens rendus seulement côté client rendent les pages invisibles à ces robots, même si Google les trouve. | CLAIMED pour l'énoncé de Semrush (2026-09-10) ; le principe général est ESTABLISHED (Microsoft, 2025-10-08, voir [audit-framework.md](audit-framework.md)) | Contrôle manuel : comparer les liens du `curl` avec ceux du navigateur. Les scripts ne voient pas les liens injectés (voir SKILL.md, Replis). |
+| S2 | Page n'ayant qu'**un seul** lien entrant : plus dure à trouver, paraît moins importante. | CLAIMED | Lecture humaine du tableau des rubriques ; pas de règle d'audit. |
+| S3 | Lien interne de HTTPS vers HTTP : redirection inutile à chaque clic, alertes de sécurité possibles. | SUPPORTED (la redirection HTTP vers HTTPS est ESTABLISHED, voir [trust-hygiene.md](trust-hygiene.md)) | À corriger si le crawl en trouve ; déjà couvert par `link-to-redirect` quand la cible redirige. |
+| S4 | Ancre de 5 mots au plus ; au moins 2 à 3 liens internes vers chaque nouvelle page ; au moins 10 pages à fort profil de liens externes comme sources de liens vers les pages faibles ; audit des liens chaque mois. | CLAIMED, chiffres arbitraires | Non repris comme seuils. Seul le rythme mensuel rejoint [automation.md](automation.md). |
+
 ## Sources non lues
 
 - **X (Twitter)** : ancien compte de Bourrelly suspendu ; les 100 derniers

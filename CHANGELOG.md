@@ -3,6 +3,13 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les versions 1.x sont reconstituées depuis l'historique git.
 
+## [2.11.0] - 2026-11-11
+
+### Ajouté
+- `references/french-practitioners.md` : section « Semrush : guide des liens internes » (S1 à S4), article du 2026-09-10 lu le 2026-11-11. Surtout S1 : menu et liens rendus seulement en JavaScript, invisibles aux robots IA.
+- `references/audit-framework.md` : contrôle « navigation dans le HTML initial ».
+- `SKILL.md` et `CONTRIBUTING.md` : règle de maintenance (chaque trouvaille met à jour le skill le jour même, source datée, ligne de changelog). Aucun script modifié.
+
 ## [2.10.0] - 2026-11-10
 
 ### Ajouté

@@ -41,6 +41,12 @@ conclure "pas de schema" sur la seule base d'un `curl`.
   n'exécutent pas ou peu le JavaScript ; tout ce qui n'est rendu que côté
   client est invisible pour eux (Microsoft le dit pour le contenu caché :
   « AI systems may not render hidden content », 2025-10-08, ESTABLISHED).
+- Navigation dans le HTML initial : le menu, le pied de page et les liens
+  internes importants doivent exister dans le HTML brut (`curl`), pas
+  seulement après exécution du JavaScript. Un lien rendu côté client n'est
+  pas suivi par les robots IA qui n'exécutent pas le JavaScript : la page
+  liée leur reste invisible (Semrush, 2026-09-10, CLAIMED ; principe voir
+  ci-dessus). Détail : [french-practitioners.md](french-practitioners.md), S1.
 
 ## Vitesse & Core Web Vitals
 - Bon : LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 ; mauvais : > 4 s, > 500 ms,
