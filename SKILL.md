@@ -44,6 +44,22 @@ peuvent pas lire a un plafond de zéro. Tout ce qui peut tourner sans humain
 passe par `scripts/run_audit.py`. Le jugement et les décisions produit
 restent humains.
 
+## Deux règles dures (Antoine, 13/11/2026, après la chute de vuntum.com du 26/10)
+1. **Jamais de page vide ou quasi vide envoyée à Google.** Une page sans
+   contenu propre (fiche sans données, liste vide, gabarit répété, page en
+   attente) est en `noindex` et absente du sitemap tant qu'elle n'a pas de
+   contenu utile. Le système de contenu utile de Google juge le site entier :
+   des centaines de pages vides font baisser aussi les bonnes pages. Contrôle
+   mécanique avant chaque mise en ligne : le sitemap ne contient que des URL
+   dont le texte principal dépasse un seuil (à fixer par projet, 150 mots par
+   défaut) ; échec = mise en ligne refusée.
+2. **Vérifier les sanctions manuelles à chaque audit.** Search Console >
+   « Sécurité et actions manuelles » > « Actions manuelles » (et « Problèmes
+   de sécurité »). L'API Search Console ne les expose pas : lecture dans le
+   navigateur de l'agent, capture datée dans le rapport. « Aucun problème
+   détecté » = chute algorithmique (contenu utile, mise à jour principale),
+   pas une sanction : on corrige la qualité, pas de demande de réexamen.
+
 ## Périmètre
 - **Dans** : audit et modification du site courant (code, templates,
   robots.txt, sitemap, meta, JSON-LD, en-têtes, maillage interne), mesure via
